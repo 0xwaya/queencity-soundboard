@@ -11,7 +11,7 @@ npm run dev
 ## Required env
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `NEXT_PUBLIC_TICKETING_PROVIDER` (ticketspice|tickettailor|eventbrite)
+- `NEXT_PUBLIC_TICKETING_PROVIDER` (tickettailor|ticketspice|eventbrite)  # default: tickettailor
 - `NEXT_PUBLIC_TICKETING_WIDGET_URL`
 
 ## Current routes

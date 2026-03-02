@@ -7,7 +7,7 @@ type Props = {
 };
 
 export default function TicketWidget({ eventTitle }: Props) {
-  const provider = process.env.NEXT_PUBLIC_TICKETING_PROVIDER ?? "ticketspice";
+  const provider = process.env.NEXT_PUBLIC_TICKETING_PROVIDER ?? "tickettailor";
   const widgetUrl = process.env.NEXT_PUBLIC_TICKETING_WIDGET_URL;
 
   const cta = useMemo(() => {
