@@ -29,4 +29,17 @@ export type EventItem = {
   event_date: string;
   status: "draft" | "published" | "archived";
   venue_id: string | null;
+  ticket_url?: string | null;
+  eventbrite_event_id?: string | null;
+  venues?: Venue | null;
+};
+
+export type MerchItem = {
+  id: string;
+  name: string;
+  description: string | null;
+  price_cents: number;
+  inventory_count: number;
+  image_url: string | null;
+  is_active: boolean;
 };

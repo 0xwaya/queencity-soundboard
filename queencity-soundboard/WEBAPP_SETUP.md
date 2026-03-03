@@ -16,9 +16,15 @@ npm run dev
 
 ## Current routes
 - `/` Home
-- `/events` Published events + ticket widget CTA
-- `/merch` Merch placeholder
+- `/events` Published events + ticket checkout CTA
+- `/merch` Active merch items
 - `/about` About
+
+## Ticket URL resolution
+Checkout links resolve in this order:
+1. `events.ticket_url` (per-event URL in Supabase)
+2. Eventbrite URL from `events.eventbrite_event_id` when provider is `eventbrite`
+3. `NEXT_PUBLIC_TICKETING_WIDGET_URL` fallback
 
 ## Deployment
 - Deploy `apps/web` to Vercel
