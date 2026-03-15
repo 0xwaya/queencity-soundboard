@@ -8,3 +8,7 @@
 # track only project directory
 !queencity-soundboard/
 !queencity-soundboard/**
+
+# track tarot sprint mock app
+!tarot-sprint-mock/
+!tarot-sprint-mock/**
