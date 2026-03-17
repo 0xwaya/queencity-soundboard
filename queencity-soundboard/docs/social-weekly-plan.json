@@ -1,0 +1,53 @@
+{
+  "generated_at": "2026-03-17",
+  "top_artist": "your favorite artist",
+  "posts": [
+    {
+      "platform": "IG",
+      "type": "Event teaser",
+      "caption": "Caracas Unplugged returns. Caracas Unplugged: After Dark Sessions drops soon. Doors 7, show 8. \ud83d\udd25",
+      "hashtags": [
+        "#QueenCitySoundboard",
+        "#LatinMusic",
+        "#CovingtonKY"
+      ]
+    },
+    {
+      "platform": "TikTok",
+      "type": "Behind the scenes",
+      "caption": "Soundcheck clips + venue glow. Show the vibe in 7 seconds.",
+      "hashtags": [
+        "#LiveMusic",
+        "#NightMode",
+        "#CincinnatiEvents"
+      ]
+    },
+    {
+      "platform": "X",
+      "type": "Poll update",
+      "caption": "Fan vote check: your favorite artist is leading. Keep voting on the site.",
+      "hashtags": [
+        "#LatAm",
+        "#LiveMusic"
+      ]
+    },
+    {
+      "platform": "IG",
+      "type": "Merch highlight",
+      "caption": "New QCS merch drop is live. Limited pieces, no restock.",
+      "hashtags": [
+        "#MerchDrop",
+        "#QCS"
+      ]
+    },
+    {
+      "platform": "X",
+      "type": "Countdown",
+      "caption": "Countdown to the next sold-out night. Tickets in bio.",
+      "hashtags": [
+        "#TicketTailor",
+        "#LiveEvents"
+      ]
+    }
+  ]
+}
