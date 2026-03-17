@@ -4,8 +4,52 @@ import "./globals.css";
 import Header from "@/components/header";
 
 export const metadata: Metadata = {
-  title: "QueenCity Soundboard",
-  description: "Live events, tickets, and merch.",
+  metadataBase: new URL("https://queencitysoundboard.com"),
+  title: {
+    default: "QueenCity Soundboard",
+    template: "%s | QueenCity Soundboard",
+  },
+  description: "Live events, tickets, merch, and culture-forward nights in Cincinnati.",
+  applicationName: "QueenCity Soundboard",
+  keywords: [
+    "Cincinnati events",
+    "Covington KY events",
+    "Latin music",
+    "live music",
+    "concerts",
+    "tickets",
+    "merch",
+    "QueenCity Soundboard",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "QueenCity Soundboard",
+    description: "Live events, tickets, merch, and culture-forward nights in Cincinnati.",
+    url: "https://queencitysoundboard.com",
+    siteName: "QueenCity Soundboard",
+    images: [
+      {
+        url: "/qcs-logo.png",
+        width: 1200,
+        height: 630,
+        alt: "QueenCity Soundboard logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "QueenCity Soundboard",
+    description: "Live events, tickets, merch, and culture-forward nights in Cincinnati.",
+    images: ["/qcs-logo.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   icons: {
     icon: "/qcs-logo.png",
   },
