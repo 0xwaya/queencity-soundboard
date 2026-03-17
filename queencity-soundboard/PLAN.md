@@ -20,6 +20,9 @@ Reason: drops/events + limited merch = oversell risk > engineering complexity.
 2. Admin panel (publish events, inventory)
 3. React Native app (consumer view)
 
+## Marketing / Email
+- Ticket Tailor broadcast email integration (see: https://help.tickettailor.com/en/articles/10855089-how-to-use-email-marketing-to-promote-your-events)
+
 ## Required from owner
 - Supabase project ref
 - Supabase URL + anon key + service role key
