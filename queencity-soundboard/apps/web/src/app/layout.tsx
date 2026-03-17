@@ -29,12 +29,6 @@ export default function RootLayout({
 
             <div className="flex flex-wrap items-center gap-4">
               <div className="space-y-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Contact</p>
-                <a className="font-semibold text-slate-200 hover:text-white" href="mailto:event@queencitysoundboard.com">
-                  event@queencitysoundboard.com
-                </a>
-              </div>
-              <div className="space-y-1">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Social</p>
                 <div className="flex items-center gap-3">
                   <a
