@@ -3,9 +3,57 @@ import { getPublishedEvents } from "@/lib/data";
 
 export default async function EventsPage() {
   const events = await getPublishedEvents();
+  const jsonLd =
+    events.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          itemListElement: events.map((event, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            item: {
+              "@type": "Event",
+              name: event.title,
+              startDate: event.event_date,
+              eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+              eventStatus: "https://schema.org/EventScheduled",
+              location: {
+                "@type": "Place",
+                name: event.venues?.name ?? "Madison Theater",
+                address: {
+                  "@type": "PostalAddress",
+                  addressLocality: event.venues?.city ?? "Covington",
+                  addressRegion: event.venues?.state ?? "KY",
+                  addressCountry: "US",
+                },
+              },
+              image: ["https://queencitysoundboard.com/qcs-logo.png"],
+              description:
+                event.description ?? `${event.title} live at ${event.venues?.name ?? "Madison Theater"}.`,
+              performer: event.artist_name ? { "@type": "PerformingGroup", name: event.artist_name } : undefined,
+              offers: event.ticket_url
+                ? {
+                    "@type": "Offer",
+                    url: event.ticket_url,
+                    availability: "https://schema.org/InStock",
+                    priceCurrency: "USD",
+                  }
+                : undefined,
+            },
+          })),
+        }
+      : null;
 
   return (
-    <div className="space-y-6">
+    <>
+      {jsonLd ? (
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      ) : null}
+      <div className="space-y-6">
       <div className="rounded-2xl border border-white/10 bg-[#0b1228] p-5">
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-300/80">Live lineup</p>
         <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-100 md:text-4xl">Events</h1>
@@ -58,6 +106,7 @@ export default async function EventsPage() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
