@@ -107,10 +107,10 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#0b1024]/70 p-4">
-            <div>
+            <div className="space-y-1">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Direct line</p>
               <a
-                className="mt-1 inline-flex text-base font-semibold text-white hover:text-cyan-200"
+                className="inline-flex w-full break-all text-sm font-semibold leading-5 text-white hover:text-cyan-200 sm:text-base"
                 href="mailto:event@queencitysoundboard.com"
               >
                 event@queencitysoundboard.com
