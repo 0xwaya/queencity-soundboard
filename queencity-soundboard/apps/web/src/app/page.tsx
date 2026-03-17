@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PollWidget from "@/components/poll-widget";
 
 export default function Home() {
   return (
@@ -93,6 +94,8 @@ export default function Home() {
           </div>
         </article>
       </section>
+
+      <PollWidget />
 
       <section className="rounded-3xl border border-white/10 bg-gradient-to-r from-[#0b1228] via-[#0c1634] to-[#101b3a] p-6 md:p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
