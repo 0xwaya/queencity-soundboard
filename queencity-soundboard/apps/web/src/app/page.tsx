@@ -32,6 +32,38 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="rounded-3xl border border-white/10 bg-[#0b1228] p-6 md:p-8">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-300/80">Venue Spotlight</p>
+            <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white md:text-3xl">Madison Theater</h2>
+            <p className="mt-2 max-w-2xl text-sm text-slate-300">
+              Our home stage in Covington, KY — a historic venue built for immersive sound, elevated visuals, and packed rooms.
+            </p>
+            <p className="mt-3 text-xs uppercase tracking-[0.2em] text-slate-400">Covington, KY</p>
+          </div>
+          <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#0e1732] p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Venue link</p>
+            <a
+              className="text-base font-semibold text-amber-200 hover:text-amber-100"
+              href="https://madisontheater.com/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              madisontheater.com
+            </a>
+            <a
+              className="inline-flex items-center justify-center rounded-lg bg-amber-400 px-4 py-2 text-xs font-semibold text-[#0b1020] hover:bg-amber-300"
+              href="https://madisontheater.com/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Explore the venue
+            </a>
+          </div>
+        </div>
+      </section>
+
       <section className="grid gap-4 md:grid-cols-2">
         <article className="rounded-2xl border border-white/10 bg-[#0b1228] p-5">
           <p className="text-[11px] font-bold uppercase tracking-wider text-fuchsia-300/80">Featured</p>

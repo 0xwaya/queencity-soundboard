@@ -12,7 +12,7 @@ export default function Header() {
     <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0b1020]/85 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
         <Link href="/" className="flex items-center gap-2 text-base font-extrabold tracking-tight text-slate-100 md:text-xl">
-          <Image src="/qcs-mark.svg" alt="Queen City Soundboard logo" width={28} height={28} priority />
+          <Image src="/qcs-crown.svg" alt="Queen City Soundboard crown" width={32} height={32} priority />
           <span>QueenCity Soundboard</span>
         </Link>
 
