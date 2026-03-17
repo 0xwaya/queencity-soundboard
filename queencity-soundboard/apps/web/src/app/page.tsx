@@ -67,9 +67,11 @@ export default function Home() {
       <section className="grid gap-4 md:grid-cols-2">
         <article className="rounded-2xl border border-white/10 bg-[#0b1228] p-5">
           <p className="text-[11px] font-bold uppercase tracking-wider text-fuchsia-300/80">Featured</p>
-          <h3 className="mt-2 text-xl font-bold tracking-tight text-slate-100">Roots x Caracas Night</h3>
+          <h3 className="mt-2 text-xl font-bold tracking-tight text-slate-100">Roots x Caracas: Intimate Acoustic Night</h3>
           <p className="mt-1 text-sm text-slate-400">Madison Theater • Apr 25 • 8:00 PM</p>
-          <p className="mt-3 text-sm text-slate-300">Cross-cultural showcase with live sets, exclusive drops, and immersive visuals.</p>
+          <p className="mt-3 text-sm text-slate-300">
+            A candlelit acoustic showcase with stripped-down sets, warm storytelling, and a close-up fan experience.
+          </p>
           <div className="mt-4 rounded-xl border border-white/10 bg-[#0e1732] p-3">
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Ticket Tailor</p>
             <Link href="/events" className="mt-2 inline-flex rounded-md bg-fuchsia-500 px-3 py-2 text-xs font-semibold text-white hover:bg-fuchsia-400">Buy Tickets</Link>
