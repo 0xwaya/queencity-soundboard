@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <div className="space-y-8">
       <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f1630] via-[#0b1228] to-[#070b17] p-7 md:p-11">
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-300/80">Night Mode • Pro • Edgy</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-300/80">Intimate Acoustic Nights</p>
         <h1 className="mt-3 max-w-4xl text-4xl font-extrabold tracking-tight text-slate-100 md:text-6xl">
           Live culture. Seamless tickets. Sold-out nights.
         </h1>
