@@ -16,10 +16,9 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0b1020]/85 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
-        <Link href="/" className="flex items-center gap-2 text-base font-extrabold tracking-tight text-slate-100 md:text-xl">
+        <Link href="/" className="flex items-center gap-2 text-sm font-extrabold tracking-tight text-slate-100 sm:text-base md:text-xl">
           <Image src="/qcs-logo.png" alt="Queen City Soundboard logo" width={34} height={34} priority />
-          <span className="inline sm:hidden">QCS</span>
-          <span className="hidden sm:inline">QueenCity Soundboard</span>
+          <span>QueenCity Soundboard</span>
         </Link>
 
         <nav className="hidden items-center gap-3 text-sm font-medium text-slate-300 md:flex" aria-label="Primary">
