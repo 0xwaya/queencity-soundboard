@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: "/qcs-logo-animated.png",
+    icon: "/qcs-logo-animated.gif",
   },
 };
 
