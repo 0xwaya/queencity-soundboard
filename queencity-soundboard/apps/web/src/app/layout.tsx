@@ -70,7 +70,7 @@ export default function RootLayout({
           <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 text-xs text-slate-400 md:flex-row md:items-center md:justify-between">
             <div className="space-y-1">
               <p className="text-sm font-semibold text-slate-100">QueenCity Soundboard</p>
-              <p className="text-xs text-slate-400">Culture-forward nights. Ticketed. Elevated.</p>
+              <p className="truncate text-xs text-slate-400 max-w-xs sm:max-w-none">Culture-forward nights. Ticketed. Elevated.</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
