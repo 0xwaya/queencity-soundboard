@@ -105,7 +105,10 @@ export default async function EventsPage() {
               </div>
               <p className="text-sm text-slate-300">{event.dateLabel}</p>
               <p className="text-sm text-slate-400">Madison Theater • Covington, KY</p>
-              <p className="text-sm text-slate-400">{event.artist}</p>
+              <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-400/40 bg-fuchsia-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-200">
+                <span className="text-[10px] font-bold text-fuchsia-300/80">Artist</span>
+                <span className="text-sm font-semibold normal-case tracking-normal text-white">{event.artist}</span>
+              </div>
               <p className="text-sm text-slate-300">{event.description}</p>
               <TicketWidget eventTitle={event.title} />
             </article>
@@ -133,7 +136,12 @@ export default async function EventsPage() {
                   {event.venues.city ? ` • ${event.venues.city}${event.venues.state ? `, ${event.venues.state}` : ""}` : ""}
                 </p>
               ) : null}
-              <p className="text-sm text-slate-400">{event.artist_name}</p>
+              {event.artist_name ? (
+                <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-400/40 bg-fuchsia-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-200">
+                  <span className="text-[10px] font-bold text-fuchsia-300/80">Artist</span>
+                  <span className="text-sm font-semibold normal-case tracking-normal text-white">{event.artist_name}</span>
+                </div>
+              ) : null}
               {event.description ? <p className="text-sm text-slate-300">{event.description}</p> : null}
               <TicketWidget eventTitle={event.title} eventTicketUrl={event.ticket_url} />
             </article>
