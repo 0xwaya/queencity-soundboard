@@ -96,7 +96,7 @@ export default async function EventsPage() {
       {events.length === 0 ? (
         <div className="grid gap-5 md:grid-cols-2">
           {mockEvents.map((event) => (
-            <article key={event.title} className="space-y-4 rounded-2xl border border-white/10 bg-[#0b1228] p-5">
+            <article key={event.title} className="space-y-4 rounded-2xl border border-white/10 bg-[#0b1228] p-5 transition hover:-translate-y-0.5 hover:border-fuchsia-400/30 hover:shadow-[0_18px_40px_rgba(15,23,42,0.35)]">
               <div className="flex items-start justify-between gap-3">
                 <h2 className="text-xl font-bold tracking-tight text-slate-100">{event.title}</h2>
                 <span className="rounded-full border border-white/20 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-300">
@@ -121,7 +121,7 @@ export default async function EventsPage() {
       ) : (
         <div className="grid gap-5 md:grid-cols-2">
           {events.map((event) => (
-            <article key={event.id} className="space-y-4 rounded-2xl border border-white/10 bg-[#0b1228] p-5">
+            <article key={event.id} className="space-y-4 rounded-2xl border border-white/10 bg-[#0b1228] p-5 transition hover:-translate-y-0.5 hover:border-fuchsia-400/30 hover:shadow-[0_18px_40px_rgba(15,23,42,0.35)]">
               <div className="flex items-start justify-between gap-3">
                 <h2 className="text-xl font-bold tracking-tight text-slate-100">{event.title}</h2>
                 <span className="rounded-full border border-white/20 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-300">
