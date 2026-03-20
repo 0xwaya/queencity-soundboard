@@ -1,7 +1,13 @@
+import Link from "next/link";
 import TicketWidget from "@/components/ticket-widget";
 import { getPublishedEvents } from "@/lib/data";
 
-export default async function EventsPage() {
+type EventsPageProps = {
+  searchParams?: { view?: string };
+};
+
+export default async function EventsPage({ searchParams }: EventsPageProps) {
+  const view = searchParams?.view === "compact" ? "compact" : "spotlight";
   const events = await getPublishedEvents();
   const jsonLd =
     events.length > 0
@@ -98,7 +104,7 @@ export default async function EventsPage() {
             <p className="mt-1 text-xs text-slate-400">Doors 7:00 PM • Showtime 8:00 PM</p>
           </div>
         </div>
-        <div className="mt-6 flex flex-wrap gap-2">
+        <div className="mt-6 flex flex-wrap items-center gap-2">
           {['All', 'After Dark', 'Acoustic', 'Latin', 'VIP'].map((label) => (
             <span
               key={label}
@@ -107,42 +113,91 @@ export default async function EventsPage() {
               {label}
             </span>
           ))}
+          <div className="ml-auto flex items-center gap-2">
+            <Link
+              href="/events?view=spotlight"
+              className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition ${
+                view === "spotlight"
+                  ? "border-fuchsia-400/50 bg-fuchsia-500/15 text-fuchsia-200"
+                  : "border-white/10 bg-white/5 text-slate-300 hover:border-white/30"
+              }`}
+            >
+              Spotlight
+            </Link>
+            <Link
+              href="/events?view=compact"
+              className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition ${
+                view === "compact"
+                  ? "border-cyan-400/60 bg-cyan-500/15 text-cyan-200"
+                  : "border-white/10 bg-white/5 text-slate-300 hover:border-white/30"
+              }`}
+            >
+              Compact
+            </Link>
+          </div>
         </div>
       </section>
 
       {events.length === 0 ? (
-        <div className="grid gap-5 md:grid-cols-2">
-          {mockEvents.map((event) => (
-            <article key={event.title} className="space-y-4 rounded-2xl border border-white/10 bg-[#0b1228] p-5 transition hover:-translate-y-0.5 hover:border-fuchsia-400/30 hover:shadow-[0_18px_40px_rgba(15,23,42,0.35)]">
-              <div className="flex items-start justify-between gap-3">
-                <h2 className="text-xl font-bold tracking-tight text-slate-100">{event.title}</h2>
-                <span className="rounded-full border border-white/20 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-300">
-                  Mock Event
-                </span>
-              </div>
-              <p className="text-sm text-slate-300">{event.dateLabel}</p>
-              <p className="text-sm text-slate-400">Madison Theater • Covington, KY</p>
-              <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-400/40 bg-fuchsia-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-200">
-                <span className="text-[10px] font-bold text-fuchsia-300/80">Artist</span>
-                <span className="text-sm font-semibold normal-case tracking-normal text-white">{event.artist}</span>
-              </div>
-              <p className="text-sm text-slate-300">{event.description}</p>
-              <TicketWidget eventTitle={event.title} />
-            </article>
-          ))}
+        <div className={`grid gap-5 ${view === "compact" ? "md:grid-cols-1" : "md:grid-cols-2"}`}>
+          {mockEvents.map((event, index) => {
+            const featured = index === 0;
+            return (
+              <article
+                key={event.title}
+                className={`space-y-4 rounded-2xl border bg-[#0b1228] p-5 transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(15,23,42,0.35)] ${
+                  featured
+                    ? "border-fuchsia-400/60 shadow-[0_0_35px_rgba(217,70,239,0.18)]"
+                    : "border-white/10 hover:border-fuchsia-400/30"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="text-xl font-bold tracking-tight text-slate-100">{event.title}</h2>
+                  <span
+                    className={`rounded-full border px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                      featured ? "border-fuchsia-300/60 text-fuchsia-200" : "border-white/20 text-slate-300"
+                    }`}
+                  >
+                    {featured ? "Featured" : "Mock Event"}
+                  </span>
+                </div>
+                <p className="text-sm text-slate-300">{event.dateLabel}</p>
+                <p className="text-sm text-slate-400">Madison Theater • Covington, KY</p>
+                <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-400/40 bg-fuchsia-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-200">
+                  <span className="text-[10px] font-bold text-fuchsia-300/80">Artist</span>
+                  <span className="text-sm font-semibold normal-case tracking-normal text-white">{event.artist}</span>
+                </div>
+                <p className="text-sm text-slate-300">{event.description}</p>
+                <TicketWidget eventTitle={event.title} />
+              </article>
+            );
+          })}
           <div className="rounded-2xl border border-dashed border-white/10 bg-[#0b1228] p-6 text-sm text-slate-300">
             Publish events in Supabase to replace these mock cards. Ticket CTA uses
             <code className="mx-1 rounded bg-white/10 px-1">NEXT_PUBLIC_TICKETING_WIDGET_URL</code> when set.
           </div>
         </div>
       ) : (
-        <div className="grid gap-5 md:grid-cols-2">
-          {events.map((event) => (
-            <article key={event.id} className="space-y-4 rounded-2xl border border-white/10 bg-[#0b1228] p-5 transition hover:-translate-y-0.5 hover:border-fuchsia-400/30 hover:shadow-[0_18px_40px_rgba(15,23,42,0.35)]">
+        <div className={`grid gap-5 ${view === "compact" ? "md:grid-cols-1" : "md:grid-cols-2"}`}>
+          {events.map((event, index) => {
+            const featured = index === 0;
+            return (
+            <article
+              key={event.id}
+              className={`space-y-4 rounded-2xl border bg-[#0b1228] p-5 transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(15,23,42,0.35)] ${
+                featured
+                  ? "border-fuchsia-400/60 shadow-[0_0_35px_rgba(217,70,239,0.18)]"
+                  : "border-white/10 hover:border-fuchsia-400/30"
+              }`}
+            >
               <div className="flex items-start justify-between gap-3">
                 <h2 className="text-xl font-bold tracking-tight text-slate-100">{event.title}</h2>
-                <span className="rounded-full border border-white/20 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-300">
-                  Live
+                <span
+                  className={`rounded-full border px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                    featured ? "border-fuchsia-300/60 text-fuchsia-200" : "border-white/20 text-slate-300"
+                  }`}
+                >
+                  {featured ? "Featured" : "Live"}
                 </span>
               </div>
 
@@ -162,7 +217,8 @@ export default async function EventsPage() {
               {event.description ? <p className="text-sm text-slate-300">{event.description}</p> : null}
               <TicketWidget eventTitle={event.title} eventTicketUrl={event.ticket_url} />
             </article>
-          ))}
+          );
+          })}
         </div>
       )}
       </div>
