@@ -41,7 +41,7 @@ export default function Home() {
       </section>
 
       <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0b1228] p-6 md:p-8">
-        <div className="absolute inset-0 bg-[url('/madison3.JPG')] bg-cover bg-center opacity-25" />
+        <div className="absolute inset-0 bg-[url('/madison3.JPG')] bg-cover bg-[position:50%_70%] opacity-25" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0b1228] via-[#0b1228]/80 to-transparent" />
         <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
