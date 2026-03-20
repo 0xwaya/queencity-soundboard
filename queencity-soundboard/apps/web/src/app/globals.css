@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap");
 
 :root {
   --background: #07090f;
@@ -24,8 +24,8 @@ body {
 }
 
 .wayalabs-word {
-  font-family: "Space Grotesk", Inter, Arial, sans-serif;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: lowercase;
+  font-family: "Bebas Neue", Inter, Arial, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
