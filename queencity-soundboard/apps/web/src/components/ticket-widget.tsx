@@ -1,5 +1,7 @@
 "use client";
 
+import { track } from "@vercel/analytics";
+
 type Props = {
   eventTitle: string;
   eventTicketUrl?: string | null;
@@ -25,6 +27,7 @@ export default function TicketWidget({ eventTitle, eventTicketUrl }: Props) {
             href={checkoutUrl}
             target="_blank"
             rel="noreferrer"
+            onClick={() => track("checkout_click", { title: eventTitle, url: checkoutUrl, provider })}
             className="qcs-button-3d inline-flex w-full items-center justify-center rounded-lg bg-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-fuchsia-400"
           >
             Buy Tickets
