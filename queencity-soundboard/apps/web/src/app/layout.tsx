@@ -71,6 +71,10 @@ export default function RootLayout({
             <div className="space-y-1">
               <p className="text-sm font-semibold text-slate-100">QueenCity Soundboard</p>
               <p className="truncate text-xs text-slate-400 max-w-xs sm:max-w-none">Culture-forward nights. Ticketed. Elevated.</p>
+              <p className="text-[11px] text-slate-500">
+                © {new Date().getFullYear()} QueenCity Soundboard. Built by {" "}
+                <span className="wayalabs-word text-slate-200">wayalabs</span>.
+              </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-4">

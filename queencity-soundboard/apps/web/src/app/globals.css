@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&display=swap");
 
 :root {
   --background: #07090f;
@@ -20,4 +21,11 @@ body {
   background: radial-gradient(circle at 20% 0%, #101a38 0%, #0a1125 40%, #07090f 100%);
   color: var(--foreground);
   font-family: Inter, Arial, Helvetica, sans-serif;
+}
+
+.wayalabs-word {
+  font-family: "Space Grotesk", Inter, Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
 }
