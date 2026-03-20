@@ -13,11 +13,11 @@ export default async function MerchPage() {
   const t =
     locale === "es-ve"
       ? {
-          eyebrow: "Merch de la casa",
+          eyebrow: "Merch pa’ la pinta",
           title: "Merch",
-          subtitle: "Drops limitados conectados a noches y momentos de artistas.",
-          empty: "El merch viene pronto. El primer drop se anuncia en el canal de eventos.",
-          stock: "en stock",
+          subtitle: "Drops limitados pa’ que te vistas como es, conectado a noches y momentos de artistas. ¡Póntelo y saca pecho!",
+          empty: "El merch viene pronto, así que pilas. El primer drop lo soltamos por el canal de eventos. ¡No te quedes sin el tuyo!",
+          stock: "disponible (apúrate)",
         }
       : {
           eyebrow: "Fan gear",

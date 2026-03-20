@@ -18,21 +18,21 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
   const t =
     locale === "es-ve"
       ? {
-          eyebrow: "Lineup en vivo",
+          eyebrow: "Lineup pa’ la gozadera",
           title: "After Dark Sessions",
-          subtitle: "Artistas latinos en spotlight. Sonido pro. Compra en segundos.",
-          seriesLabel: "Foco de la serie",
+          subtitle: "Artistas latinos en el spotlight. Sonido pro, compra sin estrés. ¡Asegura tu entrada, mi pana!",
+          seriesLabel: "El flow de la serie",
           seriesTitle: "Madison Theater • Covington, KY",
-          seriesMeta: "Puertas 7:00 PM • Show 8:00 PM",
-          tags: ["Todo", "After Dark", "Acústico", "Latino", "VIP"],
-          featured: "Destacado",
-          mock: "Evento demo",
+          seriesMeta: "Puertas 7:00 PM • Show 8:00 PM (¡Llega temprano pa’ agarrar puesto!)",
+          tags: ["To’ el mundo", "After Dark", "Acústico", "Latino", "VIP"],
+          featured: "¡Pega’o!",
+          mock: "Demo, pues",
           live: "En vivo",
           artist: "Artista",
           venue: "Madison Theater • Covington, KY",
           publishHint:
-            "Publica eventos en Supabase para reemplazar estas tarjetas demo. El CTA usa NEXT_PUBLIC_TICKETING_WIDGET_URL cuando esté listo.",
-          spotlight: "Destacado",
+            "Publica eventos en Supabase pa’ quitar estas tarjetas demo. El botón usa NEXT_PUBLIC_TICKETING_WIDGET_URL cuando esté listo. ¡No seas lento!",
+          spotlight: "Brilla’o",
           compact: "Compacto",
         }
       : {

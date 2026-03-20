@@ -5,14 +5,14 @@ export default async function AboutPage() {
   const t =
     locale === "es-ve"
       ? {
-          eyebrow: "Sobre Queen City",
-          title: "Hecho para noches con cultura",
+          eyebrow: "¿Quiénes somos, pues?",
+          title: "Hecho pa’ rumbear con cultura",
           body:
-            "QueenCity Soundboard es una plataforma fan-first que conecta talento venezolano y latino con el Midwest a través de experiencias en vivo premium, boletos sin fricción y drops curados.",
+            "QueenCity Soundboard es la movida fan-first que conecta talento venezolano y latino con el Midwest. Aquí hay pura experiencia premium, entradas sin rollo y drops de merch que están brutales. ¡Pa’ que vaciles como en Caracas, pero en Kentucky!",
           cards: [
-            { title: "Eventos en vivo", body: "Descubre showcases, pop-ups y colaboraciones que vienen con toda." },
-            { title: "Checkout rápido", body: "Compra móvil, simple y sin vueltas usando ticketing probado." },
-            { title: "Drops de merch", body: "Capsules limitadas con artistas, venues y momentos clave." },
+            { title: "Eventos en vivo", body: "Showcases, pop-ups y colaboraciones que vienen con todo el flow criollo. ¡No te lo pierdas, pana!" },
+            { title: "Checkout rápido", body: "Compra desde el cel, facilito y sin dar tantas vueltas. Aquí no hay cola, solo gozo." },
+            { title: "Drops de merch", body: "Capsulitas limitadas con artistas, panas y momentos que quedan pa’ la historia. ¡Corre que vuelan!" },
           ],
         }
       : {
