@@ -40,8 +40,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-white/10 bg-[#0b1228] p-6 md:p-8">
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0b1228] p-6 md:p-8">
+        <div className="absolute inset-0 bg-[url('/madison3.JPG')] bg-cover bg-center opacity-25" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0b1228] via-[#0b1228]/80 to-transparent" />
+        <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-300/80">Venue Spotlight</p>
             <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white md:text-3xl">Madison Theater</h2>
