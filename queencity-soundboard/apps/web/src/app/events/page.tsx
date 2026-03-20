@@ -81,11 +81,34 @@ export default async function EventsPage() {
         />
       ) : null}
       <div className="space-y-6">
-      <div className="rounded-2xl border border-white/10 bg-[#0b1228] p-5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-300/80">Live lineup</p>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-100 md:text-4xl">Events</h1>
-        <p className="mt-2 text-sm text-slate-300">Tap any event and complete checkout in a few clicks.</p>
-      </div>
+      <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f1630] via-[#0b1228] to-[#070b17] p-6 md:p-10">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-300/80">Live lineup</p>
+            <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-100 md:text-5xl">
+              After Dark Sessions
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm text-slate-300 md:text-base">
+              Spotlighted Latin artists. Premium sound. Seamless checkout. Secure your seat in seconds.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-[#0e1732] px-5 py-4 text-sm text-slate-300">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-fuchsia-300/80">Series Focus</p>
+            <p className="mt-2 text-base font-semibold text-white">Madison Theater • Covington, KY</p>
+            <p className="mt-1 text-xs text-slate-400">Doors 7:00 PM • Showtime 8:00 PM</p>
+          </div>
+        </div>
+        <div className="mt-6 flex flex-wrap gap-2">
+          {['All', 'After Dark', 'Acoustic', 'Latin', 'VIP'].map((label) => (
+            <span
+              key={label}
+              className="rounded-full border border-fuchsia-400/30 bg-fuchsia-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-200"
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+      </section>
 
       {events.length === 0 ? (
         <div className="grid gap-5 md:grid-cols-2">

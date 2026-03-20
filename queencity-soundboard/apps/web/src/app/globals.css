@@ -4,6 +4,13 @@
 :root {
   --background: #07090f;
   --foreground: #e2e8f0;
+  --qcs-surface: #0b1228;
+  --qcs-surface-soft: #0c142a;
+  --qcs-accent: #d946ef;
+  --qcs-accent-2: #22d3ee;
+  --qcs-text: #f8fafc;
+  --qcs-text-muted: #94a3b8;
+  --qcs-border: rgba(255,255,255,0.12);
 }
 
 @theme inline {
