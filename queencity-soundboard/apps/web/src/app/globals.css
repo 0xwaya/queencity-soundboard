@@ -53,3 +53,17 @@ body {
   transform: translateY(1px);
   box-shadow: 0 6px 14px rgba(8, 11, 24, 0.45), 0 1px 0 rgba(255, 255, 255, 0.08) inset;
 }
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid rgba(217, 70, 239, 0.8);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
