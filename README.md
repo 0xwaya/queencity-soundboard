@@ -1,6 +1,6 @@
 # Echo Operator Workspace
 
-This is the working directory for **Echo** — the autonomous AI operator running on macOS for `@0xwaya`. 
+This is the working directory for **Echo** — the autonomous AI operator running on macOS for `@0xwaya`.
 
 ---
 
@@ -10,7 +10,8 @@ This is the working directory for **Echo** — the autonomous AI operator runnin
 - Version: `2026.3.2`
 - Port: `18789` (loopback only)
 - Service: `ai.openclaw.gateway` (launchd)
-- Auth: bearer token stored in `~/.openclaw/openclaw.json`
+- Auth: bearer token injected at startup by `tools/secret-bootstrap.sh`
+  - Secrets must be encrypted at rest (`credentials/openclaw.env.enc` + key) or injected by environment (launchd/CI/secret manager)
 
 ### Core Python Modules (`sandboxes/langraph-echo-sandbox/`)
 
@@ -62,11 +63,11 @@ Operational docs maintained in local workspace state:
 
 | Command | Description |
 |---------|-------------|
-| `/run <cmd>` or `/exec` | Run shell command (30s timeout) |
-| `/file <path>` or `/read` | Read file (max 8KB, no binary, `/Users/pc/` only) |
-| `/write <path> <content>` | Write file (same path guard) |
+| `/run <cmd>` or `/exec` | Run shell command (600s timeout; metacharacters blocked) |
+| `/file <path>` or `/read` | Read file (max 64KB, no binary; strict path guards when `ECHO_STRICT_FS=1`) |
+| `/write <path> :: <content>` | Write file (strict path guards when `ECHO_STRICT_FS=1`) |
 | `/skill <name>` | Invoke an OpenClaw skill |
-| `/do <task>` | Natural language task delegation |
+| `/do <skill> [args]` | Alias for `/skill` |
 | `/note <text>` | Append note to today's memory file |
 | `/mem` or `/memory` | Show today's memory excerpt |
 | `/status` | Show Echo runtime status |
@@ -78,11 +79,11 @@ Operational docs maintained in local workspace state:
 
 | Guard | Value | Behaviour |
 |-------|-------|-----------|
-| Tool calls per message | 6 | Hard cap — returns partial after limit |
+| Tool calls per message | 20 | Hard cap — returns budget warning after limit |
 | Total API calls per task | 50 | `lc_adapter` global cap (budgeted per channel) |
 | Session tokens | 500K | `lc_adapter` global cap (budgeted per channel) |
-| Shell timeout | 120s | Process killed, error returned |
-| Wall-clock timeout | 120s | `handle()` returns partial |
+| Shell timeout | 600s | Process killed, error returned |
+| Wall-clock timeout | 600s | `handle()` returns partial |
 
 Per-channel budgets (lc_adapter):
 - global: 50 calls / 500K tokens
@@ -135,7 +136,7 @@ Recent optimization work followed this sequence:
 ## Safety Properties
 
 - `lc_adapter.py`: API key deleted from module namespace (`del _API_KEY`) after `ChatOpenAI` construction — not accessible via `lc_adapter._API_KEY`
-- `echo_agent.py`: File reads restricted to `/Users/pc/` subtree; binary files rejected; LLM output sanitized before return
+- `echo_agent.py`: Binary file reads rejected; LLM output sanitized before return; optional strict path enforcement via `ECHO_STRICT_FS=1`
 - `telegram_adapter.py`: Belt-and-suspenders `_sanitize_output()` applied to all outgoing messages
 - No API keys in version-controlled files; `models.json` lives in `~/.openclaw/agents/main/agent/` (outside sandbox)
 

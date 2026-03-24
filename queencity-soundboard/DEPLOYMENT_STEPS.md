@@ -12,10 +12,15 @@ Ship web-first MVP using:
    ```bash
    cd queencity-soundboard/apps/web
    npm install
-   npm run dev
+   cp .env.example .env.local
+   cd ..
+   bash tools/env-crypto.sh encrypt
+   bash tools/env-crypto.sh clean
+   bash tools/env-crypto.sh dev
    ```
 2. Confirm env template exists: `.env.example`
-3. Confirm at least one placeholder logo is selected for v0 launch.
+3. Confirm encrypted env bundle exists: `apps/web/.env.encrypted`
+4. Confirm at least one placeholder logo is selected for v0 launch.
 
 ## 2) Supabase setup
 1. Create project: `queencitysoundboard-prod` (US East)

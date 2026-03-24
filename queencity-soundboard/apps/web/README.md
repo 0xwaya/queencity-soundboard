@@ -5,10 +5,14 @@ Mobile-first event and merch front-end for QueenCity Soundboard.
 ## Local setup
 
 ```bash
-cp .env.example .env.local
-npm install
-npm run dev
+cp apps/web/.env.example apps/web/.env.local
+cd apps/web && npm install && cd ..
+bash tools/env-crypto.sh encrypt apps/web/.env.local apps/web/.env.encrypted
+bash tools/env-crypto.sh clean
+bash tools/env-crypto.sh dev
 ```
+
+`bash tools/env-crypto.sh dev` decrypts to `apps/web/.env.local` for runtime and removes it automatically on exit.
 
 ## Required environment variables
 

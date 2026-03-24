@@ -10,6 +10,8 @@ branding/
 .env
 .env.*
 !.env.example
+!apps/web/.env.encrypted
+!/.env.encrypted
 *.key
 secrets/
 credentials/

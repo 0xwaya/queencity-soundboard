@@ -29,11 +29,24 @@ A web-first, mobile-friendly platform for:
 
 ## Quick start
 ```bash
+# one-time setup
 cd apps/web
-cp .env.example .env.local
 npm install
-npm run dev
+cp .env.example .env.local
+
+# from repo root: encrypt and remove plaintext
+cd ..
+bash tools/env-crypto.sh encrypt
+bash tools/env-crypto.sh clean
+
+# day-to-day dev: decrypt only for runtime, auto-clean on exit
+bash tools/env-crypto.sh dev
 ```
+
+### Env security workflow
+- Keep `apps/web/.env.local` as temporary runtime material only.
+- Commit `apps/web/.env.encrypted` when you need shared encrypted defaults.
+- Set `QCS_ENV_PASSPHRASE` in your shell, or enter passphrase interactively.
 
 ## Core docs
 - `PLAN.md` — build sequence

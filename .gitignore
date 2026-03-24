@@ -13,3 +13,51 @@
 !tarot-sprint-mock/
 !tarot-sprint-mock/**
 .vercel
+
+# -----------------------------
+# Security and secrets (global)
+# -----------------------------
+**/.env
+**/.env.*
+**/*.env.enc
+**/*.env.key
+**/credentials/**
+**/secrets/**
+**/*.secret*
+**/*.token*
+**/*apikey*
+**/*api_key*
+
+# Private keys and certificates
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.p7b
+**/*.der
+**/*.crt
+**/*.csr
+**/*.jks
+**/*.keystore
+**/*id_rsa*
+**/*id_ed25519*
+
+# Logs, dumps, and local data
+**/*.log
+**/*.sqlite
+**/*.sqlite3
+**/*.db
+**/*.jsonl
+**/logs/**
+**/tmp/**
+**/cache/**
+
+# Dependency and build artifacts
+**/node_modules/**
+**/dist/**
+**/build/**
+**/coverage/**
+**/.pytest_cache/**
+**/__pycache__/**
+**/.venv/**
+**/venv/**

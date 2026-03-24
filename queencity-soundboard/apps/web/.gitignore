@@ -33,6 +33,7 @@ yarn-error.log*
 # env files (keep real envs private, allow template)
 .env*
 !.env.example
+!.env.encrypted
 
 # Encrypted env bundles and keys (never commit)
 *.env.enc
