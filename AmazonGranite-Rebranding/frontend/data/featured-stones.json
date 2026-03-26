@@ -7,7 +7,7 @@
     "tiers": [
       {
         "name": "Featured Best Sellers",
-        "range": "Top 4–5",
+        "range": "Top 4\u20135",
         "slabs": [
           {
             "name": "Calacatta Laza",
@@ -51,7 +51,7 @@
     "tiers": [
       {
         "name": "Featured Best Sellers",
-        "range": "Top 4–5",
+        "range": "Top 4\u20135",
         "slabs": [
           {
             "name": "Carrara Mist",
@@ -95,7 +95,7 @@
     "tiers": [
       {
         "name": "Featured Best Sellers",
-        "range": "Top 4–5",
+        "range": "Top 4\u20135",
         "slabs": [
           {
             "name": "Pure White",
@@ -139,41 +139,49 @@
     "tiers": [
       {
         "name": "Featured Best Sellers",
-        "range": "Top 4–5",
+        "range": "Top 4\u20135",
         "slabs": [
           {
-            "name": "Galaxy Black",
-            "notes": "Sparkle granite",
-            "image": "https://www.avanimarble.com/wp-content/uploads/2023/03/Avani-Marble-Granite-New.jpg",
-            "imageLarge": "https://www.avanimarble.com/wp-content/uploads/2023/03/Avani-Marble-Granite-New.jpg"
+            "name": "Crystal Cream (KY-1007)",
+            "notes": "3cm quartz",
+            "image": "/materials/avani/KY-1007- Crystal cream 3cm quartz .jpg",
+            "imageLarge": "/materials/avani/KY-1007- Crystal cream 3cm quartz .jpg"
           },
           {
-            "name": "Bianco Romano",
-            "notes": "Warm white granite",
-            "image": "https://www.avanimarble.com/wp-content/uploads/2023/03/Avani-Marble-Granite-New.jpg",
-            "imageLarge": "https://www.avanimarble.com/wp-content/uploads/2023/03/Avani-Marble-Granite-New.jpg"
+            "name": "Calacatta Aurus (KY-5035)",
+            "notes": "3cm quartz",
+            "image": "/materials/avani/KY-5035-Calacatta Aurus 3cm quartz.jpg",
+            "imageLarge": "/materials/avani/KY-5035-Calacatta Aurus 3cm quartz.jpg"
           },
           {
-            "name": "Fantasy Brown",
-            "notes": "Marble-like movement",
-            "image": "https://www.avanimarble.com/wp-content/uploads/2023/03/Avani-Marble-Granite-New.jpg",
-            "imageLarge": "https://www.avanimarble.com/wp-content/uploads/2023/03/Avani-Marble-Granite-New.jpg"
+            "name": "Calacatta Andromeda (KY-5040)",
+            "notes": "3cm quartz",
+            "image": "/materials/avani/KY-5040 - Calacatta andromeda 3cm quartz.jpg",
+            "imageLarge": "/materials/avani/KY-5040 - Calacatta andromeda 3cm quartz.jpg"
           },
           {
-            "name": "River White",
-            "notes": "Soft grey veins",
-            "image": "https://www.avanimarble.com/wp-content/uploads/2023/03/Avani-Marble-Granite-New.jpg",
-            "imageLarge": "https://www.avanimarble.com/wp-content/uploads/2023/03/Avani-Marble-Granite-New.jpg"
+            "name": "Black Mamba (KY-5140)",
+            "notes": "3cm quartz",
+            "image": "/materials/avani/KY-5140-Black mamba 3cm quartz.jpg",
+            "imageLarge": "/materials/avani/KY-5140-Black mamba 3cm quartz.jpg"
           },
           {
-            "name": "Viscon White",
-            "notes": "Popular light granite",
-            "image": "https://www.avanimarble.com/wp-content/uploads/2023/03/Avani-Marble-Granite-New.jpg",
-            "imageLarge": "https://www.avanimarble.com/wp-content/uploads/2023/03/Avani-Marble-Granite-New.jpg"
+            "name": "Calacatta Gelato (KY-5520)",
+            "notes": "3cm quartz",
+            "image": "/materials/avani/KY-5520-Calacatta Gelato 3cm quartz.jpg",
+            "imageLarge": "/materials/avani/KY-5520-Calacatta Gelato 3cm quartz.jpg"
           }
         ]
       }
-    ]
+    ],
+    "phone": "(614) 372-5508",
+    "hours": {
+      "mon_fri": "8:00 AM \u2013 5:00 PM",
+      "sat": "9:00 AM \u2013 1:00 PM"
+    },
+    "address": "4051 Fondorf Dr Unit 3, Columbus, OH 43228",
+    "gallery": "https://avanigranites.com/gallery/",
+    "heroImage": "/materials/avani/Avani-hero image.webp"
   },
   {
     "name": "Citi Quartz",
@@ -183,7 +191,7 @@
     "tiers": [
       {
         "name": "Featured Best Sellers",
-        "range": "Top 4–5",
+        "range": "Top 4\u20135",
         "slabs": [
           {
             "name": "Calacatta Rio",
