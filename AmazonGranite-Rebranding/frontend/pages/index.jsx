@@ -14,6 +14,8 @@ export default function Home() {
         <meta name="description" content="Amazon Granite LLC — premium countertops with 3–5 day turnaround in Cincinnati." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
       </Head>
       <div className="min-h-screen bg-bg text-text">
         <div className="max-w-7xl mx-auto px-6">
