@@ -4,6 +4,19 @@
 # allow git internals and key root docs
 !.gitignore
 !README.md
+!HEARTBEAT.md
+!AGENTS.md
+!TOOLS.md
+!api-ratelimit.md
+!RATE_LIMIT_PROBLEM_REPORT.md
+
+# allow selected local operator docs for heartbeat/runtime tracking
+!memory/
+!memory/memory.md
+!memory/2026-03-25-bootstrap-memory-pack.md
+!memory/2026-03-28.md
+!openclaw/
+!openclaw/LANGGRAPH_CASE_STUDY.md
 
 # track only project directory
 !queencity-soundboard/
