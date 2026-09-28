@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import EventSubmitForm from "@/components/event-submit-form";
 import PromotionRequestForm from "@/components/promotion-request-form";
+import SkylineBackdrop from "@/components/skyline-backdrop";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -14,7 +15,8 @@ export const metadata: Metadata = buildPageMetadata({
 export default function PartnersPage() {
   return (
     <div className="space-y-7">
-      <section className="qcs-ambient-card rounded-3xl p-6 md:p-10">
+      <section className="qcs-ambient-card relative overflow-hidden rounded-3xl p-6 md:p-10">
+        <SkylineBackdrop opacity={40} />
         <div className="qcs-card-content max-w-3xl">
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-300/90">Partner with us</p>
           <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-100 md:text-5xl">

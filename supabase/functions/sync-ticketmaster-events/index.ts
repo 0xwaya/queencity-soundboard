@@ -35,10 +35,19 @@ interface TicketmasterClassification {
   genre?: { name?: string };
 }
 
+interface TicketmasterImage {
+  url?: string;
+  ratio?: string;
+  width?: number;
+  height?: number;
+  fallback?: boolean;
+}
+
 interface TicketmasterEvent {
   id?: string;
   name: string;
   url?: string;
+  images?: TicketmasterImage[];
   dates?: { start?: { dateTime?: string }; status?: { code?: string } };
   classifications?: TicketmasterClassification[];
   _embedded?: { venues?: TicketmasterVenue[] };
@@ -72,6 +81,23 @@ const GENRE_TO_CATEGORY: Record<string, string> = {
   jazz: "jazz",
   comedy: "comedy",
 };
+
+/** Widest non-fallback 16:9 asset, which suits a wide card backdrop; falls back to the widest image. */
+function pickHeroImage(images?: TicketmasterImage[]): string | null {
+  const usable = (images ?? []).filter((image) => {
+    if (!image.url || image.fallback) return false;
+    try {
+      return new URL(image.url).protocol === "https:";
+    } catch {
+      return false;
+    }
+  });
+  if (usable.length === 0) return null;
+
+  const byWidthDesc = [...usable].sort((left, right) => (right.width ?? 0) - (left.width ?? 0));
+  const wide = byWidthDesc.find((image) => image.ratio === "16_9" && (image.width ?? 0) >= 1024);
+  return (wide ?? byWidthDesc[0]).url ?? null;
+}
 
 function resolveCategory(classifications?: TicketmasterClassification[]): string {
   const primary = classifications?.[0];
@@ -292,6 +318,7 @@ async function handler(req: Request) {
           ticket_url: event.url ?? null,
           category,
           source: "sync",
+          hero_image_url: pickHeroImage(event.images),
           ticketmaster_relevance_rank: relevanceRank,
         },
         { onConflict: "title,event_date" },

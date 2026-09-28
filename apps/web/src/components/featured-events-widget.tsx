@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import EventBackdrop from "@/components/event-backdrop";
 import type { EventItem } from "@/lib/supabase";
 
 type Props = {
@@ -27,8 +28,9 @@ export default function FeaturedEventsWidget({ events }: Props) {
 
   return (
     <Link href="/events">
-      <div className="group qcs-ambient-card rounded-2xl border border-[#d4b87e]/20 p-6 transition-all hover:border-[#d4b87e]/40 cursor-pointer">
-        <div className="flex items-start justify-between gap-4">
+      <div className="group qcs-ambient-card relative overflow-hidden rounded-2xl border border-[#d4b87e]/20 p-6 transition-all hover:border-[#d4b87e]/40 cursor-pointer">
+        <EventBackdrop src={currentEvent.hero_image_url} opacity={30} />
+        <div className="relative z-10 flex items-start justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <span className="text-xl">🎵</span>
@@ -85,7 +87,7 @@ export default function FeaturedEventsWidget({ events }: Props) {
           </div>
         </div>
 
-        <div className="mt-5 flex items-center justify-between">
+        <div className="relative z-10 mt-5 flex items-center justify-between">
           <div className="text-xs text-slate-400">Browse all events</div>
         </div>
       </div>

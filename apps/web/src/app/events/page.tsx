@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import EventsViewToggle from "@/components/events-view-toggle";
+import EventBackdrop from "@/components/event-backdrop";
+import SkylineBackdrop from "@/components/skyline-backdrop";
 import TicketWidget from "@/components/ticket-widget";
 import TrackedLink from "@/components/tracked-link";
 import { getEventCategories, getPublishedEvents } from "@/lib/data";
@@ -148,8 +150,9 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
         />
       ) : null}
       <div className="space-y-6">
-      <section className="rounded-3xl border border-white/10 bg-linear-to-br from-[#0f1630] via-[#0b1228] to-[#070b17] p-7 md:p-11">
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-linear-to-br from-[#0f1630] via-[#0b1228] to-[#070b17] p-7 md:p-11">
+        <SkylineBackdrop opacity={40} />
+        <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-300/80">{t.eyebrow}</p>
             <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-100 md:text-5xl">
@@ -158,7 +161,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
             <p className="mt-2 max-w-2xl text-sm text-slate-300 md:text-base">{t.subtitle}</p>
           </div>
         </div>
-        <div className="mt-6 flex flex-wrap items-center gap-2">
+        <div className="relative z-10 mt-6 flex flex-wrap items-center gap-2">
           <TrackedLink
             href="/events"
             event="cta_click"
@@ -235,13 +238,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
               }`}
             >
               {event.hero_image_url ? (
-                <>
-                  <div
-                    className="absolute inset-0 bg-cover bg-center opacity-45 filter-[contrast(1.18)_saturate(1.12)_brightness(1.03)]"
-                    style={{ backgroundImage: `url('${event.hero_image_url}')` }}
-                  />
-                  <div className="absolute inset-0 bg-linear-to-r from-[#08111f] via-[#08111f]/82 to-[#08111f]/45" />
-                </>
+                <EventBackdrop src={event.hero_image_url} opacity={40} priority={index < 2} />
               ) : null}
               <div className="relative z-10 space-y-4">
               <div className="flex items-start justify-between gap-3">

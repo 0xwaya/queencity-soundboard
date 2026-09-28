@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import TrackedExternalLink from "@/components/tracked-external-link";
 import TrackedLink from "@/components/tracked-link";
 import FeaturedEventsWidget from "@/components/featured-events-widget";
+import EventBackdrop from "@/components/event-backdrop";
+import SkylineBackdrop from "@/components/skyline-backdrop";
 import { buildPageMetadata } from "@/lib/seo";
 import { getPublishedEvents } from "@/lib/data";
 import { buildAffiliateUrl } from "@/lib/affiliate";
@@ -42,10 +44,8 @@ export default async function Home() {
       <meta name="impact-site-verification" {...({ value: "d7fec6ff-ceae-4bce-bdc2-f31621a65833" } as Record<string, string>)} />
     <div className="space-y-7">
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <section className="qcs-ambient-card rounded-3xl p-6 md:p-10">
-          <div className="pointer-events-none absolute -left-10 top-8 h-44 w-44 rounded-full bg-cyan-400/10 blur-2xl" />
-          <div className="pointer-events-none absolute right-8 top-14 h-36 w-36 rounded-full bg-fuchsia-400/12 blur-2xl" />
-          <div className="pointer-events-none absolute bottom-12 right-20 h-28 w-28 rounded-full border border-amber-300/20" />
+        <section className="qcs-ambient-card relative overflow-hidden rounded-3xl p-6 md:p-10">
+          <SkylineBackdrop opacity={50} />
           <div className="qcs-card-content max-w-3xl">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-300/90">Cincinnati + NKY</p>
             <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-slate-100 md:text-6xl">
@@ -86,8 +86,9 @@ export default async function Home() {
           </div>
         </section>
 
-        <aside className="qcs-ambient-card flex min-h-64 flex-col justify-between rounded-2xl border border-amber-300/25 p-5">
-          <div>
+        <aside className="qcs-ambient-card relative flex min-h-64 flex-col justify-between overflow-hidden rounded-2xl border border-amber-300/25 p-5">
+          <EventBackdrop src={spotlightEvent?.hero_image_url} opacity={40} priority />
+          <div className="relative z-10">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-300/90">Ticket Spotlight</p>
             {spotlightEvent ? (
               <>
@@ -121,7 +122,7 @@ export default async function Home() {
               label={`home_ticket_spotlight_${spotlightEvent.id}`}
               target="_blank"
               rel="sponsored noopener noreferrer"
-              className="qcs-button-3d mt-5 inline-flex w-fit rounded-lg bg-amber-300 px-4 py-2.5 text-sm font-bold text-[#15120a] hover:bg-amber-200"
+              className="qcs-button-3d relative z-10 mt-5 inline-flex w-fit rounded-lg bg-amber-300 px-4 py-2.5 text-sm font-bold text-[#15120a] hover:bg-amber-200"
             >
               Get tickets
             </TrackedExternalLink>
@@ -130,12 +131,12 @@ export default async function Home() {
               href="/events"
               event="cta_click"
               label="home_ticket_spotlight_browse"
-              className="qcs-button-3d mt-5 inline-flex w-fit rounded-lg bg-amber-300 px-4 py-2.5 text-sm font-bold text-[#15120a] hover:bg-amber-200"
+              className="qcs-button-3d relative z-10 mt-5 inline-flex w-fit rounded-lg bg-amber-300 px-4 py-2.5 text-sm font-bold text-[#15120a] hover:bg-amber-200"
             >
               Browse events
             </TrackedLink>
           )}
-          <p className="mt-3 text-[11px] leading-4 text-slate-400">
+          <p className="relative z-10 mt-3 text-[11px] leading-4 text-slate-400">
             We may earn a commission from ticket links, at no extra cost to you.
           </p>
         </aside>

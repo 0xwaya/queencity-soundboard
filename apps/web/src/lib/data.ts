@@ -1,5 +1,5 @@
 import { getSupabaseBrowserClient, hasSupabaseConfig, type EventItem, type MerchItem } from "@/lib/supabase";
-import { normalizeHttpsUrl } from "@/lib/url";
+import { normalizeHttpsUrl, normalizeImageUrl } from "@/lib/url";
 
 export type QueryResult<T> = {
   data: T;
@@ -49,6 +49,7 @@ export async function getPublishedEvents(): Promise<QueryResult<EventItem[]>> {
     const normalizedRows = rows.map((row) => ({
       ...row,
       ticket_url: normalizeHttpsUrl(row.ticket_url),
+      hero_image_url: normalizeImageUrl(row.hero_image_url),
       is_promoted: isPromotionActive(row),
       venues: Array.isArray(row.venues) ? row.venues[0] ?? null : row.venues ?? null,
     }));
