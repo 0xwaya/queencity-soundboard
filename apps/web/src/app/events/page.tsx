@@ -272,6 +272,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
               <TicketWidget
                 eventTitle={event.title}
                 eventTicketUrl={event.ticket_url}
+                eventId={event.id}
                 locale={locale}
                 salesDisabled={false}
               />

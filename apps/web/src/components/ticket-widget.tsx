@@ -1,11 +1,12 @@
 "use client";
 
 import { track } from "@vercel/analytics";
-import { normalizeHttpsUrl } from "@/lib/url";
+import { buildAffiliateUrl } from "@/lib/affiliate";
 
 type Props = {
   eventTitle: string;
   eventTicketUrl?: string | null;
+  eventId?: string;
   locale?: "en" | "es-ve";
   salesDisabled?: boolean;
   salesDisabledReason?: "paused" | "date-tbd";
@@ -14,12 +15,13 @@ type Props = {
 export default function TicketWidget({
   eventTitle,
   eventTicketUrl,
+  eventId,
   locale = "en",
   salesDisabled = false,
   salesDisabledReason = "paused",
 }: Props) {
   const provider = "external tickets";
-  const checkoutUrl = salesDisabled ? null : normalizeHttpsUrl(eventTicketUrl);
+  const checkoutUrl = salesDisabled ? null : buildAffiliateUrl(eventTicketUrl, eventId);
   const copy =
     locale === "es-ve"
       ? {
@@ -55,7 +57,7 @@ export default function TicketWidget({
           <a
             href={checkoutUrl}
             target="_blank"
-            rel="noreferrer noopener"
+            rel="sponsored noreferrer noopener"
             onClick={() => track("checkout_click", { title: eventTitle, url: checkoutUrl, provider })}
             className="qcs-button-3d inline-flex w-full items-center justify-center rounded-lg bg-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-fuchsia-400"
           >

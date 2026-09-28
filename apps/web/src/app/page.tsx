@@ -4,6 +4,7 @@ import TrackedLink from "@/components/tracked-link";
 import FeaturedEventsWidget from "@/components/featured-events-widget";
 import { buildPageMetadata } from "@/lib/seo";
 import { getPublishedEvents } from "@/lib/data";
+import { buildAffiliateUrl } from "@/lib/affiliate";
 import type { EventItem } from "@/lib/supabase";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -115,7 +116,7 @@ export default async function Home() {
           </div>
           {spotlightEvent?.ticket_url ? (
             <TrackedExternalLink
-              href={spotlightEvent.ticket_url}
+              href={buildAffiliateUrl(spotlightEvent.ticket_url, spotlightEvent.id) ?? spotlightEvent.ticket_url}
               event="ticket_click"
               label={`home_ticket_spotlight_${spotlightEvent.id}`}
               target="_blank"
@@ -135,7 +136,7 @@ export default async function Home() {
             </TrackedLink>
           )}
           <p className="mt-3 text-[11px] leading-4 text-slate-400">
-            Some ticket links may earn us a commission at no extra cost to you.
+            We may earn a commission from ticket links, at no extra cost to you.
           </p>
         </aside>
       </div>
