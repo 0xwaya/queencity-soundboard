@@ -2,8 +2,20 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.98.0";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-const ticketmasterApiKey = Deno.env.get("TICKETMASTER_API_KEY") || "";
+const rawTicketmasterApiKey = Deno.env.get("TICKETMASTER_API_KEY") || "";
+// Dashboard-pasted secrets often carry stray whitespace or wrapping quotes, which Ticketmaster rejects as Invalid ApiKey.
+const ticketmasterApiKey = rawTicketmasterApiKey.trim().replace(/^["']|["']$/g, "");
 const syncSecret = Deno.env.get("QCS_TICKETMASTER_SYNC_SECRET") || "";
+
+function describeApiKey() {
+  return {
+    rawLength: rawTicketmasterApiKey.length,
+    usedLength: ticketmasterApiKey.length,
+    hadSurroundingWhitespace: rawTicketmasterApiKey !== rawTicketmasterApiKey.trim(),
+    hadWrappingQuotes: /^["']|["']$/.test(rawTicketmasterApiKey.trim()),
+    isAlphanumeric: /^[A-Za-z0-9]+$/.test(ticketmasterApiKey),
+  };
+}
 
 // Centered on Cincinnati, radius covers Covington/Newport/NKY too.
 const SEARCH_LATLONG = "39.1031,-84.5120";
@@ -98,7 +110,10 @@ async function fetchTicketmasterEvents(): Promise<{ events: RankedTicketmasterEv
 
     const response = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${params}`);
     if (!response.ok) {
-      throw new Error(`Ticketmaster ${classification} request failed with status ${response.status}`);
+      const faultBody = (await response.text()).slice(0, 500);
+      throw new Error(
+        `Ticketmaster ${classification} request failed with status ${response.status}: ${faultBody} | keyMeta=${JSON.stringify(describeApiKey())}`,
+      );
     }
 
     const body = (await response.json()) as { _embedded?: { events?: TicketmasterEvent[] } };
