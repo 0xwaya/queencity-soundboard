@@ -1,33 +1,39 @@
 import type { Metadata } from "next";
-import PollWidget from "@/components/poll-widget";
+import TrackedExternalLink from "@/components/tracked-external-link";
 import TrackedLink from "@/components/tracked-link";
 import FeaturedEventsWidget from "@/components/featured-events-widget";
-import { getLocale } from "@/lib/i18n";
 import { buildPageMetadata } from "@/lib/seo";
 import { getPublishedEvents } from "@/lib/data";
+import type { EventItem } from "@/lib/supabase";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Cincinnati's Soundboard for the Hottest Events",
+  title: "Sounds of the Queen City | Cincinnati Live Music & Events",
   description:
-    "QueenCity Soundboard is Cincinnati and Northern Kentucky's discovery hub for the hottest live music, comedy, and cultural events — every genre, every neighborhood.",
+    "Find live music, concerts, comedy, and cultural events across Cincinnati and Northern Kentucky. Explore the local calendar and get official ticket links.",
   path: "/",
   keywords: [
-    "Cincinnati events",
-    "things to do Cincinnati",
-    "concerts Cincinnati",
-    "Northern Kentucky events",
-    "Latin music Cincinnati",
-    "live music Covington",
+    "live music Cincinnati",
+    "concerts Covington",
+    "country shows Cincinnati",
+    "alternative music Northern Kentucky",
+    "what's on in Cincinnati this weekend",
+    "Queen City live music",
+    "all-genre events Cincinnati",
     "QueenCity Soundboard",
   ],
 });
 
-const GENRE_CHIPS = ["Live Music", "Latin", "Hip-Hop", "Rock", "EDM", "Comedy", "Community"];
+const GENRE_CHIPS = ["Country", "Rock & Alternative", "Hip-Hop & R&B", "Pop", "Jazz", "Electronic", "Comedy", "Community"];
+
+function findSpotlightEvent(events: EventItem[]): EventItem | undefined {
+  const now = Date.now();
+  return events.find((event) => event.ticket_url && new Date(event.event_date).getTime() >= now);
+}
 
 export default async function Home() {
-  const locale = await getLocale();
   const eventsResult = await getPublishedEvents();
   const events = eventsResult.data;
+  const spotlightEvent = findSpotlightEvent(events);
 
   return (
     <>
@@ -42,11 +48,12 @@ export default async function Home() {
           <div className="qcs-card-content max-w-3xl">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-300/90">Cincinnati + NKY</p>
             <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-slate-100 md:text-6xl">
-              The Soundboard for the hottest events in the Queen City.
+              Sounds of the Queen City.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-200 md:text-base">
-              Discover, vote on, and follow the shows worth showing up for — Latin nights, hip-hop, rock,
-              comedy, and everything trending across Cincinnati and Northern Kentucky, all in one place.
+              Cincinnati&apos;s soundboard for live music and cultural moments. Find the local calendar and official ticket links,
+              and follow the nights worth showing up for across every genre — from country, indie, rock, hip-hop,
+              R&B, pop, and jazz to comedy, theatre, and community events.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-2 text-xs text-slate-200">
@@ -72,13 +79,65 @@ export default async function Home() {
                 label="home_partner_with_us"
                 className="rounded-lg border border-white/20 bg-white/8 px-4 py-2.5 text-sm font-semibold text-slate-100 hover:bg-white/12"
               >
-                Partner with us
+                Feature your show
               </TrackedLink>
             </div>
           </div>
         </section>
 
-        <PollWidget locale={locale} variant="compact" />
+        <aside className="qcs-ambient-card flex min-h-64 flex-col justify-between rounded-2xl border border-amber-300/25 p-5">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-300/90">Ticket Spotlight</p>
+            {spotlightEvent ? (
+              <>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-200">
+                  {spotlightEvent.category ?? "Live in Cincinnati + NKY"}
+                </p>
+                <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white">{spotlightEvent.title}</h2>
+                <p className="mt-2 text-sm text-slate-300">
+                  {new Intl.DateTimeFormat("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    timeZone: "America/New_York",
+                  }).format(new Date(spotlightEvent.event_date))}
+                  {spotlightEvent.venues?.name ? ` · ${spotlightEvent.venues.name}` : ""}
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-white">Your next great night out.</h2>
+                <p className="mt-2 text-sm text-slate-300">
+                  Browse the Cincinnati + NKY calendar for upcoming shows and official ticket links.
+                </p>
+              </>
+            )}
+          </div>
+          {spotlightEvent?.ticket_url ? (
+            <TrackedExternalLink
+              href={spotlightEvent.ticket_url}
+              event="ticket_click"
+              label={`home_ticket_spotlight_${spotlightEvent.id}`}
+              target="_blank"
+              rel="sponsored noopener noreferrer"
+              className="qcs-button-3d mt-5 inline-flex w-fit rounded-lg bg-amber-300 px-4 py-2.5 text-sm font-bold text-[#15120a] hover:bg-amber-200"
+            >
+              Get tickets
+            </TrackedExternalLink>
+          ) : (
+            <TrackedLink
+              href="/events"
+              event="cta_click"
+              label="home_ticket_spotlight_browse"
+              className="qcs-button-3d mt-5 inline-flex w-fit rounded-lg bg-amber-300 px-4 py-2.5 text-sm font-bold text-[#15120a] hover:bg-amber-200"
+            >
+              Browse events
+            </TrackedLink>
+          )}
+          <p className="mt-3 text-[11px] leading-4 text-slate-400">
+            Some ticket links may earn us a commission at no extra cost to you.
+          </p>
+        </aside>
       </div>
 
       <FeaturedEventsWidget events={events} />
@@ -89,7 +148,7 @@ export default async function Home() {
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-fuchsia-300/80">Events first</p>
             <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white md:text-3xl">What&apos;s coming up</h2>
             <p className="mt-2 text-sm text-slate-300">
-              The site puts confirmed events, dates, and upcoming announcements ahead of everything else.
+              Find confirmed dates and ticket links across genres, from touring acts to neighborhood rooms and free community events.
             </p>
           </div>
           <TrackedLink
@@ -138,7 +197,7 @@ export default async function Home() {
               Know about a show we&apos;re missing?
             </h2>
             <p className="mt-3 max-w-2xl text-sm text-slate-300">
-              Submit an event, pitch a partnership, or flag a correction. Our team responds fast.
+              Submit any genre of show, feature your venue or artist, or flag a correction. Our team responds fast.
             </p>
           </div>
           <div className="qcs-glass-panel flex flex-col gap-3 rounded-2xl p-4">

@@ -50,7 +50,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
       ? {
           eyebrow: "Lineup pa’ la gozadera",
           title: "Eventos en Cincinnati + NKY",
-          subtitle: "Todo lo que está sonando en la ciudad — música en vivo, comedia y cultura, en todos los géneros.",
+          subtitle: "Eventos confirmados de música en vivo, comedia y cultura en Cincinnati y el norte de Kentucky.",
           seriesLabel: "Filtro activo",
           allCategories: "Todos",
           featured: "¡Pega’o!",
@@ -68,7 +68,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
       : {
           eyebrow: "Live lineup",
           title: "Events in Cincinnati + NKY",
-          subtitle: "Everything trending across the city — live music, comedy, and culture, in every genre.",
+          subtitle: "Confirmed upcoming music, comedy, and cultural events across Cincinnati and Northern Kentucky.",
           seriesLabel: "Active filter",
           allCategories: "All",
           featured: "Featured",
@@ -226,7 +226,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
               {event.hero_image_url ? (
                 <>
                   <div
-                    className="absolute inset-0 bg-cover bg-center opacity-45 [filter:contrast(1.18)_saturate(1.12)_brightness(1.03)]"
+                    className="absolute inset-0 bg-cover bg-center opacity-45 filter-[contrast(1.18)_saturate(1.12)_brightness(1.03)]"
                     style={{ backgroundImage: `url('${event.hero_image_url}')` }}
                   />
                   <div className="absolute inset-0 bg-linear-to-r from-[#08111f] via-[#08111f]/82 to-[#08111f]/45" />

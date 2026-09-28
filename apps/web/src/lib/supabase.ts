@@ -22,6 +22,7 @@ export type Venue = {
   name: string;
   city: string | null;
   state: string | null;
+  is_active?: boolean;
 };
 
 export type EventItem = {

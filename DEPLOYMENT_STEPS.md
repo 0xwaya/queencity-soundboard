@@ -1,129 +1,76 @@
-# QueenCity Soundboard — Deployment Steps (Patch 1)
+# QueenCity Soundboard — Deployment and Release Runbook
 
-## Objective
+## Deployment ownership
 
-Ship web-first MVP using:
+- Vercel scope/team: `0xwaya-projects`
+- Vercel project: `queencity-soundboard`
+- Source repo: `github.com/0xwaya/queencity-soundboard-standalone`
+- Root directory: `apps/web`
+- Framework: Next.js
+- Production domains: `queencitysoundboard.com`, `www.queencitysoundboard.com`
+- DNS is managed at GoDaddy; see [DEPLOY_OWNERSHIP.md](docs/DEPLOY_OWNERSHIP.md) for recovery and ownership procedures.
 
-- Vercel (Next.js hosting)
-- Supabase (DB/Auth/Storage)
-- Ticket Tailor (hosted checkout/widget)
-- GoDaddy (domain DNS)
+## Current integrations
 
-## 1) Preflight (local)
+- Supabase supplies published events and merch; server routes accept event submissions.
+- Vercel Production and Preview have `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` configured. Production also has server-side Supabase credentials. Do not print, commit, or copy secret values into this document.
+- Supabase Production connectivity was verified on 2026-09-26 with a read-only published-event count (5 rows at that time). Recheck after incidents and deployments.
+- Ticket checkout is hosted by external providers. Ticket buttons require that event's own valid HTTPS `events.ticket_url`; missing URLs do not render a checkout link.
+- `NEXT_PUBLIC_TICKETING_WIDGET_URL` may remain in older Vercel settings, but the app no longer reads it. Remove it from project settings after confirming no external workflow depends on it.
+- Never expose service-role credentials to the browser.
 
-1. Confirm app runs:
+## Local preflight
 
-   ```bash
-   cd queencity-soundboard/apps/web
-   npm install
-   cp .env.example .env.local
-   cd ..
-   bash tools/env-crypto.sh encrypt
-   bash tools/env-crypto.sh clean
-   bash tools/env-crypto.sh dev
-   ```
-
-2. Confirm env template exists: `.env.example`
-3. Confirm encrypted env bundle exists: `apps/web/.env.encrypted`
-4. Confirm at least one placeholder logo is selected for v0 launch.
-
-## 2) Supabase setup
-
-1. Create project: `queencitysoundboard-prod` (US East)
-2. Run migration in SQL editor:
-   - `queencity-soundboard/supabase/migrations/20260302_000001_init.sql`
-   - `queencity-soundboard/supabase/migrations/20260423_000003_hardening_urls_and_votes.sql`
-   - `queencity-soundboard/supabase/migrations/20260423_000004_disable_franco_ticket_sales.sql`
-3. Create storage bucket:
-   - name: `images`
-   - public: `true`
-4. Save keys for Vercel env:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-
-## 3) Seed launch data
-
-1. Add at least one venue (if not seeded)
-2. Add one event in `events` with `status='published'`
-3. (Optional) add one merch item
-4. (Recommended) set `events.ticket_url` per published event for direct checkout links
-
-## 4) Ticket Tailor integration
-
-1. Create event in Ticket Tailor
-2. Copy public checkout URL / widget URL
-3. Set Vercel env:
-   - `NEXT_PUBLIC_TICKETING_WIDGET_URL=<ticket_tailor_url>` (global fallback)
-
-## 5) Vercel deploy
-
-1. Import repo `0xwaya/queencity-soundboard-standalone` into Vercel
-2. Set root directory:
-   - `apps/web`
-3. Confirm framework preset is `nextjs`
-4. Add environment variables:
-   - `NEXT_PUBLIC_SITE_URL`
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `NEXT_PUBLIC_TICKETING_WIDGET_URL`
-5. Deploy and verify preview URL
-
-### 5a) Access/Scope sanity check (prevents most Vercel confusion)
-
-Run:
+From the repository root:
 
 ```bash
-npx -y vercel whoami
-npx -y vercel project ls --scope 0xwaya-projects
-npx -y vercel project inspect queencity-soundboard --scope 0xwaya-projects
+cd apps/web
+npm install
+cp .env.example .env.local
 ```
 
-Expected:
+Set local variables using the encrypted-env workflow documented in the root README. Do not paste credentials into source control or chat. Then validate:
 
-- project exists under `0xwaya-projects`
-- `Root Directory: apps/web`
-- `Framework Preset: nextjs`
-- linked repo is `0xwaya/queencity-soundboard-standalone`
+```bash
+npm run lint
+npm run test:run
+npm run build
+```
 
-## 6) Domain cutover (GoDaddy -> Vercel)
+Known lint debt is documented in `PLAN.md`; distinguish it from newly introduced failures.
 
-DNS records:
+## Supabase migration process
 
-- `A` record: `@` -> `76.76.21.21`
-- `CNAME`: `www` -> `cname.vercel-dns.com`
+1. Confirm the target project and inspect its migration history before applying SQL.
+2. Apply only migrations not already recorded as applied, in filename order from `supabase/migrations/`.
+3. Do not blindly rerun historical migrations or seed scripts in Production.
+4. Confirm event/venue data, RLS policies, and the pending event-submission queue after schema changes.
+5. Verify that the anonymous browser key can read only intended public data and that staff-only operations remain protected by `public.is_admin()` or a server-side authorization boundary.
 
-In Vercel project:
+The current database includes event categories, event submissions, promoted events, ticket URL hardening, and a poll-artists table retained for legacy/API compatibility. The new `expand_event_categories` migration widens the event category constraint to match the submission UI/API; inspect Production migration history and apply it if pending. Review migrations before applying; migration history is authoritative.
 
-- Add domains:
-  - `queencitysoundboard.com`
-  - `www.queencitysoundboard.com`
-- Wait for SSL provisioning
+## Vercel release
 
-## 7) Launch QA checklist
+1. Confirm the linked project, scope, root directory, and production branch before deployment.
+2. Verify required environment-variable names and target environments in Vercel without exposing values. Required public names currently include `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+3. Confirm the event-specific ticket links and any affiliate parameters are valid. Do not treat a normal ticket URL as an affiliate link.
+4. Deploy to Preview and test data reads, ticket links, event submission, and mobile navigation.
+5. Promote/deploy to Production through the normal Vercel workflow.
 
-- [ ] Home renders properly on mobile + desktop
-- [ ] Header shell aligns with page content on desktop and mobile
-- [ ] Locale toggle switches between `EN`/`ES` and preserves preference after refresh
-- [ ] `/events` lists published events
-- [ ] Ticket button opens Ticket Tailor flow for active events
-- [ ] Franco De Vita event(s) show ticket-sales paused state (no checkout CTA)
-- [ ] No secrets exposed in client code
-- [ ] Basic performance sanity (no broken images/console errors)
-- [ ] Domain + HTTPS active
-- [ ] `/robots.txt` and `/sitemap.xml` return 200
-- [ ] Rich results test passes for Local Business / Event structured data
+## Release QA checklist
 
-## 9) Framework notes
+- [ ] Home Ticket Spotlight selects a future published event with its own valid ticket URL, or shows the browse-events fallback.
+- [ ] Ticket buttons lead only to their event-specific official provider URL; rows without valid URLs show no checkout link.
+- [ ] Events page shows published rows, category filters, and both view modes.
+- [ ] City hubs and canonical metadata resolve correctly.
+- [ ] Partner event submissions validate, return a useful confirmation, and enter the pending Supabase queue.
+- [ ] Submission failures and Supabase outages are visible to the visitor and logged without exposing secrets or personal data.
+- [ ] Promoted placement is labeled; affiliate disclosure is adjacent to links that may earn commission.
+- [ ] English and Spanish copy is correct for the routes that claim localization.
+- [ ] Mobile/desktop layout, keyboard focus, reduced motion, and contrast are checked.
+- [ ] `/robots.txt` and `/sitemap.xml` return successfully; structured data matches current page content.
+- [ ] No stale Fan Signal/Latin-only lead copy remains in the current public experience unless explicitly intended for a specific event.
 
-- On Next.js 16, server-side `cookies()` and route `searchParams` are async. Treating them synchronously can degrade route performance and break builds.
+## After release
 
-## 8) Post-launch day-1 ops
-
-- Track:
-  - event page visits
-  - ticket CTA clicks
-  - conversion in Ticket Tailor dashboard
-- Patch queue:
-  - branding polish
-  - admin UX improvements
-  - analytics + attribution tuning
+Review Vercel Analytics for page visits and outbound event/ticket clicks. Monitor Supabase reads, submissions, sync-function outcomes, and stale listings. Track visitor growth, email signups (when the opt-in flow exists), ticket clicks, event submissions, and partner inquiries as separate metrics.

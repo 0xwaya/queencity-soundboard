@@ -3,10 +3,10 @@ import { getServerSupabaseClient, hasServerSupabaseConfig } from "@/lib/supabase
 // Fallback list used when Supabase isn't configured or the poll_artists table is empty.
 export const POLL_ARTISTS = [
   "Ilegales",
-  "Stevie B",
-  "Fulanito",
-  "Lisette Melendez",
-  "Elite Latin throwback DJ",
+  "Tyler Childers",
+  "The National",
+  "The Black Keys",
+  "21 Savage",
 ] as const;
 
 export type PollArtist = (typeof POLL_ARTISTS)[number];

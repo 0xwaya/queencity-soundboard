@@ -6,6 +6,15 @@ export type QueryResult<T> = {
   error: string | null;
 };
 
+export function isPublicUpcomingEvent(event: EventItem, now = Date.now()): boolean {
+  const eventTime = new Date(event.event_date).getTime();
+  return (
+    eventTime >= now &&
+    event.venues?.is_active !== false &&
+    event.venues?.name !== "Madison Theater"
+  );
+}
+
 export async function getPublishedEvents(): Promise<QueryResult<EventItem[]>> {
   if (!hasSupabaseConfig()) {
     return { data: [], error: null };
@@ -16,9 +25,10 @@ export async function getPublishedEvents(): Promise<QueryResult<EventItem[]>> {
     const { data, error } = await supabase
       .from("events")
       .select(
-        "id,title,artist_name,description,hero_image_url,event_date,status,venue_id,ticket_url,category,is_promoted,venues(id,name,city,state)",
+        "id,title,artist_name,description,hero_image_url,event_date,status,venue_id,ticket_url,category,is_promoted,venues(id,name,city,state,is_active)",
       )
       .eq("status", "published")
+      .gte("event_date", new Date().toISOString())
       .order("is_promoted", { ascending: false })
       .order("event_date", { ascending: true });
 
@@ -33,7 +43,7 @@ export async function getPublishedEvents(): Promise<QueryResult<EventItem[]>> {
       ticket_url: normalizeHttpsUrl(row.ticket_url),
       venues: Array.isArray(row.venues) ? row.venues[0] ?? null : row.venues ?? null,
     }));
-    return { data: normalizedRows, error: null };
+    return { data: normalizedRows.filter((row) => isPublicUpcomingEvent(row)), error: null };
   } catch (err) {
     console.error("[getPublishedEvents] Unexpected failure", err);
     return { data: [], error: "Unable to load events right now." };

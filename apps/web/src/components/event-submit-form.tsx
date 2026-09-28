@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-
-const CATEGORIES = ["latin", "hiphop", "rock", "pop", "edm", "country", "jazz", "comedy", "sports", "community", "other"];
+import { EVENT_CATEGORIES } from "@/lib/event-categories";
 
 export default function EventSubmitForm() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -92,7 +91,7 @@ export default function EventSubmitForm() {
             className="rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-fuchsia-400"
           >
             <option value="">Select one</option>
-            {CATEGORIES.map((c) => (
+            {EVENT_CATEGORIES.map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>

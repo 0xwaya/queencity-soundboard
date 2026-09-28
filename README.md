@@ -1,24 +1,24 @@
-# QueenCity Soundboard 🔊
+# QueenCity Soundboard
 
-**Cincinnati’s cleanest cultural event platform.**
-Bridging Venezuelan artists, Midwest roots music lovers, and unforgettable live nights.
+**Sounds of the Queen City:** Cincinnati + Northern Kentucky's local discovery hub for live music, comedy, and culture across every genre.
 
-> Not just ticket links. We curate moments.
+We curate the local calendar, connect fans to official ticket links, and help the community find nights worth showing up for.
 
 ## What this repo is
 
-A web-first, mobile-friendly platform for:
+A web-first, mobile-friendly local event platform for:
 
-- Event discovery
-- Third-party ticket checkout (no in-house payment risk)
-- Merch + fan engagement
-- Scalable venue/event ops backend
+- Multi-genre event discovery across Cincinnati and Northern Kentucky
+- Third-party ticket links; checkout stays with the venue or ticketing provider
+- Event submissions for review and manually curated listings
+- Promoted event placements, venue/artist partnership intake, and merch browsing
+- English-first experience with partial Spanish localization
 
 ## Stack
 
 - **Web:** Next.js on Vercel
 - **Data/Auth/Storage:** Supabase
-- **Ticketing:** Ticket Tailor widget
+- **Ticketing:** Event-specific external ticket URLs; missing links are shown as unavailable rather than routing to a shared checkout
 - **Canonical GitHub repo:** `github.com/0xwaya/queencity-soundboard-standalone`
 
 > Vercel may still show the project slug `queencity-soundboard`; the source repo
@@ -29,30 +29,21 @@ A web-first, mobile-friendly platform for:
 - Locale switching uses a client-side `qcs_locale` preference cookie only. It stores language choice, not auth or sensitive user data.
 - Next.js 16 route APIs such as `cookies()` and `searchParams` must be handled asynchronously in server components.
 
-## Recent updates (2026-06-01)
+## Current product status
 
-- Poll feature relaxed: allows unlimited repeated votes from same user (configurable via `POLL_RATE_LIMIT_MAX_VOTES` env).
-- Poll UX improved: vote count refreshes every 12s (was 30s), auto-dismiss confirmation banner after 3.5s.
-- Poll backend optimized: Redis batch `mget` support for sub-100ms vote totals retrieval.
-- Added regression tests for poll vote store with `npm test -- --run src/lib/votes-store.test.ts`.
+- Home features a ticket spotlight selected from upcoming published events with ticket links, plus promoted/event listings and submission/partner calls to action.
+- `/events` lists published events, category filters derived from available inventory, spotlight/compact views, city hubs, ticket links, and event structured data.
+- `/cincinnati` and `/covington` provide local discovery entry points; `/about`, `/partners`, and `/merch` provide supporting product pages.
+- Public event submissions are validated and stored in Supabase as pending review. There is no staff moderation dashboard yet.
+- The production Supabase connection was read-tested on 2026-09-26; the published-event query returned 5 rows. This confirms connectivity at that time, not the freshness or completeness of the calendar.
+- See [Frontend and full-functionality roadmap](docs/FRONTEND_AND_ROADMAP.md) for the shipped experience, known gaps, and recommended sequence.
 
-## Recent updates (2026-04-23)
+## Product and operating model
 
-- Added URL hardening for ticket checkout links (`https://` only) in app + DB constraints.
-- Added Franco De Vita ticket-sales hold logic and migration to null existing `ticket_url` values for affected events.
-- Added poll vote aggregation RPC (`get_artist_vote_totals`) to avoid full-table client reads.
-- Added SEO/local-SEO structure:
-  - page-level metadata templates (title/description/keywords/canonical/OG/Twitter)
-  - robots and sitemap tuning
-  - `MusicVenue` structured data + local address signals
-- Added web stability tests with Vitest + Testing Library (`npm run test:run`).
-
-## Why this architecture
-
-- Fast to ship
-- Low fixed cost
-- Pro UX out of the gate
-- Security-first (reduced PCI scope)
+- Curate locally across genres instead of acting as a generic ticket marketplace.
+- Keep checkout with official venue and ticketing providers; do not collect payment-card data.
+- Build the inventory and partner relationships before adding costly services.
+- Treat Latin events as one part of a broader Cincinnati + NKY calendar, not the platform's defining category.
 
 ## Quick start
 
@@ -79,16 +70,13 @@ bash tools/env-crypto.sh dev
 
 ## Core docs
 
-- `PLAN.md` — build sequence
-- `DEPLOYMENT_STEPS.md` — setup + deploy notes
+- `PLAN.md` — prioritized delivery phases
+- `docs/FRONTEND_AND_ROADMAP.md` — current frontend walkthrough and path to full functionality
+- `docs/QCS_UI_SPEC.md` — current interface structure and visual tokens
+- `DEPLOYMENT_STEPS.md` — setup, migration, release, and production QA
+- `marketing/queen-city-picks-30-day-calendar.md` — all-genres editorial calendar
 - `docs/DEPLOY_OWNERSHIP.md` — canonical Vercel ownership/scope + recovery steps
 - `SECURITY.md` — security baseline
 - `supabase/migrations/*` — production DB schema + RLS
 
-## Brand direction
-
-Clean. Pro. Edgy.
-Like a velvet rope with great Wi‑Fi.
-
----
-Built for Queen City culture. Tuned for sell-outs.
+Older Latin Acoustic Series files in `marketing/` and `branding/` are campaign/heritage material; they are not the current platform-wide positioning.

@@ -66,7 +66,7 @@ export default function Header({ locale }: HeaderProps) {
             onClick={toggleLocale}
             disabled={isPending}
             className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/30 hover:bg-white/10"
-            aria-label={locale === "es-ve" ? "Switch to English" : "Cambiar a español de Venezuela"}
+              aria-label={locale === "es-ve" ? "Switch to English" : "Cambiar a español"}
           >
             <span className="text-base">{toggleFlag}</span>
             <span>{toggleLabel}</span>
@@ -79,7 +79,7 @@ export default function Header({ locale }: HeaderProps) {
             onClick={toggleLocale}
             disabled={isPending}
             className="inline-flex items-center justify-center rounded-md border border-white/10 px-2 py-1 text-xs font-semibold text-slate-200 transition hover:border-white/30 hover:bg-white/10"
-            aria-label={locale === "es-ve" ? "Switch to English" : "Cambiar a español de Venezuela"}
+              aria-label={locale === "es-ve" ? "Switch to English" : "Cambiar a español"}
           >
             {toggleFlag}
           </button>

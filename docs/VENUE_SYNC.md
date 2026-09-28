@@ -1,146 +1,35 @@
-# Event Sync Automation
+# Local Event and Venue Sources
 
-## Overview
+QueenCity Soundboard publishes real upcoming events across Cincinnati and Northern Kentucky. Never seed sample lineups, infer a booking from artist interest, or publish a placeholder date as an event.
 
-QueenCity Soundboard pulls events from multiple sources into a single `events` table, tagged with
-`source` (`sync` | `manual` | `submission`) and `category`. Priority order for onboarding a new venue:
+## Venue priorities
 
-1. **Aggregator API** (Ticketmaster Discovery API, SeatGeek) — covers most touring/mid-size venues with
-   minimal maintenance and gives a "trending" signal for free.
-2. **Direct venue scrape** — only for venues an aggregator doesn't cover but which expose a public
-   JSON/API endpoint (see the Madison Theater sync below as the reference pattern).
-3. **Manual entry / `/partners` submission** — everything else (small/indie rooms, one-off shows).
+The local discovery roster prioritizes:
 
-## Sync Functions
+- Riverbend Music Center and PNC Pavilion
+- Andrew J. Brady Music Center
+- MegaCorp Pavilion and Heritage Bank Center
+- Bogart's, Ludlow Garage, and Southgate House Revival
+- Taft Theatre, Woodward Theater, and Memorial Hall OTR
+- Hard Rock Cincinnati event spaces
+- Annie's Music Center and Seatfun Stages
 
-### `sync-ticketmaster-events`
+Existing venue records may use minor naming differences from Ticketmaster. Sync-created venues should be reviewed for duplicates and location accuracy before promotion.
 
-- Queries the [Ticketmaster Discovery API](https://developer.ticketmaster.com/) (free tier) for
-  Music/Comedy/Sports events within a 25-mile radius of Cincinnati.
-- Maps Ticketmaster classifications to our `category` enum, upserts the venue by name if missing,
-  and upserts events on `(title, event_date)`.
-- Requires `TICKETMASTER_API_KEY` — without it the function returns `503 not_configured` instead of failing.
-- Deploy: `cd supabase/functions/sync-ticketmaster-events && supabase functions deploy sync-ticketmaster-events --no-verify-jwt`
+## Current event source
 
-### `sync-madison-theater-events`
+`sync-ticketmaster-events` queries the Ticketmaster Discovery API for upcoming events within 25 miles of Cincinnati. It includes music, arts and theatre, comedy, and sports, orders results by Ticketmaster relevance, maps categories, and upserts the actual event, venue, and official Ticketmaster URL. It requires the Supabase Edge Function secret `TICKETMASTER_API_KEY`.
 
-Automated weekly sync of events from [Madison Theater's official website](https://madisontheater.com/).
-Kept as the reference implementation for scraping a venue that isn't covered by an aggregator.
+The function code exists, but its Production secret, deployment, and schedule must be verified before the feed can be considered operational. A populated venue roster alone does not create events. Do not claim an event is trending or promoted unless the data supports that label.
 
-1. **Supabase Edge Function** (`sync-madison-theater-events`)
-   - Fetches event data from Madison Theater's public API
-   - Upserts events to the `events` table (deduplicates by title + date)
-   - Tags events with `external_url` for source tracking
-   - Preserves existing ticket URLs
+## Madison Theater
 
-2. **Weekly Trigger**
-   - Scheduled via Supabase Cron (Postgres pg_cron extension)
-   - Runs every Sunday at 2 AM UTC
-   - Sends webhook to Edge Function
+Madison Theater is retired from the active venue roster. Its records are archived, and its former sync endpoint returns HTTP 410. Do not add new listings for this venue unless the operating status and current schedule are confirmed and the venue is explicitly reactivated.
 
-## Setup Instructions
+## Review rules
 
-### 1. Deploy Edge Function
-
-```bash
-cd supabase/functions/sync-madison-theater-events
-supabase functions deploy sync-madison-theater-events --no-verify-jwt
-```
-
-### 2. Create Weekly Cron Job
-
-
-In Supabase SQL editor:
-
-```sql
--- Enable pg_cron extension
-create extension if not exists pg_cron;
-
--- Schedule weekly sync (Sundays at 2:00 AM UTC)
-select cron.schedule(
-  'madison-theater-sync-weekly',
-  '0 2 * * 0',
-  $$
-  select net.http_post(
-    url := (select concat(
-      'https://',
-      current_setting('app.supabase_url'),
-      '/functions/v1/sync-madison-theater-events'
-    )),
-    headers := jsonb_build_object(
-      'authorization', concat('Bearer ', current_setting('app.service_role_key')),
-      'content-type', 'application/json'
-    ),
-    body := '{"event":"scheduled"}'::jsonb
-  ) as request_id;
-  $$
-);
-```
-
-### 3. Test the Sync Manually
-
-```bash
-curl -X POST https://your-supabase-url/functions/v1/sync-madison-theater-events \
-  -H "Authorization: Bearer YOUR_SERVICE_ROLE_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{}'
-```
-
-### 4. Monitor Sync Logs
-
-View function logs in Supabase dashboard:
-- Navigate to **Functions** → **sync-madison-theater-events**
-- Check the **Logs** tab for recent invocations
-
-## Event Data Mapping
-
-Events synced from Madison Theater are mapped as:
-
-| Field | Source |
-|-------|--------|
-| `title` | Event name from Madison Theater |
-| `artist_name` | First part of title (before " - ") |
-| `event_date` | Event date/time from Madison Theater |
-| `venue_id` | Madison Theater (UUID) |
-| `status` | Published |
-| `ticket_url` | Ticketweb or venue ticket link |
-| `external_url` | Link to event page on madisontheater.com |
-
-## Failure Handling
-
-- Failed syncs are logged in Supabase function logs
-- No events are deleted; only new/updated events are added
-- If Madison Theater API is unavailable, the job silently fails and retries next week
-- Check the **Functions** dashboard for error details
-
-## Updating Event URLs
-
-After events are synced, you can:
-
-1. **Update ticket URLs** — manually edit `ticket_url` field if tickets move
-2. **Archive old events** — set `status = 'archived'` for past events
-3. **Add context** — extend `description` field with QCS-specific notes
-
-Example update:
-
-```sql
-update public.events
-set ticket_url = 'https://www.ticketweb.com/...'
-where title = 'Event Name' and event_date > now();
-```
-
-## Manual Cross-Reference
-
-For one-off updates before automation is live:
-
-1. Visit https://madisontheater.com/events
-2. Compare against `/madison-theater` page
-3. Manually update any missing/outdated events in Supabase
-4. Verify ticket URLs match official site
-
-## Next Steps
-
-- ✅ Deploy Edge Function
-- ✅ Set up Cron job
-- 📋 Monitor first sync (next Sunday 2 AM UTC)
-- 🔄 Adjust sync schedule if needed (e.g., daily instead of weekly)
+- Require a real event title, future date, venue, and a source page before publication.
+- Use only the event's official venue, organizer, artist, or ticket-provider URL for ticket actions.
+- Treat Ticketmaster relevance as an ordering signal, not a paid promotion or a guarantee of popularity.
+- Keep expired and inactive-venue listings out of the public calendar.
+- For venues not covered by an aggregator, review and publish verified events manually; do not fabricate a schedule to fill the calendar.

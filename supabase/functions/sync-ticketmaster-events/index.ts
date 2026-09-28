@@ -7,7 +7,7 @@ const ticketmasterApiKey = Deno.env.get("TICKETMASTER_API_KEY") || "";
 // Centered on Cincinnati, radius covers Covington/Newport/NKY too.
 const SEARCH_LATLONG = "39.1031,-84.5120";
 const SEARCH_RADIUS_MILES = "25";
-const CLASSIFICATIONS = ["Music", "Comedy", "Sports"];
+const CLASSIFICATIONS = ["Music", "Arts & Theatre", "Comedy", "Sports"];
 
 interface TicketmasterVenue {
   name: string;
@@ -59,7 +59,12 @@ function resolveCategory(classifications?: TicketmasterClassification[]): string
     return GENRE_TO_CATEGORY[genreKey];
   }
 
-  const segmentKey = primary?.segment?.name?.trim().toLowerCase().replace(/\s+/g, "_");
+  const segmentKey = primary?.segment?.name
+    ?.trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "");
   if (segmentKey && SEGMENT_TO_CATEGORY[segmentKey]) {
     return SEGMENT_TO_CATEGORY[segmentKey];
   }
@@ -78,7 +83,7 @@ async function fetchTicketmasterEvents(): Promise<TicketmasterEvent[]> {
       unit: "miles",
       classificationName: classification,
       size: "100",
-      sort: "date,asc",
+      sort: "relevance,desc",
     });
 
     const response = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${params}`);

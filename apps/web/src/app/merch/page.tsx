@@ -10,7 +10,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/merch",
   keywords: [
     "concert merch Cincinnati",
-    "Latin music merch",
+    "live music merch Cincinnati",
     "event merch drops Kentucky",
     "QueenCity Soundboard merch",
   ],

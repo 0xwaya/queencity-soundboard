@@ -20,7 +20,7 @@ export default function CincinnatiPage() {
   const localJsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Cincinnati Latin Concerts and Live Music",
+    name: "Sounds of the Queen City: Cincinnati Live Music and Events",
     url: `${SEO.baseUrl}/cincinnati`,
     isPartOf: {
       "@type": "WebSite",

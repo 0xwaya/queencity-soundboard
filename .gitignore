@@ -91,3 +91,4 @@ htmlcov/
 *~
 .turbo/
 supabase/.temp/
+apps/web/supabase/.temp/

@@ -33,7 +33,7 @@ export default function FeaturedEventsWidget({ events }: Props) {
             <div className="flex items-center gap-2">
               <span className="text-xl">🎵</span>
               <span className="text-xs font-bold uppercase tracking-widest text-[#d4b87e]">
-                {featured.length > 0 ? "Promoted Event" : "Trending in Cincinnati"}
+                {featured.length > 0 ? "Promoted Event" : "Upcoming in Cincinnati + NKY"}
               </span>
             </div>
 

@@ -18,22 +18,22 @@ export default async function AboutPage() {
           eyebrow: "¿Quiénes somos?",
           title: "El soundboard de la Queen City",
           body:
-            "QueenCity Soundboard conecta a la comunidad con los eventos que realmente están sonando en Cincinnati y el norte de Kentucky — música en vivo, comedia y cultura en todos los géneros, curados en un solo lugar.",
+            "QueenCity Soundboard es la guía local de música en vivo, comedia y cultura en Cincinnati y el norte de Kentucky. Explora el calendario y encuentra enlaces oficiales para comprar entradas.",
           cards: [
-            { title: "Descubre eventos", body: "Un calendario cruzado por género, venue y vecindario — no otro copy-paste de un solo promotor." },
-            { title: "Vota y participa", body: "Encuestas de interés que ayudan a traer los shows que la ciudad realmente quiere ver." },
-            { title: "Conecta con promotores", body: "Venues y artistas pueden enviar eventos o asociarse directamente con nosotros." },
+            { title: "Descubre eventos", body: "Un calendario local de todos los géneros, desde grandes conciertos hasta salas de barrio y eventos comunitarios." },
+            { title: "Compra directamente", body: "Encuentra enlaces oficiales de entradas y continúa con el venue o su socio de ticketing." },
+            { title: "Conecta con la escena", body: "Venues, artistas y promotores pueden enviar eventos, destacar sus proyectos o asociarse con nosotros." },
           ],
         }
       : {
           eyebrow: "About Queen City",
           title: "The soundboard for the Queen City",
           body:
-            "QueenCity Soundboard connects the community with the events actually trending across Cincinnati and Northern Kentucky — live music, comedy, and culture in every genre, curated in one place.",
+            "QueenCity Soundboard is a local guide to live music, comedy, and culture across Cincinnati and Northern Kentucky. Explore the calendar and find official ticket links for your next night out.",
           cards: [
-            { title: "Discover events", body: "A calendar cross-checked by genre, venue, and neighborhood — not another single-promoter feed." },
-            { title: "Vote and participate", body: "Interest polls that help bring the shows the city is actually asking for." },
-            { title: "Connect with promoters", body: "Venues and artists can submit events or partner with us directly." },
+            { title: "Discover events", body: "A locally curated calendar across genres, from major concerts to neighborhood rooms and community events." },
+            { title: "Go straight to tickets", body: "Find official ticket links and continue with the venue or its ticketing partner." },
+            { title: "Connect with the scene", body: "Venues, artists, and promoters can submit events, feature their work, or partner with us." },
           ],
         };
 

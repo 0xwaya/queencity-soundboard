@@ -29,7 +29,7 @@ The legacy monorepo-shaped repo is not the canonical deploy source for this proj
 - `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `NEXT_PUBLIC_TICKETING_WIDGET_URL`
+- `NEXT_PUBLIC_TICKETING_WIDGET_URL` (legacy setting; current event ticket buttons require `events.ticket_url` and do not read this variable)
 
 ## SEO ownership checks (post-deploy)
 

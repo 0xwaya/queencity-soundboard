@@ -18,15 +18,14 @@ export default function TicketWidget({
   salesDisabled = false,
   salesDisabledReason = "paused",
 }: Props) {
-  const provider = "tickettailor";
-  const widgetUrl = normalizeHttpsUrl(process.env.NEXT_PUBLIC_TICKETING_WIDGET_URL);
-  const checkoutUrl = salesDisabled ? null : normalizeHttpsUrl(eventTicketUrl) ?? widgetUrl;
+  const provider = "external tickets";
+  const checkoutUrl = salesDisabled ? null : normalizeHttpsUrl(eventTicketUrl);
   const copy =
     locale === "es-ve"
       ? {
           title: "Checkout de entradas",
           cta: "Comprar entradas",
-          missing: "Falta el link de tickets. Agrega",
+          missing: "El enlace oficial de entradas todavía no está disponible.",
           disabled:
             salesDisabledReason === "date-tbd"
               ? "Entradas disponibles cuando se confirme la fecha."
@@ -35,7 +34,7 @@ export default function TicketWidget({
       : {
           title: "Ticket Checkout",
           cta: "Buy Tickets",
-          missing: "Missing ticket URL. Add",
+          missing: "Official ticket link is not available yet.",
           disabled:
             salesDisabledReason === "date-tbd"
               ? "Tickets will open when the date is confirmed."
@@ -65,10 +64,7 @@ export default function TicketWidget({
         ) : salesDisabled ? (
           <p className="text-sm text-amber-300">{copy.disabled}</p>
         ) : (
-          <p className="text-sm text-amber-300">
-            {copy.missing} <code>NEXT_PUBLIC_TICKETING_WIDGET_URL</code> {locale === "es-ve" ? "o define" : "or set"} {" "}
-            <code>events.ticket_url</code>.
-          </p>
+          <p className="text-sm text-amber-300">{copy.missing}</p>
         )}
       </div>
     </section>

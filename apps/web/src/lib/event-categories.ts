@@ -1,0 +1,18 @@
+export const EVENT_CATEGORIES = [
+  "country",
+  "alternative",
+  "rock",
+  "hiphop",
+  "pop",
+  "rnb",
+  "latin",
+  "edm",
+  "jazz",
+  "folk",
+  "metal",
+  "comedy",
+  "community",
+  "festival",
+  "sports",
+  "other",
+] as const;
