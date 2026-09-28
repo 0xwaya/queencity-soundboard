@@ -3,11 +3,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.98.0";
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const ticketmasterApiKey = Deno.env.get("TICKETMASTER_API_KEY") || "";
+const syncSecret = Deno.env.get("QCS_TICKETMASTER_SYNC_SECRET") || "";
 
 // Centered on Cincinnati, radius covers Covington/Newport/NKY too.
 const SEARCH_LATLONG = "39.1031,-84.5120";
 const SEARCH_RADIUS_MILES = "25";
 const CLASSIFICATIONS = ["Music", "Arts & Theatre", "Comedy", "Sports"];
+const MAX_EVENTS_PER_CATEGORY = 10;
 
 interface TicketmasterVenue {
   name: string;
@@ -22,11 +24,18 @@ interface TicketmasterClassification {
 }
 
 interface TicketmasterEvent {
+  id?: string;
   name: string;
   url?: string;
-  dates?: { start?: { dateTime?: string } };
+  dates?: { start?: { dateTime?: string }; status?: { code?: string } };
   classifications?: TicketmasterClassification[];
   _embedded?: { venues?: TicketmasterVenue[] };
+}
+
+interface RankedTicketmasterEvent {
+  event: TicketmasterEvent;
+  category: string;
+  relevanceRank: number;
 }
 
 const SEGMENT_TO_CATEGORY: Record<string, string> = {
@@ -72,8 +81,9 @@ function resolveCategory(classifications?: TicketmasterClassification[]): string
   return "other";
 }
 
-async function fetchTicketmasterEvents(): Promise<TicketmasterEvent[]> {
-  const events: TicketmasterEvent[] = [];
+async function fetchTicketmasterEvents(): Promise<{ events: RankedTicketmasterEvent[]; totalFetched: number }> {
+  const eventsById = new Map<string, RankedTicketmasterEvent>();
+  let totalFetched = 0;
 
   for (const classification of CLASSIFICATIONS) {
     const params = new URLSearchParams({
@@ -88,15 +98,76 @@ async function fetchTicketmasterEvents(): Promise<TicketmasterEvent[]> {
 
     const response = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${params}`);
     if (!response.ok) {
-      console.error(`[ticketmaster-sync] fetch failed for ${classification}: ${response.status}`);
-      continue;
+      throw new Error(`Ticketmaster ${classification} request failed with status ${response.status}`);
     }
 
     const body = (await response.json()) as { _embedded?: { events?: TicketmasterEvent[] } };
-    events.push(...(body._embedded?.events ?? []));
+    const resultEvents = body._embedded?.events ?? [];
+    totalFetched += resultEvents.length;
+
+    resultEvents.forEach((event, index) => {
+      const key = event.id ?? `${event.name}:${event.dates?.start?.dateTime ?? "unknown-date"}`;
+      const candidate = {
+        event,
+        category: resolveCategory(event.classifications),
+        relevanceRank: index + 1,
+      };
+      const existing = eventsById.get(key);
+      if (!existing || candidate.relevanceRank < existing.relevanceRank) {
+        eventsById.set(key, candidate);
+      }
+    });
   }
 
-  return events;
+  return { events: Array.from(eventsById.values()), totalFetched };
+}
+
+function selectEligibleEvents(events: RankedTicketmasterEvent[], now: number) {
+  const skipped = { notOnSale: 0, notFuture: 0, noHttpsTicketUrl: 0, overCategoryLimit: 0 };
+  const eligible: RankedTicketmasterEvent[] = [];
+
+  for (const candidate of events) {
+    const { event } = candidate;
+    if (event.dates?.status?.code !== "onsale") {
+      skipped.notOnSale += 1;
+      continue;
+    }
+
+    const eventTime = event.dates.start?.dateTime ? Date.parse(event.dates.start.dateTime) : Number.NaN;
+    if (!Number.isFinite(eventTime) || eventTime <= now) {
+      skipped.notFuture += 1;
+      continue;
+    }
+
+    let hasHttpsTicketUrl = false;
+    try {
+      hasHttpsTicketUrl = new URL(event.url ?? "").protocol === "https:";
+    } catch {
+      hasHttpsTicketUrl = false;
+    }
+    if (!hasHttpsTicketUrl) {
+      skipped.noHttpsTicketUrl += 1;
+      continue;
+    }
+
+    eligible.push(candidate);
+  }
+
+  eligible.sort((left, right) => left.category.localeCompare(right.category) || left.relevanceRank - right.relevanceRank);
+  const categoryCounts = new Map<string, number>();
+  const selected: RankedTicketmasterEvent[] = [];
+
+  for (const candidate of eligible) {
+    const count = categoryCounts.get(candidate.category) ?? 0;
+    if (count >= MAX_EVENTS_PER_CATEGORY) {
+      skipped.overCategoryLimit += 1;
+      continue;
+    }
+    categoryCounts.set(candidate.category, count + 1);
+    selected.push(candidate);
+  }
+
+  return { events: selected, skipped, categoryCounts: Object.fromEntries(categoryCounts) };
 }
 
 async function upsertVenue(
@@ -132,10 +203,17 @@ async function upsertVenue(
  * Requires TICKETMASTER_API_KEY (free tier: https://developer.ticketmaster.com/).
  * Runs on demand or via scheduled invocation, upserts into the events table.
  */
-export default async function handler(req: Request) {
+async function handler(req: Request) {
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "method_not_allowed" }), {
       status: 405,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
+  if (!syncSecret || req.headers.get("x-qcs-sync-secret") !== syncSecret) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), {
+      status: 401,
       headers: { "content-type": "application/json" },
     });
   }
@@ -149,10 +227,34 @@ export default async function handler(req: Request) {
 
   try {
     const supabase = createClient(supabaseUrl, supabaseKey);
-    const events = await fetchTicketmasterEvents();
+    const { events: fetchedEvents, totalFetched } = await fetchTicketmasterEvents();
+    const { events, skipped, categoryCounts } = selectEligibleEvents(fetchedEvents, Date.now());
+    const dryRun = new URL(req.url).searchParams.get("dry_run") === "true";
+
+    if (dryRun) {
+      return new Response(
+        JSON.stringify({
+          message: "sync_preview",
+          totalFetched,
+          deduplicated: fetchedEvents.length,
+          eligible: events.length,
+          skipped,
+          categoryCounts,
+          maxPerCategory: MAX_EVENTS_PER_CATEGORY,
+          samples: events.slice(0, 12).map(({ event, category, relevanceRank }) => ({
+            title: event.name,
+            venue: event._embedded?.venues?.[0]?.name ?? null,
+            category,
+            relevanceRank,
+            eventDate: event.dates?.start?.dateTime,
+          })),
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }
 
     if (events.length === 0) {
-      return new Response(JSON.stringify({ message: "no_events_found", synced: 0 }), {
+      return new Response(JSON.stringify({ message: "no_eligible_events", totalFetched, synced: 0, skipped }), {
         status: 200,
         headers: { "content-type": "application/json" },
       });
@@ -161,15 +263,9 @@ export default async function handler(req: Request) {
     let synced = 0;
     let failed = 0;
 
-    for (const event of events) {
+    for (const { event, category, relevanceRank } of events) {
       const eventDate = event.dates?.start?.dateTime;
-      if (!eventDate) {
-        failed += 1;
-        continue;
-      }
-
       const venueId = await upsertVenue(supabase, event._embedded?.venues?.[0]);
-      const category = resolveCategory(event.classifications);
 
       const { error } = await supabase.from("events").upsert(
         {
@@ -181,6 +277,7 @@ export default async function handler(req: Request) {
           ticket_url: event.url ?? null,
           category,
           source: "sync",
+          ticketmaster_relevance_rank: relevanceRank,
         },
         { onConflict: "title,event_date" },
       );
@@ -193,10 +290,10 @@ export default async function handler(req: Request) {
       }
     }
 
-    console.log(`[ticketmaster-sync] synced ${synced}/${events.length} events (${failed} failed)`);
+    console.log(`[ticketmaster-sync] synced ${synced}/${events.length} eligible events (${failed} failed)`);
 
     return new Response(
-      JSON.stringify({ message: "sync_completed", synced, failed, total: events.length }),
+      JSON.stringify({ message: "sync_completed", synced, failed, totalFetched, eligible: events.length, skipped, categoryCounts }),
       { status: 200, headers: { "content-type": "application/json" } },
     );
   } catch (error) {
@@ -207,3 +304,5 @@ export default async function handler(req: Request) {
     );
   }
 }
+
+export default { fetch: handler };

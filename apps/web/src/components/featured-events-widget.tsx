@@ -33,7 +33,11 @@ export default function FeaturedEventsWidget({ events }: Props) {
             <div className="flex items-center gap-2">
               <span className="text-xl">🎵</span>
               <span className="text-xs font-bold uppercase tracking-widest text-[#d4b87e]">
-                {featured.length > 0 ? "Promoted Event" : "Upcoming in Cincinnati + NKY"}
+                {currentEvent.is_promoted
+                  ? "Promoted Event"
+                  : currentEvent.ticketmaster_relevance_rank != null
+                    ? "Ticketmaster relevance"
+                    : "Upcoming in Cincinnati + NKY"}
               </span>
             </div>
 

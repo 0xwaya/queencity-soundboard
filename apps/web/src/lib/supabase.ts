@@ -37,6 +37,7 @@ export type EventItem = {
   ticket_url?: string | null;
   category?: string;
   is_promoted?: boolean;
+  ticketmaster_relevance_rank?: number | null;
   venues?: Venue | null;
 };
 

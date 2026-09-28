@@ -240,7 +240,13 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
                     event.is_promoted || featured ? "border-fuchsia-300/60 text-fuchsia-200" : "border-white/20 text-slate-300"
                   }`}
                 >
-                  {event.is_promoted ? "Promoted" : featured ? t.featured : t.live}
+                  {event.is_promoted
+                    ? "Promoted"
+                    : event.ticketmaster_relevance_rank != null
+                      ? "Ticketmaster relevance"
+                      : featured
+                        ? t.featured
+                        : t.live}
                 </span>
               </div>
 

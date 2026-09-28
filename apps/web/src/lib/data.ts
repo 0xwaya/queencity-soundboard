@@ -25,11 +25,12 @@ export async function getPublishedEvents(): Promise<QueryResult<EventItem[]>> {
     const { data, error } = await supabase
       .from("events")
       .select(
-        "id,title,artist_name,description,hero_image_url,event_date,status,venue_id,ticket_url,category,is_promoted,venues(id,name,city,state,is_active)",
+        "id,title,artist_name,description,hero_image_url,event_date,status,venue_id,ticket_url,category,is_promoted,ticketmaster_relevance_rank,venues(id,name,city,state,is_active)",
       )
       .eq("status", "published")
       .gte("event_date", new Date().toISOString())
       .order("is_promoted", { ascending: false })
+      .order("ticketmaster_relevance_rank", { ascending: true, nullsFirst: false })
       .order("event_date", { ascending: true });
 
     if (error) {
