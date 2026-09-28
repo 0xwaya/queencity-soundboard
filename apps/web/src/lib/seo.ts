@@ -50,6 +50,11 @@ export function buildPageMetadata(input: {
     keywords: input.keywords ?? SEO.defaultKeywords,
     alternates: {
       canonical,
+      languages: {
+        en: canonical,
+        es: canonical,
+        "x-default": canonical,
+      },
     },
     openGraph: {
       title: input.title,
@@ -72,5 +77,19 @@ export function buildPageMetadata(input: {
       description: input.description,
       images: [SEO.ogImage],
     },
+  };
+}
+
+/** Breadcrumbs give search and answer engines the page's place in the site hierarchy. */
+export function buildBreadcrumbJsonLd(trail: { name: string; path: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: trail.map((entry, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: entry.name,
+      item: `${SEO.baseUrl}${entry.path.startsWith("/") ? entry.path : `/${entry.path}`}`,
+    })),
   };
 }

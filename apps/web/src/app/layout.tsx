@@ -72,11 +72,11 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale();
   const footerTagline =
-    locale === "es-ve"
-      ? "Noches con cultura. Boletos listos. Full nivel."
+    locale === "es"
+      ? "Noches con cultura. Entradas listas. Al máximo nivel."
       : "Culture-forward nights. Ticketed. Elevated.";
   const footerCredit =
-    locale === "es-ve"
+    locale === "es"
       ? "Construido por"
       : "Built by";
   const localBusinessJsonLd = {
@@ -84,11 +84,34 @@ export default async function RootLayout({
     "@type": "Organization",
     "@id": `${SEO.baseUrl}/#organization`,
     name: SEO.legalBusinessName,
+    alternateName: SEO.siteName,
+    description: SEO.defaultDescription,
     url: SEO.baseUrl,
     email: SEO.contactEmail,
     telephone: SEO.contactPhone,
     image: `${SEO.baseUrl}${SEO.ogImage}`,
+    logo: {
+      "@type": "ImageObject",
+      url: `${SEO.baseUrl}/qcs-logo.png`,
+    },
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        email: SEO.contactEmail,
+        telephone: SEO.contactPhone,
+        areaServed: "US",
+        availableLanguage: ["English", "Spanish"],
+      },
+    ],
     areaServed: SEO.serviceAreas.map((name) => ({ "@type": "City", name })),
+    knowsAbout: [
+      "Cincinnati live music",
+      "Northern Kentucky concerts",
+      "Covington events",
+      "comedy shows Cincinnati",
+      "local event tickets",
+    ],
     sameAs: SEO.socialProfiles,
   };
 
@@ -98,11 +121,13 @@ export default async function RootLayout({
     "@id": `${SEO.baseUrl}/#website`,
     name: SEO.siteName,
     url: SEO.baseUrl,
+    description: SEO.defaultDescription,
+    publisher: { "@id": `${SEO.baseUrl}/#organization` },
     inLanguage: ["en", "es"],
   };
 
   return (
-    <html lang={locale === "es-ve" ? "es" : "en"}>
+    <html lang={locale === "es" ? "es" : "en"}>
       <body className={`${bebasNeue.variable} bg-[#07090f] text-slate-100 antialiased`}>
         <script
           type="application/ld+json"

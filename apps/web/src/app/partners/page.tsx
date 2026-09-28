@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import EventSubmitForm from "@/components/event-submit-form";
+import PromotionRequestForm from "@/components/promotion-request-form";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -28,6 +29,20 @@ export default function PartnersPage() {
             </a>
             .
           </p>
+        </div>
+      </section>
+
+      <section className="qcs-ambient-card rounded-3xl p-6 md:p-8">
+        <div className="qcs-card-content">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-300/90">Paid placement</p>
+          <h2 className="mt-2 text-xl font-extrabold tracking-tight text-white md:text-2xl">Promote your show</h2>
+          <p className="mt-2 text-sm text-slate-300">
+            Put your event in the Ticket Spotlight or at the top of the calendar. Promoted listings are labeled as
+            promoted and run for an agreed window. Tell us what you need and we&apos;ll send availability and pricing.
+          </p>
+          <div className="mt-6">
+            <PromotionRequestForm />
+          </div>
         </div>
       </section>
 

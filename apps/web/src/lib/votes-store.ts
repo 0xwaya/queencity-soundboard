@@ -147,8 +147,9 @@ async function getVoteTotalsFromKv(artists: string[] = [...POLL_ARTISTS]): Promi
   }
 
   const keys = artists.map(getVoteKey);
-  if (typeof (redis as any).mget === "function") {
-    const values = (await (redis as any).mget(...keys)) as Array<string | null>;
+  const mgetCapable = redis as { mget?: (...keys: string[]) => Promise<Array<string | null>> };
+  if (typeof mgetCapable.mget === "function") {
+    const values = await mgetCapable.mget(...keys);
     values.forEach((value, index) => {
       const artist = artists[index];
       const numeric = Number(value);

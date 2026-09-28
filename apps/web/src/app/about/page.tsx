@@ -13,7 +13,7 @@ export const metadata: Metadata = buildPageMetadata({
 export default async function AboutPage() {
   const locale = await getLocale();
   const t =
-    locale === "es-ve"
+    locale === "es"
       ? {
           eyebrow: "¿Quiénes somos?",
           title: "El soundboard de la Queen City",
@@ -21,8 +21,8 @@ export default async function AboutPage() {
             "QueenCity Soundboard es la guía local de música en vivo, comedia y cultura en Cincinnati y el norte de Kentucky. Explora el calendario y encuentra enlaces oficiales para comprar entradas.",
           cards: [
             { title: "Descubre eventos", body: "Un calendario local de todos los géneros, desde grandes conciertos hasta salas de barrio y eventos comunitarios." },
-            { title: "Compra directamente", body: "Encuentra enlaces oficiales de entradas y continúa con el venue o su socio de ticketing." },
-            { title: "Conecta con la escena", body: "Venues, artistas y promotores pueden enviar eventos, destacar sus proyectos o asociarse con nosotros." },
+            { title: "Compra directamente", body: "Encuentra enlaces oficiales de entradas y completa tu compra con el recinto o su plataforma de venta autorizada." },
+            { title: "Conecta con la escena", body: "Recintos, artistas y promotores pueden enviar eventos, destacar sus proyectos o asociarse con nosotros." },
           ],
         }
       : {

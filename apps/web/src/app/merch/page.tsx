@@ -27,7 +27,7 @@ export default async function MerchPage() {
   const merch = merchResult.data;
   const locale = await getLocale();
   const t =
-    locale === "es-ve"
+    locale === "es"
       ? {
           eyebrow: "Merch pa’ la pinta",
           title: "Merch",

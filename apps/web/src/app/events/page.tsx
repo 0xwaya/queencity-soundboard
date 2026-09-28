@@ -5,7 +5,7 @@ import TrackedLink from "@/components/tracked-link";
 import { getEventCategories, getPublishedEvents } from "@/lib/data";
 import { getLocale } from "@/lib/i18n";
 import { safeJsonLd } from "@/lib/json-ld";
-import { buildPageMetadata } from "@/lib/seo";
+import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
 
 function getVenueSchemaData(event: { venues?: { name?: string | null; city?: string | null; state?: string | null } | null }) {
   return {
@@ -46,7 +46,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
   const selectedCategory = resolvedSearchParams?.category;
   const events = selectedCategory ? allEvents.filter((event) => event.category === selectedCategory) : allEvents;
   const t =
-    locale === "es-ve"
+    locale === "es"
       ? {
           eyebrow: "Lineup pa’ la gozadera",
           title: "Eventos en Cincinnati + NKY",
@@ -130,6 +130,17 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: safeJsonLd(
+            buildBreadcrumbJsonLd([
+              { name: "Home", path: "/" },
+              { name: "Events", path: "/events" },
+            ]),
+          ),
+        }}
+      />
       {jsonLd ? (
         <script
           type="application/ld+json"

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isPublicUpcomingEvent } from "@/lib/data";
+import { isPromotionActive, isPublicUpcomingEvent } from "@/lib/data";
 import type { EventItem } from "@/lib/supabase";
 
 const event = (overrides: Partial<EventItem> = {}): EventItem => ({
@@ -29,5 +29,22 @@ describe("isPublicUpcomingEvent", () => {
   it("hides events at retired or inactive venues", () => {
     expect(isPublicUpcomingEvent(event({ venues: { id: "old", name: "Madison Theater", city: "Covington", state: "KY", is_active: true } }), now)).toBe(false);
     expect(isPublicUpcomingEvent(event({ venues: { id: "old", name: "Closed Venue", city: null, state: null, is_active: false } }), now)).toBe(false);
+  });
+});
+
+describe("isPromotionActive", () => {
+  const now = new Date("2026-09-26T12:00:00.000Z").getTime();
+
+  it("is false when the event was never promoted", () => {
+    expect(isPromotionActive(event(), now)).toBe(false);
+  });
+
+  it("keeps an open-ended promotion active", () => {
+    expect(isPromotionActive(event({ is_promoted: true }), now)).toBe(true);
+  });
+
+  it("keeps a promotion active until its end date passes", () => {
+    expect(isPromotionActive(event({ is_promoted: true, promoted_until: "2026-09-27T00:00:00.000Z" }), now)).toBe(true);
+    expect(isPromotionActive(event({ is_promoted: true, promoted_until: "2026-09-25T00:00:00.000Z" }), now)).toBe(false);
   });
 });

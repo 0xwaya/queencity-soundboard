@@ -7,7 +7,7 @@ type Props = {
   eventTitle: string;
   eventTicketUrl?: string | null;
   eventId?: string;
-  locale?: "en" | "es-ve";
+  locale?: "en" | "es";
   salesDisabled?: boolean;
   salesDisabledReason?: "paused" | "date-tbd";
 };
@@ -23,7 +23,7 @@ export default function TicketWidget({
   const provider = "external tickets";
   const checkoutUrl = salesDisabled ? null : buildAffiliateUrl(eventTicketUrl, eventId);
   const copy =
-    locale === "es-ve"
+    locale === "es"
       ? {
           title: "Checkout de entradas",
           cta: "Comprar entradas",

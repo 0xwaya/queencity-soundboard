@@ -20,7 +20,7 @@ export default function PollWidget({ locale, variant = "full" }: PollWidgetProps
   const totalVotes = useMemo(() => Object.values(counts).reduce((sum, val) => sum + val, 0), [counts]);
 
   const copy =
-    locale === "es-ve"
+    locale === "es"
       ? {
           eyebrow: "Pulso del publico",
           title: "Quien va despues?",

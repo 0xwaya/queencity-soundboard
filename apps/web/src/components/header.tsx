@@ -13,15 +13,14 @@ export default function Header({ locale }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startRefreshTransition] = useTransition();
   const router = useRouter();
-  const nextLocale = locale === "es-ve" ? "en" : "es-ve";
-  // Show the flag of the language the user would switch to
-  const toggleFlag = locale === "es-ve" ? "🇺🇸" : "🇻🇪";
-  const toggleLabel = locale === "es-ve" ? "EN" : "ES";
+  const nextLocale = locale === "es" ? "en" : "es";
+  const toggleLabel = locale === "es" ? "EN" : "ES";
+  const toggleAriaLabel = locale === "es" ? "Switch to English" : "Cambiar a español";
   const nav = [
-    { href: "/events", label: locale === "es-ve" ? "Eventos" : "Events" },
-    { href: "/merch", label: locale === "es-ve" ? "Merch" : "Merch" },
-    { href: "/partners", label: locale === "es-ve" ? "Colabora" : "Partners" },
-    { href: "/about", label: locale === "es-ve" ? "Nosotros" : "About" },
+    { href: "/events", label: locale === "es" ? "Eventos" : "Events" },
+    { href: "/merch", label: locale === "es" ? "Merch" : "Merch" },
+    { href: "/partners", label: locale === "es" ? "Colabora" : "Partners" },
+    { href: "/about", label: locale === "es" ? "Nosotros" : "About" },
   ];
 
   const toggleLocale = () => {
@@ -66,9 +65,9 @@ export default function Header({ locale }: HeaderProps) {
             onClick={toggleLocale}
             disabled={isPending}
             className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/30 hover:bg-white/10"
-              aria-label={locale === "es-ve" ? "Switch to English" : "Cambiar a español"}
+              aria-label={toggleAriaLabel}
           >
-            <span className="text-base">{toggleFlag}</span>
+            <span aria-hidden="true">🌐</span>
             <span>{toggleLabel}</span>
           </button>
         </nav>
@@ -79,9 +78,9 @@ export default function Header({ locale }: HeaderProps) {
             onClick={toggleLocale}
             disabled={isPending}
             className="inline-flex items-center justify-center rounded-md border border-white/10 px-2 py-1 text-xs font-semibold text-slate-200 transition hover:border-white/30 hover:bg-white/10"
-              aria-label={locale === "es-ve" ? "Switch to English" : "Cambiar a español"}
+              aria-label={toggleAriaLabel}
           >
-            {toggleFlag}
+            {toggleLabel}
           </button>
           <button
             type="button"

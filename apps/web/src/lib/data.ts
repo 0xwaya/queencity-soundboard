@@ -15,6 +15,13 @@ export function isPublicUpcomingEvent(event: EventItem, now = Date.now()): boole
   );
 }
 
+/** A promotion that has passed its paid window must not keep its placement. */
+export function isPromotionActive(event: EventItem, now = Date.now()): boolean {
+  if (!event.is_promoted) return false;
+  if (!event.promoted_until) return true;
+  return new Date(event.promoted_until).getTime() > now;
+}
+
 export async function getPublishedEvents(): Promise<QueryResult<EventItem[]>> {
   if (!hasSupabaseConfig()) {
     return { data: [], error: null };
@@ -25,7 +32,7 @@ export async function getPublishedEvents(): Promise<QueryResult<EventItem[]>> {
     const { data, error } = await supabase
       .from("events")
       .select(
-        "id,title,artist_name,description,hero_image_url,event_date,status,venue_id,ticket_url,category,is_promoted,ticketmaster_relevance_rank,venues(id,name,city,state,is_active)",
+        "id,title,artist_name,description,hero_image_url,event_date,status,venue_id,ticket_url,category,is_promoted,promoted_until,ticketmaster_relevance_rank,venues(id,name,city,state,is_active)",
       )
       .eq("status", "published")
       .gte("event_date", new Date().toISOString())
@@ -42,6 +49,7 @@ export async function getPublishedEvents(): Promise<QueryResult<EventItem[]>> {
     const normalizedRows = rows.map((row) => ({
       ...row,
       ticket_url: normalizeHttpsUrl(row.ticket_url),
+      is_promoted: isPromotionActive(row),
       venues: Array.isArray(row.venues) ? row.venues[0] ?? null : row.venues ?? null,
     }));
     return { data: normalizedRows.filter((row) => isPublicUpcomingEvent(row)), error: null };
