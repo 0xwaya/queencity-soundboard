@@ -45,7 +45,7 @@ export default async function Home() {
     <div className="space-y-7">
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <section className="qcs-ambient-card relative overflow-hidden rounded-3xl p-6 md:p-10">
-          <SkylineBackdrop opacity={50} />
+          <SkylineBackdrop opacity={50} priority />
           <div className="qcs-card-content max-w-3xl">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-300/90">Cincinnati + NKY</p>
             <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-slate-100 md:text-6xl">
