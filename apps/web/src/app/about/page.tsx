@@ -3,7 +3,7 @@ import { getLocale } from "@/lib/i18n";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "About QueenCity Soundboard",
+  title: "About",
   description:
     "QueenCity Soundboard is Cincinnati and Northern Kentucky's discovery hub for the hottest live events, across every genre.",
   path: "/about",

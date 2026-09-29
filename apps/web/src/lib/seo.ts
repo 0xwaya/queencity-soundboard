@@ -20,19 +20,13 @@ export const SEO = {
     "QueenCity Soundboard",
   ],
   serviceAreas: [
-    "Cincinnati, Ohio",
-    "Covington, Kentucky",
-    "Newport, Kentucky",
-    "Northern Kentucky",
-    "Greater Cincinnati",
-  ],
-  socialProfiles: [
-    "https://www.instagram.com/queencitysoundboard",
-    "https://www.tiktok.com/@queencitysoundboard",
-    "https://x.com/queencitysound",
+    { name: "Cincinnati, Ohio", type: "City" },
+    { name: "Covington, Kentucky", type: "City" },
+    { name: "Newport, Kentucky", type: "City" },
+    { name: "Northern Kentucky", type: "AdministrativeArea" },
+    { name: "Greater Cincinnati", type: "AdministrativeArea" },
   ],
   contactEmail: "event@queencitysoundboard.com",
-  contactPhone: "+1-859-491-2444",
 };
 
 export function buildPageMetadata(input: {
@@ -50,11 +44,6 @@ export function buildPageMetadata(input: {
     keywords: input.keywords ?? SEO.defaultKeywords,
     alternates: {
       canonical,
-      languages: {
-        en: canonical,
-        es: canonical,
-        "x-default": canonical,
-      },
     },
     openGraph: {
       title: input.title,

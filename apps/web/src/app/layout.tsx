@@ -79,7 +79,7 @@ export default async function RootLayout({
     locale === "es"
       ? "Construido por"
       : "Built by";
-  const localBusinessJsonLd = {
+  const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": `${SEO.baseUrl}/#organization`,
@@ -88,7 +88,6 @@ export default async function RootLayout({
     description: SEO.defaultDescription,
     url: SEO.baseUrl,
     email: SEO.contactEmail,
-    telephone: SEO.contactPhone,
     image: `${SEO.baseUrl}${SEO.ogImage}`,
     logo: {
       "@type": "ImageObject",
@@ -99,12 +98,11 @@ export default async function RootLayout({
         "@type": "ContactPoint",
         contactType: "customer support",
         email: SEO.contactEmail,
-        telephone: SEO.contactPhone,
         areaServed: "US",
         availableLanguage: ["English", "Spanish"],
       },
     ],
-    areaServed: SEO.serviceAreas.map((name) => ({ "@type": "City", name })),
+    areaServed: SEO.serviceAreas.map((area) => ({ "@type": area.type, name: area.name })),
     knowsAbout: [
       "Cincinnati live music",
       "Northern Kentucky concerts",
@@ -112,7 +110,6 @@ export default async function RootLayout({
       "comedy shows Cincinnati",
       "local event tickets",
     ],
-    sameAs: SEO.socialProfiles,
   };
 
   const websiteJsonLd = {
@@ -123,7 +120,7 @@ export default async function RootLayout({
     url: SEO.baseUrl,
     description: SEO.defaultDescription,
     publisher: { "@id": `${SEO.baseUrl}/#organization` },
-    inLanguage: ["en", "es"],
+    inLanguage: "en",
   };
 
   return (
@@ -131,7 +128,7 @@ export default async function RootLayout({
       <body className={`${bebasNeue.variable} bg-[#07090f] text-slate-100 antialiased`}>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLd(localBusinessJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationJsonLd) }}
         />
         <script
           type="application/ld+json"

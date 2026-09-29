@@ -30,7 +30,7 @@ ${SEO.siteName} is an events discovery portal for Cincinnati, Ohio and Northern 
 across every genre, and links to official ticket sellers.
 
 ## Coverage
-${SEO.serviceAreas.map((area) => `- ${area}`).join("\n")}
+${SEO.serviceAreas.map((area) => `- ${area.name}`).join("\n")}
 
 ## Key pages
 - ${SEO.baseUrl}/ — homepage and ticket spotlight
@@ -38,6 +38,7 @@ ${SEO.serviceAreas.map((area) => `- ${area}`).join("\n")}
 - ${SEO.baseUrl}/cincinnati — Cincinnati, Ohio event guide
 - ${SEO.baseUrl}/covington — Covington, Kentucky event guide
 - ${SEO.baseUrl}/partners — submit an event or request a promoted placement
+- ${SEO.baseUrl}/merch — active merchandise catalog
 - ${SEO.baseUrl}/about — about the portal
 
 ## Upcoming events${eventLines.length ? `\n${eventLines.join("\n")}` : "\n- No published events at this time."}
@@ -50,7 +51,7 @@ Some ticket links are affiliate links and may earn a commission at no extra cost
 Paid placements are labeled "Promoted".
 
 ## Notes
-- Event data is refreshed twice daily from ticketing partners.
+- Ticketmaster events are synchronized twice daily. Other listings may be manually curated or submitted for review; submissions are not published automatically.
 - Ticket purchases are completed on the official ticket seller's site, not on this portal.
 `;
 

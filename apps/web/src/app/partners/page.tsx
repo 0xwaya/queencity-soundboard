@@ -5,7 +5,7 @@ import SkylineBackdrop from "@/components/skyline-backdrop";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Partner With QueenCity Soundboard",
+  title: "Partner With Us",
   description:
     "Submit an event, pitch a venue spotlight, or become a partner with QueenCity Soundboard — Cincinnati and Northern Kentucky's events discovery hub.",
   path: "/partners",
