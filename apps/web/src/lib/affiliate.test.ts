@@ -33,9 +33,10 @@ describe("resolveAffiliateProvider", () => {
 });
 
 describe("buildAffiliateUrl", () => {
-  it("returns the destination unchanged when no template is configured", async () => {
+  it("does not expose a direct ticket URL when no template is configured", async () => {
     const { buildAffiliateUrl } = await importAffiliate();
-    expect(buildAffiliateUrl(TICKETMASTER_EVENT)).toBe(TICKETMASTER_EVENT);
+    expect(buildAffiliateUrl(TICKETMASTER_EVENT)).toBeNull();
+    expect(buildAffiliateUrl("https://tickets.example.com/e/123")).toBeNull();
   });
 
   it("applies the configured template with publisher and sub ids", async () => {
@@ -55,7 +56,7 @@ describe("buildAffiliateUrl", () => {
   it("falls back to the destination when a template would downgrade the scheme", async () => {
     vi.stubEnv("NEXT_PUBLIC_AFFILIATE_TEMPLATE_TICKETMASTER", "http://insecure.example.com/?u={url}");
     const { buildAffiliateUrl } = await importAffiliate();
-    expect(buildAffiliateUrl(TICKETMASTER_EVENT)).toBe(TICKETMASTER_EVENT);
+    expect(buildAffiliateUrl(TICKETMASTER_EVENT)).toBeNull();
   });
 
   it("returns null for missing or unsafe URLs", async () => {

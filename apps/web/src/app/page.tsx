@@ -39,6 +39,9 @@ export default async function Home() {
   const events = eventsResult.data;
   const homepageEvents = getHomepageEvents(events);
   const spotlightEvent = findSpotlightEvent(events);
+  const spotlightTicketUrl = spotlightEvent
+    ? buildAffiliateUrl(spotlightEvent.ticket_url, spotlightEvent.id)
+    : null;
 
   return (
     <>
@@ -117,9 +120,9 @@ export default async function Home() {
               </>
             )}
           </div>
-          {spotlightEvent?.ticket_url ? (
+          {spotlightTicketUrl && spotlightEvent ? (
             <TrackedExternalLink
-              href={buildAffiliateUrl(spotlightEvent.ticket_url, spotlightEvent.id) ?? spotlightEvent.ticket_url}
+              href={spotlightTicketUrl}
               event="ticket_click"
               label={`home_ticket_spotlight_${spotlightEvent.id}`}
               target="_blank"

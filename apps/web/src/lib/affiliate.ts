@@ -8,8 +8,8 @@
  *   {publisherId} value of NEXT_PUBLIC_IMPACT_PUBLISHER_ID
  *   {subId}       per-click attribution value, URL-encoded
  *
- * When a provider has no template configured the original URL is returned unchanged, so
- * links keep working before a program is approved.
+ * A destination is only returned when its provider has a valid tracking template. This
+ * prevents ticket CTAs from silently becoming untracked links.
  */
 import { normalizeHttpsUrl } from "@/lib/url";
 
@@ -61,7 +61,7 @@ export function buildAffiliateUrl(rawUrl?: string | null, subId?: string): strin
 
   const provider = resolveAffiliateProvider(destination);
   const template = provider ? PROVIDER_TEMPLATE_ENV[provider] : undefined;
-  if (!template) return destination;
+  if (!template) return null;
 
   const publisherId = process.env.NEXT_PUBLIC_IMPACT_PUBLISHER_ID ?? "";
   const tracked = template
@@ -70,6 +70,6 @@ export function buildAffiliateUrl(rawUrl?: string | null, subId?: string): strin
     .replaceAll("{publisherId}", encodeURIComponent(publisherId))
     .replaceAll("{subId}", encodeURIComponent(subId ?? ""));
 
-  // A malformed template must never downgrade the scheme or emit a non-HTTPS redirect.
-  return normalizeHttpsUrl(tracked) ?? destination;
+  // A malformed template must never fall back to an untracked destination.
+  return normalizeHttpsUrl(tracked);
 }

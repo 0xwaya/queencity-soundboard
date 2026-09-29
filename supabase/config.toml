@@ -1,0 +1,2 @@
+[functions.sync-ticketmaster-events]
+verify_jwt = false

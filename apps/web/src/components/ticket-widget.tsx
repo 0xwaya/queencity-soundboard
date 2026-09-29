@@ -27,7 +27,7 @@ export default function TicketWidget({
       ? {
           title: "Checkout de entradas",
           cta: "Comprar entradas",
-          missing: "El enlace oficial de entradas todavía no está disponible.",
+          missing: "El enlace afiliado de entradas todavía no está disponible.",
           disabled:
             salesDisabledReason === "date-tbd"
               ? "Entradas disponibles cuando se confirme la fecha."
@@ -36,7 +36,7 @@ export default function TicketWidget({
       : {
           title: "Ticket Checkout",
           cta: "Buy Tickets",
-          missing: "Official ticket link is not available yet.",
+          missing: "Affiliate ticket link is not available yet.",
           disabled:
             salesDisabledReason === "date-tbd"
               ? "Tickets will open when the date is confirmed."

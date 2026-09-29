@@ -24,7 +24,8 @@ QueenCity Soundboard is a multi-genre local discovery surface for Cincinnati and
 - Ticket URLs are normalized to safe HTTPS destinations. Ticket buttons require per-event URLs; the legacy global Ticket Tailor fallback is no longer read by the app.
 - Vercel Analytics is active for page traffic and click events. Click measurement does not itself create affiliate attribution or a commission agreement.
 - Production Supabase was reachable on 2026-09-26; a read-only query returned 5 published events. Confirm feed freshness, dates, ticket links, and venue quality separately.
-- Ticketmaster and Madison sync Edge Function directories exist. Their live schedules, credentials, error handling, and current operational health must be verified before treating them as dependable ingestion.
+- Ticketmaster sync runs through a deployed Supabase Edge Function on a twice-daily schedule; monitor cron responses and sync logs to confirm ongoing health. Madison Theater sync is deprecated and out of scope; its former endpoint returns HTTP 410.
+- Ticket CTAs require an event-specific HTTPS destination and a configured provider affiliate template. The affiliate URL builder fails closed rather than silently sending untracked direct links. Configure only templates for approved programs, then verify the corresponding production environment variables.
 
 ## Known gaps before calling it fully functional
 
@@ -43,7 +44,7 @@ QueenCity Soundboard is a multi-genre local discovery surface for Cincinnati and
 
 ### P2 — Revenue and community
 
-- Define actual affiliate partners and attribution parameters per provider; disclose affiliate links beside each monetized CTA and measure provider-specific outbound conversions where possible.
+- Confirm production affiliate partners and attribution parameters per provider; disclose affiliate links beside each monetized CTA and measure provider-specific outbound conversions where possible. Do not describe unconfigured ticket destinations as monetized.
 - Establish paid-placement labeling and partner terms before accepting featured-placement revenue.
 - Add consent-based email signup, confirmed/unsubscribe flows, and the weekly Queen City Picks digest.
 - Define merch fulfillment/support or keep the section informational until operations are ready.

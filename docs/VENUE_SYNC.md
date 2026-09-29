@@ -20,11 +20,11 @@ Existing venue records may use minor naming differences from Ticketmaster. Sync-
 
 `sync-ticketmaster-events` queries the Ticketmaster Discovery API for upcoming events within 25 miles of Cincinnati. It includes music, arts and theatre, comedy, and sports, orders results by Ticketmaster relevance, maps categories, and upserts the actual event, venue, and official Ticketmaster URL. It requires the Supabase Edge Function secret `TICKETMASTER_API_KEY`.
 
-The function code exists, but its Production secret, deployment, and schedule must be verified before the feed can be considered operational. A populated venue roster alone does not create events. Do not claim an event is trending or promoted unless the data supports that label.
+The twice-daily `sync-ticketmaster-events` schedule is installed by migration `20260928174929_schedule_ticketmaster_sync.sql`. `supabase/config.toml` disables gateway JWT verification for this function because `pg_net` authenticates with the handler's required `x-qcs-sync-secret` instead. Deploy the function with that config in effect, set its `TICKETMASTER_API_KEY` and `QCS_TICKETMASTER_SYNC_SECRET` function secrets, and store `project_url` plus `qcs_ticketmaster_sync_secret` in Supabase Vault. The Vault sync secret must exactly match the Edge Function secret. Verify that the cron job is active and inspect its `pg_net` responses after deployment; a scheduled job without these prerequisites is not an operational feed. A populated venue roster alone does not create events. Do not claim an event is trending or promoted unless the data supports that label.
 
-## Madison Theater
+## Deprecated Madison Theater Sync
 
-Madison Theater is retired from the active venue roster. Its records are archived, and its former sync endpoint returns HTTP 410. Do not add new listings for this venue unless the operating status and current schedule are confirmed and the venue is explicitly reactivated.
+Madison Theater sync is deprecated and out of scope. Its records are archived, and the former endpoint returns HTTP 410. Do not add new listings for this venue unless the operating status and current schedule are confirmed and the venue is explicitly reactivated.
 
 ## Review rules
 
