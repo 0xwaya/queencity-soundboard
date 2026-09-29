@@ -30,8 +30,8 @@ export default function EventBackdrop({ src, opacity = 40, priority = false }: P
         priority={priority}
         className={`object-cover ${OPACITY_CLASS[opacity]} saturate-[1.1] contrast-[1.05]`}
       />
-      <div className="absolute inset-0 bg-linear-to-r from-[#08111f] via-[#08111f]/85 to-[#08111f]/55" />
-      <div className="absolute inset-0 bg-linear-to-t from-[#08111f] via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-r from-[#08111f]/85 via-[#08111f]/70 to-[#08111f]/40" />
+      <div className="absolute inset-0 bg-linear-to-t from-[#08111f]/85 via-transparent to-transparent" />
     </div>
   );
 }

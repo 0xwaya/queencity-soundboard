@@ -32,12 +32,12 @@ export default function SkylineBackdrop({ variant = "cincinnati", opacity = 50, 
         fill
         sizes="100vw"
         priority={priority}
-        className={`object-cover object-bottom ${OPACITY_CLASS[opacity]}`}
+        className={`object-cover object-[center_72%] ${OPACITY_CLASS[opacity]}`}
       />
       <div className={`absolute inset-0 ${tint}`} />
       {/* Scrims keep headline and body copy legible over the photograph. */}
-      <div className="absolute inset-0 bg-linear-to-r from-[#08111f] via-[#08111f]/85 to-[#08111f]/45" />
-      <div className="absolute inset-0 bg-linear-to-t from-[#08111f]/95 via-transparent to-[#08111f]/60" />
+      <div className="absolute inset-0 bg-linear-to-r from-[#08111f]/85 via-[#08111f]/70 to-[#08111f]/30" />
+      <div className="absolute inset-0 bg-linear-to-t from-[#08111f]/80 via-transparent to-[#08111f]/45" />
     </div>
   );
 }

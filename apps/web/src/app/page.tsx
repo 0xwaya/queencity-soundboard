@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import TrackedExternalLink from "@/components/tracked-external-link";
 import TrackedLink from "@/components/tracked-link";
 import FeaturedEventsWidget from "@/components/featured-events-widget";
+import CincinnatiSportsCard from "@/components/cincinnati-sports-card";
 import EventBackdrop from "@/components/event-backdrop";
 import SkylineBackdrop from "@/components/skyline-backdrop";
 import { buildPageMetadata } from "@/lib/seo";
-import { getPublishedEvents } from "@/lib/data";
+import { getHomepageEvents, getPublishedEvents } from "@/lib/data";
 import { buildAffiliateUrl } from "@/lib/affiliate";
 import type { EventItem } from "@/lib/supabase";
 
@@ -36,6 +37,7 @@ function findSpotlightEvent(events: EventItem[]): EventItem | undefined {
 export default async function Home() {
   const eventsResult = await getPublishedEvents();
   const events = eventsResult.data;
+  const homepageEvents = getHomepageEvents(events);
   const spotlightEvent = findSpotlightEvent(events);
 
   return (
@@ -147,10 +149,10 @@ export default async function Home() {
       <section className="qcs-ambient-card rounded-3xl p-6 md:p-8">
         <div className="qcs-card-content flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-fuchsia-300/80">Events first</p>
-            <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white md:text-3xl">What&apos;s coming up</h2>
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-fuchsia-300/80">Today + Next Up</p>
+            <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white md:text-3xl">Meet the artists</h2>
             <p className="mt-2 text-sm text-slate-300">
-              Find confirmed dates and ticket links across genres, from touring acts to neighborhood rooms and free community events.
+              Today&apos;s shows first, followed by the next dates on the Cincinnati + NKY calendar.
             </p>
           </div>
           <TrackedLink
@@ -163,16 +165,26 @@ export default async function Home() {
           </TrackedLink>
         </div>
         <div className="qcs-card-content mt-6 grid gap-4 md:grid-cols-3">
-          {events.slice(0, 3).map((event) => (
+          {homepageEvents.map((event) => (
             <article key={event.id} className="qcs-glass-panel relative min-h-48 overflow-hidden rounded-2xl p-6">
+              <EventBackdrop src={event.hero_image_url} opacity={40} />
               <div className="relative z-10">
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-300/80">
                   {event.category ?? "Featured"}
                 </p>
-                <h3 className="mt-2 text-2xl font-bold tracking-tight text-white">{event.title}</h3>
-                <p className="mt-2 text-base text-slate-300">
-                  {event.artist_name}
-                  {event.venues?.name ? ` • ${event.venues.name}` : ""}
+                <h3 className="mt-2 text-2xl font-bold tracking-tight text-white">{event.artist_name}</h3>
+                <p className="mt-1 text-sm font-medium text-slate-200">{event.title}</p>
+                {event.description ? (
+                  <p className="mt-2 line-clamp-2 text-sm text-slate-300">{event.description}</p>
+                ) : null}
+                <p className="mt-2 text-sm text-slate-300">
+                  {new Intl.DateTimeFormat("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    timeZone: "America/New_York",
+                  }).format(new Date(event.event_date))}
+                  {event.venues?.name ? ` · ${event.venues.name}` : ""}
                 </p>
                 <TrackedLink
                   href="/events"
@@ -185,11 +197,13 @@ export default async function Home() {
               </div>
             </article>
           ))}
-          {events.length === 0 ? (
+          {homepageEvents.length === 0 ? (
             <p className="text-sm text-slate-400">No published events yet — check back soon.</p>
           ) : null}
         </div>
       </section>
+
+      <CincinnatiSportsCard events={events} />
 
       <section className="qcs-ambient-card rounded-3xl p-6 md:p-8">
         <div className="qcs-card-content flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
