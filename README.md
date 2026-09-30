@@ -19,10 +19,10 @@ A web-first, mobile-friendly local event platform for:
 - **Web:** Next.js on Vercel
 - **Data/Auth/Storage:** Supabase
 - **Ticketing:** Event-specific external ticket URLs; missing links are shown as unavailable rather than routing to a shared checkout
-- **Canonical GitHub repo:** `github.com/0xwaya/queencity-soundboard-standalone`
+- **Canonical GitHub repo:** `github.com/0xwaya/queencity-soundboard`
+- **Canonical Vercel project:** `0xwaya-projects/queencity-soundboard`
 
-> Vercel may still show the project slug `queencity-soundboard`; the source repo
-> should remain this standalone repository.
+> The GitHub repository and Vercel project now intentionally use the same name.
 
 ## Runtime notes
 
@@ -67,6 +67,7 @@ bash tools/env-crypto.sh dev
 
 - Local app variables live in `apps/web/.env.local` (ignored) or an encrypted `apps/web/.env.encrypted`; `apps/web/.env.vercel` is an ignored Vercel export. The parent `/Users/pc/.openclaw/workspace/` has no `.env` file as of 2026-09-30. Do not load unrelated OpenClaw credentials into this app.
 - Vercel Preview and Production variables live in the `0xwaya-projects/queencity-soundboard` project settings, not in the local shell by default. Supabase Edge Function secrets (`TICKETMASTER_API_KEY`, `QCS_TICKETMASTER_SYNC_SECRET`) and matching Vault settings are separate from Vercel variables. See [DEPLOYMENT_STEPS.md](DEPLOYMENT_STEPS.md) before deploying the sync.
+- Supabase does not store the GitHub repository name in this repository's local configuration. If Supabase Dashboard GitHub integration or a CI workflow is enabled, its repository selector must point to `0xwaya/queencity-soundboard`.
 - Keep `apps/web/.env.local` and `apps/web/.env.vercel` out of Git; never print or paste values. Use `bash tools/env-crypto.sh status` to check local presence without displaying secrets.
 - Commit `apps/web/.env.encrypted` only when shared encrypted defaults are needed.
 - Set `QCS_ENV_PASSPHRASE` in your shell, or enter passphrase interactively.

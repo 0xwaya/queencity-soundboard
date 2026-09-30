@@ -4,7 +4,7 @@
 
 - Vercel scope/team: `0xwaya-projects`
 - Vercel project: `queencity-soundboard`
-- Source repo: `github.com/0xwaya/queencity-soundboard-standalone`
+- Source repo: `github.com/0xwaya/queencity-soundboard`
 - Root directory: `apps/web`
 - Framework: Next.js
 - Production domains: `queencitysoundboard.com`, `www.queencitysoundboard.com`
@@ -15,6 +15,7 @@
 - Supabase supplies published events and merch; server routes accept event submissions.
 - Vercel Production and Preview have `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` configured. Production also has server-side Supabase credentials. Do not print, commit, or copy secret values into this document.
 - Local app runtime variables are in ignored `apps/web/.env.local`; `apps/web/.env.vercel` is an ignored local Vercel export, not the authoritative production setting. No `.env` file was found directly in `/Users/pc/.openclaw/workspace/` on 2026-09-30. Manage Preview/Production values in Vercel project settings under `0xwaya-projects/queencity-soundboard`. Supabase Function secrets and Vault values must be checked separately; the local env files do not contain `TICKETMASTER_API_KEY` or `QCS_TICKETMASTER_SYNC_SECRET`.
+- Canonical source after the rename is `github.com/0xwaya/queencity-soundboard`. Update any Supabase Dashboard GitHub integration or external CI connection to this repository; Supabase project/ref and Edge Function names are independent of the GitHub repository name.
 - Fan voting is paused. The widget and poll storage code are removed; `/api/votes/submit`, `/api/votes/totals`, `/api/votes/health`, and `/api/votes/admin/reset` return 410. Leave existing poll database records intact; legacy `POLL_*`/Upstash variables in old Vercel exports are not needed by the current app.
 - Supabase Production connectivity was verified on 2026-09-26 with a read-only published-event count (5 rows at that time). Recheck after incidents and deployments.
 - Ticket checkout is hosted by external providers. Ticket buttons require an event-specific HTTPS `events.ticket_url` and a valid affiliate template for its provider; otherwise no outbound ticket link is rendered.

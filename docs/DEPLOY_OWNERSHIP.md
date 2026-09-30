@@ -4,7 +4,7 @@
 
 - **Vercel Team/Scope:** `0xwaya-projects`
 - **Vercel Project:** `queencity-soundboard`
-- **Git repo:** `github.com/0xwaya/queencity-soundboard-standalone`
+- **Git repo:** `github.com/0xwaya/queencity-soundboard`
 - **Production branch:** `master`
 - **Root Directory:** `apps/web`
 - **Framework:** `nextjs`
@@ -12,7 +12,7 @@
 If Vercel shows the project slug `queencity-soundboard`, that is expected; the
 deployment source must still be this standalone GitHub repository.
 
-The legacy monorepo-shaped repo is not the canonical deploy source for this project.
+The legacy monorepo-shaped repo is not the canonical deploy source for this project. Supabase is a separate deployment boundary; its local configuration contains no GitHub repository name. Verify any Supabase Dashboard GitHub/CI integration points to `0xwaya/queencity-soundboard`.
 
 ## Canonical Domains
 

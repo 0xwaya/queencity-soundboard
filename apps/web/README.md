@@ -33,4 +33,4 @@ Each event's checkout button uses only its own valid HTTPS `events.ticket_url`. 
 
 ## Deploy
 
-Deploy `apps/web` from `0xwaya/queencity-soundboard-standalone` to Vercel and add the required Supabase environment variables in project settings.
+Deploy `apps/web` from `0xwaya/queencity-soundboard` to the `queencity-soundboard` Vercel project and add the required Supabase environment variables in project settings. Supabase Edge Function deployment remains separate from Vercel deployment.
