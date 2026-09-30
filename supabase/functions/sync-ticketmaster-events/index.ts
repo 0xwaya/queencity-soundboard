@@ -22,6 +22,10 @@ const SEARCH_LATLONG = "39.1031,-84.5120";
 const SEARCH_RADIUS_MILES = "25";
 const CLASSIFICATIONS = ["Music", "Arts & Theatre", "Comedy", "Sports"];
 const MAX_EVENTS_PER_CATEGORY = 10;
+const MUSIC_PAGES = 5;
+const MAX_MUSIC_PER_CATEGORY = 30;
+const MAX_MUSIC_PER_VENUE = 6;
+const MAX_MUSIC_EVENTS = 80;
 
 interface TicketmasterVenue {
   name: string;
@@ -122,49 +126,74 @@ function resolveCategory(classifications?: TicketmasterClassification[]): string
 async function fetchTicketmasterEvents(): Promise<{ events: RankedTicketmasterEvent[]; totalFetched: number }> {
   const eventsById = new Map<string, RankedTicketmasterEvent>();
   let totalFetched = 0;
+  const startDateTime = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
-  for (const classification of CLASSIFICATIONS) {
-    const params = new URLSearchParams({
-      apikey: ticketmasterApiKey,
-      latlong: SEARCH_LATLONG,
-      radius: SEARCH_RADIUS_MILES,
-      unit: "miles",
-      classificationName: classification,
-      size: "100",
-      sort: "relevance,desc",
-    });
+  const venuesResponse = await fetch(`https://app.ticketmaster.com/discovery/v2/venues.json?${new URLSearchParams({
+    apikey: ticketmasterApiKey,
+    keyword: "Ludlow Garage",
+    size: "20",
+  })}`);
+  if (!venuesResponse.ok) console.warn(`[ticketmaster-sync] Ludlow venue lookup returned ${venuesResponse.status}`);
+  const venuesBody = venuesResponse.ok
+    ? await venuesResponse.json() as { _embedded?: { venues?: (TicketmasterVenue & { id?: string })[] } }
+    : null;
+  const ludlowId = venuesBody?._embedded?.venues?.find((venue) =>
+    /^(the )?ludlow garage$/i.test(venue.name) && venue.city?.name?.toLowerCase() === "cincinnati" && venue.state?.stateCode === "OH"
+  )?.id;
 
-    const response = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${params}`);
-    if (!response.ok) {
-      const faultBody = (await response.text()).slice(0, 500);
-      throw new Error(
-        `Ticketmaster ${classification} request failed with status ${response.status}: ${faultBody} | keyMeta=${JSON.stringify(describeApiKey())}`,
-      );
-    }
+  const searches = [...CLASSIFICATIONS.map((classification) => ({ classification, venueId: "" }))];
+  if (ludlowId) searches.push({ classification: "Music", venueId: ludlowId });
 
-    const body = (await response.json()) as { _embedded?: { events?: TicketmasterEvent[] } };
-    const resultEvents = body._embedded?.events ?? [];
-    totalFetched += resultEvents.length;
+  for (const { classification, venueId } of searches) {
+    const pageLimit = venueId ? 2 : classification === "Music" ? MUSIC_PAGES : 1;
+    for (let page = 0; page < pageLimit; page++) {
+      const params = new URLSearchParams({
+        apikey: ticketmasterApiKey,
+        latlong: SEARCH_LATLONG,
+        radius: SEARCH_RADIUS_MILES,
+        unit: "miles",
+        classificationName: classification,
+        size: "100",
+        page: String(page),
+        sort: classification === "Music" ? "date,asc" : "relevance,desc",
+        startDateTime,
+      });
+      if (venueId) params.set("venueId", venueId);
 
-    resultEvents.forEach((event, index) => {
-      const key = event.id ?? `${event.name}:${event.dates?.start?.dateTime ?? "unknown-date"}`;
-      const candidate = {
-        event,
-        category: resolveCategory(event.classifications),
-        relevanceRank: index + 1,
-      };
-      const existing = eventsById.get(key);
-      if (!existing || candidate.relevanceRank < existing.relevanceRank) {
-        eventsById.set(key, candidate);
+      const response = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${params}`);
+      if (!response.ok) {
+        const faultBody = (await response.text()).slice(0, 500);
+        throw new Error(
+          `Ticketmaster ${classification} page ${page} request failed with status ${response.status}: ${faultBody} | keyMeta=${JSON.stringify(describeApiKey())}`,
+        );
       }
-    });
+
+      const body = (await response.json()) as { page?: { totalPages?: number }; _embedded?: { events?: TicketmasterEvent[] } };
+      const resultEvents = body._embedded?.events ?? [];
+      totalFetched += resultEvents.length;
+
+      resultEvents.forEach((event, index) => {
+        const key = event.id ?? `${event.name}:${event.dates?.start?.dateTime ?? "unknown-date"}`;
+        const candidate = {
+          event,
+          category: resolveCategory(event.classifications),
+          relevanceRank: page * 100 + index + 1,
+        };
+        const existing = eventsById.get(key);
+        if (!existing || candidate.relevanceRank < existing.relevanceRank) {
+          eventsById.set(key, candidate);
+        }
+      });
+
+      if (page + 1 >= (body.page?.totalPages ?? 1) || resultEvents.length === 0) break;
+    }
   }
 
   return { events: Array.from(eventsById.values()), totalFetched };
 }
 
 function selectEligibleEvents(events: RankedTicketmasterEvent[], now: number) {
-  const skipped = { notOnSale: 0, notFuture: 0, noHttpsTicketUrl: 0, overCategoryLimit: 0 };
+  const skipped = { notOnSale: 0, notFuture: 0, noHttpsTicketUrl: 0, noVenue: 0, duplicateShow: 0, overVenueLimit: 0, overCategoryLimit: 0, overMusicLimit: 0 };
   const eligible: RankedTicketmasterEvent[] = [];
 
   for (const candidate of events) {
@@ -190,21 +219,50 @@ function selectEligibleEvents(events: RankedTicketmasterEvent[], now: number) {
       skipped.noHttpsTicketUrl += 1;
       continue;
     }
+    if (!event._embedded?.venues?.[0]?.name) {
+      skipped.noVenue += 1;
+      continue;
+    }
 
     eligible.push(candidate);
   }
 
-  eligible.sort((left, right) => left.category.localeCompare(right.category) || left.relevanceRank - right.relevanceRank);
+  eligible.sort((left, right) =>
+    Date.parse(left.event.dates!.start!.dateTime!) - Date.parse(right.event.dates!.start!.dateTime!) ||
+    left.relevanceRank - right.relevanceRank
+  );
   const categoryCounts = new Map<string, number>();
+  const venueCounts = new Map<string, number>();
+  const seenShows = new Set<string>();
   const selected: RankedTicketmasterEvent[] = [];
+  let musicCount = 0;
 
   for (const candidate of eligible) {
+    const isMusic = candidate.event.classifications?.[0]?.segment?.name?.toLowerCase() === "music";
+    const venueName = candidate.event._embedded?.venues?.[0]?.name?.trim().toLowerCase().replace(/^the /, "");
+    const showKey = venueName ? `${venueName}:${candidate.event.name.trim().toLowerCase()}` : null;
+    if (showKey && seenShows.has(showKey)) {
+      skipped.duplicateShow += 1;
+      continue;
+    }
+
     const count = categoryCounts.get(candidate.category) ?? 0;
-    if (count >= MAX_EVENTS_PER_CATEGORY) {
+    if (count >= (isMusic ? MAX_MUSIC_PER_CATEGORY : MAX_EVENTS_PER_CATEGORY)) {
       skipped.overCategoryLimit += 1;
       continue;
     }
+    if (isMusic && venueName && (venueCounts.get(venueName) ?? 0) >= MAX_MUSIC_PER_VENUE) {
+      skipped.overVenueLimit += 1;
+      continue;
+    }
+    if (isMusic && musicCount >= MAX_MUSIC_EVENTS) {
+      skipped.overMusicLimit += 1;
+      continue;
+    }
     categoryCounts.set(candidate.category, count + 1);
+    if (isMusic) musicCount += 1;
+    if (isMusic && venueName) venueCounts.set(venueName, (venueCounts.get(venueName) ?? 0) + 1);
+    if (showKey) seenShows.add(showKey);
     selected.push(candidate);
   }
 
@@ -217,13 +275,14 @@ async function upsertVenue(
 ): Promise<string | null> {
   if (!venue?.name) return null;
 
-  const { data: existing } = await supabase.from("venues").select("id").eq("name", venue.name).maybeSingle();
+  const name = /^the ludlow garage$/i.test(venue.name) ? "Ludlow Garage" : venue.name;
+  const { data: existing } = await supabase.from("venues").select("id").eq("name", name).maybeSingle();
   if (existing?.id) return existing.id as string;
 
   const { data: inserted, error } = await supabase
     .from("venues")
     .insert({
-      name: venue.name,
+      name,
       address: venue.address?.line1 ?? null,
       city: venue.city?.name ?? null,
       state: venue.state?.stateCode ?? null,
@@ -282,6 +341,9 @@ async function handler(req: Request) {
           skipped,
           categoryCounts,
           maxPerCategory: MAX_EVENTS_PER_CATEGORY,
+          maxMusicPerCategory: MAX_MUSIC_PER_CATEGORY,
+          maxMusicPerVenue: MAX_MUSIC_PER_VENUE,
+          maxMusicEvents: MAX_MUSIC_EVENTS,
           samples: events.slice(0, 12).map(({ event, category, relevanceRank }) => ({
             title: event.name,
             venue: event._embedded?.venues?.[0]?.name ?? null,
@@ -303,10 +365,18 @@ async function handler(req: Request) {
 
     let synced = 0;
     let failed = 0;
+    const venueIds = new Map<string, string | null>();
 
     for (const { event, category, relevanceRank } of events) {
       const eventDate = event.dates?.start?.dateTime;
-      const venueId = await upsertVenue(supabase, event._embedded?.venues?.[0]);
+      const venue = event._embedded?.venues?.[0];
+      const venueKey = `${venue?.name.trim().toLowerCase().replace(/^the /, "")}:${venue?.city?.name}:${venue?.state?.stateCode}`;
+      if (!venueIds.has(venueKey)) venueIds.set(venueKey, await upsertVenue(supabase, venue));
+      const venueId = venueIds.get(venueKey) ?? null;
+      if (!venueId) {
+        failed += 1;
+        continue;
+      }
 
       const { error } = await supabase.from("events").upsert(
         {
@@ -319,7 +389,7 @@ async function handler(req: Request) {
           category,
           source: "sync",
           hero_image_url: pickHeroImage(event.images),
-          ticketmaster_relevance_rank: relevanceRank,
+          ticketmaster_relevance_rank: event.classifications?.[0]?.segment?.name?.toLowerCase() === "music" ? null : relevanceRank,
         },
         { onConflict: "title,event_date" },
       );

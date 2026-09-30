@@ -36,6 +36,7 @@ A web-first, mobile-friendly local event platform for:
 - `/cincinnati` and `/covington` provide local discovery entry points; `/about`, `/partners`, and `/merch` provide supporting product pages.
 - Public event submissions are validated and stored in Supabase as pending review. There is no staff moderation dashboard yet.
 - The production Supabase connection was read-tested on 2026-09-26; the published-event query returned 5 rows. This confirms connectivity at that time, not the freshness or completeness of the calendar.
+- Fan voting is paused: the widget has been removed and all `/api/votes/*` endpoints return HTTP 410. Existing poll records are preserved for a future decision, not served by the app.
 - See [Frontend and full-functionality roadmap](docs/FRONTEND_AND_ROADMAP.md) for the shipped experience, known gaps, and recommended sequence.
 
 ## Product and operating model
@@ -64,8 +65,10 @@ bash tools/env-crypto.sh dev
 
 ### Env security workflow
 
-- Keep `apps/web/.env.local` as temporary runtime material only.
-- Commit `apps/web/.env.encrypted` when you need shared encrypted defaults.
+- Local app variables live in `apps/web/.env.local` (ignored) or an encrypted `apps/web/.env.encrypted`; `apps/web/.env.vercel` is an ignored Vercel export. The parent `/Users/pc/.openclaw/workspace/` has no `.env` file as of 2026-09-30. Do not load unrelated OpenClaw credentials into this app.
+- Vercel Preview and Production variables live in the `0xwaya-projects/queencity-soundboard` project settings, not in the local shell by default. Supabase Edge Function secrets (`TICKETMASTER_API_KEY`, `QCS_TICKETMASTER_SYNC_SECRET`) and matching Vault settings are separate from Vercel variables. See [DEPLOYMENT_STEPS.md](DEPLOYMENT_STEPS.md) before deploying the sync.
+- Keep `apps/web/.env.local` and `apps/web/.env.vercel` out of Git; never print or paste values. Use `bash tools/env-crypto.sh status` to check local presence without displaying secrets.
+- Commit `apps/web/.env.encrypted` only when shared encrypted defaults are needed.
 - Set `QCS_ENV_PASSPHRASE` in your shell, or enter passphrase interactively.
 
 ## Core docs

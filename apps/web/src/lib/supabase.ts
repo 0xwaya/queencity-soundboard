@@ -39,6 +39,7 @@ export type EventItem = {
   is_promoted?: boolean;
   promoted_until?: string | null;
   ticketmaster_relevance_rank?: number | null;
+  source?: "manual" | "sync" | "submission";
   venues?: Venue | null;
 };
 

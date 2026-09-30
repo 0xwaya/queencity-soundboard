@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getHomepageEvents, isPromotionActive, isPublicUpcomingEvent } from "@/lib/data";
+import { dedupeSyncedShows, getHomepageEvents, isPromotionActive, isPublicUpcomingEvent } from "@/lib/data";
 import type { EventItem } from "@/lib/supabase";
 
 const event = (overrides: Partial<EventItem> = {}): EventItem => ({
@@ -23,6 +23,20 @@ describe("getHomepageEvents", () => {
 
     const now = new Date("2026-09-28T18:00:00.000Z").getTime();
     expect(getHomepageEvents([later, soon, today], 2, now).map(({ id }) => id)).toEqual(["today", "soon"]);
+  });
+});
+
+describe("dedupeSyncedShows", () => {
+  it("keeps the earliest showing at a venue without hiding other venues or manual listings", () => {
+    const later = event({ id: "later", title: "Artist Live", source: "sync", event_date: "2026-10-03T20:00:00.000Z" });
+    const earlier = event({ id: "earlier", title: "Artist Live", source: "sync", event_date: "2026-10-01T20:00:00.000Z" });
+    const otherVenue = event({ id: "other", title: "Artist Live", source: "sync", venue_id: "venue-2", venues: { id: "venue-2", name: "Southgate House Revival", city: "Newport", state: "KY" }, event_date: "2026-10-02T20:00:00.000Z" });
+    const manual = event({ id: "manual", title: "Artist Live", source: "manual", event_date: "2026-10-02T21:00:00.000Z" });
+    const alias = event({ id: "alias", title: "Artist Live", source: "sync", venue_id: "venue-3", venues: { id: "venue-3", name: "The Ludlow Garage", city: "Cincinnati", state: "OH" }, event_date: "2026-10-04T20:00:00.000Z" });
+
+    expect(dedupeSyncedShows([later, otherVenue, manual, earlier, alias]).map(({ id }) => id)).toEqual([
+      "earlier", "other", "manual",
+    ]);
   });
 });
 

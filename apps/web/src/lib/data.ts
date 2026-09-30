@@ -82,6 +82,20 @@ export function getHomepageEvents(events: EventItem[], limit = 3, now = Date.now
     .slice(0, limit);
 }
 
+export function dedupeSyncedShows(events: EventItem[]): EventItem[] {
+  const seen = new Set<string>();
+  return [...events].sort((left, right) => Date.parse(left.event_date) - Date.parse(right.event_date)).filter((event) => {
+    if (event.source !== "sync" || !event.venue_id) return true;
+    const venue = event.venues
+      ? `${event.venues.name.trim().toLowerCase().replace(/^the /, "")}:${event.venues.city}:${event.venues.state}`
+      : event.venue_id;
+    const key = `${venue}:${event.title.trim().toLowerCase()}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 export async function getPublishedEvents(): Promise<QueryResult<EventItem[]>> {
   if (!hasSupabaseConfig()) {
     return { data: [], error: null };
@@ -93,13 +107,13 @@ export async function getPublishedEvents(): Promise<QueryResult<EventItem[]>> {
     const { data, error } = await supabase
       .from("events")
       .select(
-        "id,title,artist_name,description,hero_image_url,event_date,status,venue_id,ticket_url,category,is_promoted,promoted_until,ticketmaster_relevance_rank,venues(id,name,city,state,is_active)",
+        "id,title,artist_name,description,hero_image_url,event_date,status,venue_id,ticket_url,category,is_promoted,promoted_until,ticketmaster_relevance_rank,source,venues(id,name,city,state,is_active)",
       )
       .eq("status", "published")
       .gte("event_date", startOfEventDay(now).toISOString())
+      .order("event_date", { ascending: true })
       .order("is_promoted", { ascending: false })
-      .order("ticketmaster_relevance_rank", { ascending: true, nullsFirst: false })
-      .order("event_date", { ascending: true });
+      .order("ticketmaster_relevance_rank", { ascending: true, nullsFirst: false });
 
     if (error) {
       console.error("[getPublishedEvents] Supabase query failed", error);
@@ -114,7 +128,7 @@ export async function getPublishedEvents(): Promise<QueryResult<EventItem[]>> {
       is_promoted: isPromotionActive(row),
       venues: Array.isArray(row.venues) ? row.venues[0] ?? null : row.venues ?? null,
     }));
-    return { data: normalizedRows.filter((row) => isPublicUpcomingEvent(row, now.getTime())), error: null };
+    return { data: dedupeSyncedShows(normalizedRows.filter((row) => isPublicUpcomingEvent(row, now.getTime()))), error: null };
   } catch (err) {
     console.error("[getPublishedEvents] Unexpected failure", err);
     return { data: [], error: "Unable to load events right now." };
