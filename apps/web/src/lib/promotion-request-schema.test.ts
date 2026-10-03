@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseBudgetToCents, promotionRequestSchema } from "@/lib/promotion-request-schema";
+import { parseBudgetToCents, promotionRequestSchema, PUBLIC_PROMOTION_PACKAGES } from "@/lib/promotion-request-schema";
 
 const validRequest = {
   organization: "Taft Theatre",
@@ -8,6 +8,11 @@ const validRequest = {
 };
 
 describe("promotionRequestSchema", () => {
+  it("offers only pilot inventory while preserving legacy request compatibility", () => {
+    expect(PUBLIC_PROMOTION_PACKAGES).toEqual(["spotlight", "custom"]);
+    expect(promotionRequestSchema.safeParse({ ...validRequest, package: "homepage_takeover" }).success).toBe(true);
+  });
+
   it("accepts a minimal valid request", () => {
     expect(promotionRequestSchema.safeParse(validRequest).success).toBe(true);
   });

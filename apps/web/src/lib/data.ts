@@ -56,9 +56,19 @@ export function isPublicUpcomingEvent(event: EventItem, now = Date.now()): boole
 
 /** A promotion that has passed its paid window must not keep its placement. */
 export function isPromotionActive(event: EventItem, now = Date.now()): boolean {
-  if (!event.is_promoted) return false;
-  if (!event.promoted_until) return true;
+  if (!event.is_promoted || !event.promoted_until) return false;
   return new Date(event.promoted_until).getTime() > now;
+}
+
+export function getSponsoredEvents(events: EventItem[], now = Date.now()): EventItem[] {
+  return events
+    .filter((event) =>
+      event.status === "published" &&
+      isPublicUpcomingEvent(event, now) &&
+      new Date(event.event_date).getTime() > now &&
+      isPromotionActive(event, now),
+    )
+    .slice(0, 3);
 }
 
 export function getHomepageEvents(events: EventItem[], limit = 3, now = Date.now()): EventItem[] {

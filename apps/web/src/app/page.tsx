@@ -7,7 +7,7 @@ import EventBackdrop from "@/components/event-backdrop";
 import SkylineBackdrop from "@/components/skyline-backdrop";
 import { buildPageMetadata } from "@/lib/seo";
 import { getHomepageEvents, getPublishedEvents } from "@/lib/data";
-import { buildAffiliateUrl } from "@/lib/affiliate";
+import { buildAffiliateUrl, resolveAffiliateProvider } from "@/lib/affiliate";
 import type { EventItem } from "@/lib/supabase";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -125,6 +125,7 @@ export default async function Home() {
               href={spotlightTicketUrl}
               event="ticket_click"
               label={`home_ticket_spotlight_${spotlightEvent.id}`}
+              properties={{ event_id: spotlightEvent.id, provider: resolveAffiliateProvider(spotlightEvent.ticket_url ?? ""), surface: "home_ticket_spotlight" }}
               target="_blank"
               rel="sponsored noopener noreferrer"
               className="qcs-button-3d relative z-10 mt-5 inline-flex w-fit rounded-lg bg-amber-300 px-4 py-2.5 text-sm font-bold text-[#15120a] hover:bg-amber-200"
@@ -175,7 +176,11 @@ export default async function Home() {
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-300/80">
                   {event.category ?? "Featured"}
                 </p>
-                <h3 className="mt-2 text-2xl font-bold tracking-tight text-white">{event.artist_name}</h3>
+                <h3 className="mt-2 text-2xl font-bold tracking-tight text-white">
+                  <TrackedLink href={`/events/${event.id}`} event="event_open" properties={{ event_id: event.id, surface: "home_calendar" }} className="hover:text-cyan-200">
+                    {event.artist_name}
+                  </TrackedLink>
+                </h3>
                 <p className="mt-1 text-sm font-medium text-slate-200">{event.title}</p>
                 {event.description ? (
                   <p className="mt-2 line-clamp-2 text-sm text-slate-300">{event.description}</p>

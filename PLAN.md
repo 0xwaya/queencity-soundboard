@@ -32,12 +32,22 @@ Completed 2026-09-26: event ticket buttons now require a valid event-specific HT
 
 ### Phase 2 — Audience and attribution
 
+Implemented foundation: event-specific public detail pages, standardized `ticket_click`
+metadata, and viewable sponsored-placement impressions. Partner reports still determine
+actual conversions and commissions; browser analytics are not revenue reporting.
+
 1. Standardize outbound ticket click events and capture event ID, venue, genre, and ticket provider without logging sensitive data.
 2. Add provider-specific affiliate URLs and attribution only where an approved affiliate agreement exists; keep disclosures beside monetized links.
 3. Add an opt-in email signup and a weekly Queen City Picks digest, with consent, unsubscribe, and retention controls.
 4. Track visitor-to-event and event-to-ticket click-throughs, email growth, submissions, and partner inquiries in a privacy-conscious dashboard.
 
 ### Phase 3 — Partner and revenue extensions
+
+Implemented pilot surfaces: a separate sponsored section on the homepage/calendar,
+at most three eligible events, mandatory finite expiry, direct event links and inquiry
+packages at proposed $49-$99/7 days and $149-$249/30 days (custom venue scope).
+Payment confirmation, staff activation and campaign reporting are still manual; no
+automatic billing, takeover, hotel program or newsletter inventory is launched.
 
 1. Launch self-serve or staff-assisted Venue Spotlight / Artist Feature intake and campaign reporting.
 2. Add sponsorship inventory and a lightweight media kit; keep the core discovery calendar free.

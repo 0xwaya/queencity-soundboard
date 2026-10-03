@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { track } from "@vercel/analytics";
-import { PROMOTION_PACKAGES, PROMOTION_PACKAGE_LABELS } from "@/lib/promotion-request-schema";
+import { PUBLIC_PROMOTION_PACKAGES, PROMOTION_PACKAGE_LABELS } from "@/lib/promotion-request-schema";
 
 const inputClass =
   "rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-amber-300";
@@ -52,8 +52,8 @@ export default function PromotionRequestForm() {
   if (status === "success") {
     return (
       <p className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-6 text-sm text-emerald-200">
-        Thanks — we received your placement request. We&apos;ll reply with availability and pricing within one business
-        day.
+        Thanks - we received your placement request. We&apos;ll confirm availability, dates and a written quote before
+        any payment or publication.
       </p>
     );
   }
@@ -84,7 +84,7 @@ export default function PromotionRequestForm() {
         <label className="flex flex-col gap-1 text-sm text-slate-200">
           Placement *
           <select name="package" required defaultValue="spotlight" className={inputClass}>
-            {PROMOTION_PACKAGES.map((value) => (
+            {PUBLIC_PROMOTION_PACKAGES.map((value) => (
               <option key={value} value={value} className="bg-[#0b1228]">
                 {PROMOTION_PACKAGE_LABELS[value]}
               </option>
@@ -101,7 +101,7 @@ export default function PromotionRequestForm() {
         </label>
         <label className="flex flex-col gap-1 text-sm text-slate-200">
           Budget (USD)
-          <input name="budget" inputMode="decimal" maxLength={20} placeholder="500" className={inputClass} />
+          <input name="budget" inputMode="decimal" maxLength={20} placeholder="75" className={inputClass} />
         </label>
       </div>
 

@@ -26,10 +26,24 @@ The legacy monorepo-shaped repo is not the canonical deploy source for this proj
 
 ## Environment Variables (Production)
 
+These are configured in Vercel project settings for the `0xwaya-projects/queencity-soundboard` project, not in the Git repo.
+
+Public app variables:
 - `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_AFFILIATE_TEMPLATE_<PROVIDER>` for each provider currently approved for checkout tracking
+- `NEXT_PUBLIC_IMPACT_PUBLISHER_ID` (required only when the Impact template is used)
+
+Server-side variables used by API routes and Supabase access patterns:
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (if used for staff/admin flows; do not expose to the browser)
+
+Legacy/deprecated:
 - `NEXT_PUBLIC_TICKETING_WIDGET_URL` (legacy setting; current event ticket buttons require `events.ticket_url` and do not read this variable)
+
+Important: Keep the actual Supabase values in Vercel and the Supabase dashboard, never in this repo, commit history, logs, or chat threads. The production app should be revalidated whenever the credential set changes.
 
 ## SEO ownership checks (post-deploy)
 

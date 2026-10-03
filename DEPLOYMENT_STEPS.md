@@ -19,8 +19,36 @@
 - Fan voting is paused. The widget and poll storage code are removed; `/api/votes/submit`, `/api/votes/totals`, `/api/votes/health`, and `/api/votes/admin/reset` return 410. Leave existing poll database records intact; legacy `POLL_*`/Upstash variables in old Vercel exports are not needed by the current app.
 - Supabase Production connectivity was verified on 2026-09-26 with a read-only published-event count (5 rows at that time). Recheck after incidents and deployments.
 - Ticket checkout is hosted by external providers. Ticket buttons require an event-specific HTTPS `events.ticket_url` and a valid affiliate template for its provider; otherwise no outbound ticket link is rendered.
+- TicketWeb uses `NEXT_PUBLIC_AFFILIATE_TEMPLATE_TICKETWEB`, independently of the Ticketmaster template. Approved Sovrn links pass through without another template. The Big Whisker Revival XII (Mad Viking, TicketWeb event `14672083`) has an exact-URL override to `https://sovrn.co/oak6tu9`, so scheduled syncs cannot remove its verification link. The accompanying migration updates only the confirmed event row and can be applied separately after inspecting Production migration history.
 - `NEXT_PUBLIC_TICKETING_WIDGET_URL` may remain in older Vercel settings, but the app no longer reads it. Remove it from project settings after confirming no external workflow depends on it.
 - Never expose service-role credentials to the browser.
+
+## Sponsored placement pilot
+
+- Standard listings remain chronological. Sold inventory is the separately labeled
+	sponsored section on the homepage and calendar, not the editorial Ticket Spotlight.
+- A submitted promotion request is a lead, not a paid or approved campaign. Staff must
+	review the published event, agree a written quote and cancellation/refund terms,
+	confirm payment through the hosted invoice provider, and associate the lead with
+	the exact event before activating `is_promoted` through an authorized staff process.
+- Activate only at the agreed start; there is no automatic future-start scheduling.
+	Set `promoted_until` to a finite timestamp no later than the event start. At most
+	three concurrent events can be sold. Validate availability before accepting payment.
+	Existing promotions without expiry no longer receive paid-placement visibility.
+- Never grant public promotion-request submissions access to event activation.
+	The application does not verify invoice payment or provide a staff admin console yet.
+	Confirm staff authorization and Production migration history before any DB changes.
+- `sponsored_impression` requires 50% visibility for one continuous second and is
+	deduplicated per browser session, event, surface and placement window. `sponsor_click`
+	includes the event and a placement-window identifier (`event ID:promoted_until`).
+	It is not an invoice identifier or proof of payment. `event_view` and `ticket_click`
+	report discovery/clicks, not partner-confirmed sales. Event-page views and ticket clicks
+	are not causally attributed to a sponsor without a verified referral journey.
+- Report actual delivered visibility and clicks. Reconcile approved/reversed/paid
+	affiliate commissions using provider reports; don't equate clicks with revenue.
+- Hotel, newsletter and takeover inventory remains unavailable until explicitly
+	approved, configured and QA-tested. No hotel or payment credentials are required
+	for this phase-one release.
 
 ## Local preflight
 

@@ -43,6 +43,30 @@ describe("TicketWidget", () => {
     );
   });
 
+  it("uses the Mad Viking Sovrn verification link without a ticket provider template", async () => {
+    vi.stubEnv("NEXT_PUBLIC_AFFILIATE_TEMPLATE_TICKETMASTER", "");
+    const TicketWidget = await loadTicketWidget();
+    render(<TicketWidget eventTitle="Mad Viking Beard" eventTicketUrl="https://sovrn.co/oak6tu9" />);
+
+    expect(screen.getByRole("link", { name: "Buy Tickets" })).toHaveAttribute(
+      "href",
+      "https://sovrn.co/oak6tu9",
+    );
+  });
+
+  it("uses the Sovrn verification link when sync retains the original Mad Viking TicketWeb URL", async () => {
+    vi.stubEnv("NEXT_PUBLIC_AFFILIATE_TEMPLATE_TICKETMASTER", "https://track.example.com/?u={url}");
+    const TicketWidget = await loadTicketWidget();
+    render(
+      <TicketWidget
+        eventTitle="The Big Whisker Revival XII presented by Mad Viking Beard & Mustache Company"
+        eventTicketUrl="https://www.ticketweb.com/event/the-big-whisker-revival-xii-the-southgate-house-revival-tickets/14672083"
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: "Buy Tickets" })).toHaveAttribute("href", "https://sovrn.co/oak6tu9");
+  });
+
   it("hides checkout when sales are disabled", async () => {
     const TicketWidget = await loadTicketWidget();
     render(
@@ -80,9 +104,15 @@ describe("TicketWidget", () => {
     vi.stubEnv("NEXT_PUBLIC_AFFILIATE_TEMPLATE_TICKETMASTER", "https://track.example.com/?u={url}");
     const TicketWidget = await loadTicketWidget();
 
-    render(<TicketWidget eventTitle="Tracked Concert" eventTicketUrl="https://www.ticketmaster.com/event/abc123" />);
+    render(<TicketWidget eventTitle="Tracked Concert" eventId="event-42" surface="event_detail" eventTicketUrl="https://www.ticketmaster.com/event/abc123" />);
     fireEvent.click(screen.getByRole("link", { name: "Buy Tickets" }));
 
     expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith("ticket_click", {
+      event_id: "event-42",
+      provider: "ticketmaster",
+      affiliate_provider: "ticketmaster",
+      surface: "event_detail",
+    });
   });
 });
