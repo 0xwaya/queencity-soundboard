@@ -19,6 +19,7 @@
 - Fan voting is paused. The widget and poll storage code are removed; `/api/votes/submit`, `/api/votes/totals`, `/api/votes/health`, and `/api/votes/admin/reset` return 410. Leave existing poll database records intact; legacy `POLL_*`/Upstash variables in old Vercel exports are not needed by the current app.
 - Supabase Production connectivity was verified on 2026-09-26 with a read-only published-event count (5 rows at that time). Recheck after incidents and deployments.
 - Ticket checkout is hosted by external providers. Ticket buttons require an event-specific HTTPS `events.ticket_url` and a valid affiliate template for its provider; otherwise no outbound ticket link is rendered.
+- TicketWeb uses `NEXT_PUBLIC_AFFILIATE_TEMPLATE_TICKETWEB`, independently of the Ticketmaster template. Approved Sovrn links pass through without another template. The Big Whisker Revival XII (Mad Viking, TicketWeb event `14672083`) has an exact-URL override to `https://sovrn.co/oak6tu9`, so scheduled syncs cannot remove its verification link. The accompanying migration updates only the confirmed event row and can be applied separately after inspecting Production migration history.
 - `NEXT_PUBLIC_TICKETING_WIDGET_URL` may remain in older Vercel settings, but the app no longer reads it. Remove it from project settings after confirming no external workflow depends on it.
 - Never expose service-role credentials to the browser.
 

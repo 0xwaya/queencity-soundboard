@@ -8,15 +8,24 @@
  *   {publisherId} value of NEXT_PUBLIC_IMPACT_PUBLISHER_ID
  *   {subId}       per-click attribution value, URL-encoded
  *
- * A destination is only returned when its provider has a valid tracking template. This
+ * Approved event-specific links and Sovrn links are already tracked and pass through.
+ * Other destinations require a valid provider tracking template. This
  * prevents ticket CTAs from silently becoming untracked links.
  */
 import { normalizeHttpsUrl } from "@/lib/url";
 
-export type AffiliateProvider = "ticketmaster" | "seatgeek" | "stubhub" | "vividseats" | "axs" | "eventbrite" | "sovrn";
+const EVENT_AFFILIATE_LINKS = new Map([
+  [
+    "https://www.ticketweb.com/event/the-big-whisker-revival-xii-the-southgate-house-revival-tickets/14672083",
+    "https://sovrn.co/oak6tu9",
+  ],
+]);
+
+export type AffiliateProvider = "ticketmaster" | "ticketweb" | "seatgeek" | "stubhub" | "vividseats" | "axs" | "eventbrite" | "sovrn";
 
 const PROVIDER_HOSTS: Record<AffiliateProvider, readonly string[]> = {
-  ticketmaster: ["ticketmaster.com", "livenation.com", "ticketweb.com", "frontgatetickets.com"],
+  ticketmaster: ["ticketmaster.com", "livenation.com", "frontgatetickets.com"],
+  ticketweb: ["ticketweb.com"],
   seatgeek: ["seatgeek.com"],
   stubhub: ["stubhub.com"],
   vividseats: ["vividseats.com"],
@@ -27,6 +36,7 @@ const PROVIDER_HOSTS: Record<AffiliateProvider, readonly string[]> = {
 
 const PROVIDER_TEMPLATE_ENV: Record<AffiliateProvider, string | undefined> = {
   ticketmaster: process.env.NEXT_PUBLIC_AFFILIATE_TEMPLATE_TICKETMASTER,
+  ticketweb: process.env.NEXT_PUBLIC_AFFILIATE_TEMPLATE_TICKETWEB,
   seatgeek: process.env.NEXT_PUBLIC_AFFILIATE_TEMPLATE_SEATGEEK,
   stubhub: process.env.NEXT_PUBLIC_AFFILIATE_TEMPLATE_STUBHUB,
   vividseats: process.env.NEXT_PUBLIC_AFFILIATE_TEMPLATE_VIVIDSEATS,
@@ -53,6 +63,8 @@ export function resolveAffiliateProvider(url: string): AffiliateProvider | null 
 }
 
 export function hasAffiliateProgram(url: string): boolean {
+  const destination = normalizeHttpsUrl(url);
+  if (destination && EVENT_AFFILIATE_LINKS.has(destination)) return true;
   const provider = resolveAffiliateProvider(url);
   return provider === "sovrn" || Boolean(provider && PROVIDER_TEMPLATE_ENV[provider]);
 }
@@ -60,6 +72,9 @@ export function hasAffiliateProgram(url: string): boolean {
 export function buildAffiliateUrl(rawUrl?: string | null, subId?: string): string | null {
   const destination = normalizeHttpsUrl(rawUrl);
   if (!destination) return null;
+
+  const eventAffiliateLink = EVENT_AFFILIATE_LINKS.get(destination);
+  if (eventAffiliateLink) return eventAffiliateLink;
 
   const provider = resolveAffiliateProvider(destination);
   if (provider === "sovrn") return destination;
