@@ -13,7 +13,7 @@
  */
 import { normalizeHttpsUrl } from "@/lib/url";
 
-export type AffiliateProvider = "ticketmaster" | "seatgeek" | "stubhub" | "vividseats" | "axs" | "eventbrite";
+export type AffiliateProvider = "ticketmaster" | "seatgeek" | "stubhub" | "vividseats" | "axs" | "eventbrite" | "sovrn";
 
 const PROVIDER_HOSTS: Record<AffiliateProvider, readonly string[]> = {
   ticketmaster: ["ticketmaster.com", "livenation.com", "ticketweb.com", "frontgatetickets.com"],
@@ -22,6 +22,7 @@ const PROVIDER_HOSTS: Record<AffiliateProvider, readonly string[]> = {
   vividseats: ["vividseats.com"],
   axs: ["axs.com"],
   eventbrite: ["eventbrite.com"],
+  sovrn: ["sovrn.co"],
 };
 
 const PROVIDER_TEMPLATE_ENV: Record<AffiliateProvider, string | undefined> = {
@@ -31,6 +32,7 @@ const PROVIDER_TEMPLATE_ENV: Record<AffiliateProvider, string | undefined> = {
   vividseats: process.env.NEXT_PUBLIC_AFFILIATE_TEMPLATE_VIVIDSEATS,
   axs: process.env.NEXT_PUBLIC_AFFILIATE_TEMPLATE_AXS,
   eventbrite: process.env.NEXT_PUBLIC_AFFILIATE_TEMPLATE_EVENTBRITE,
+  sovrn: undefined,
 };
 
 /** Matches the host itself or any subdomain of it, never a lookalike such as "notticketmaster.com". */
@@ -52,7 +54,7 @@ export function resolveAffiliateProvider(url: string): AffiliateProvider | null 
 
 export function hasAffiliateProgram(url: string): boolean {
   const provider = resolveAffiliateProvider(url);
-  return Boolean(provider && PROVIDER_TEMPLATE_ENV[provider]);
+  return provider === "sovrn" || Boolean(provider && PROVIDER_TEMPLATE_ENV[provider]);
 }
 
 export function buildAffiliateUrl(rawUrl?: string | null, subId?: string): string | null {
@@ -60,6 +62,8 @@ export function buildAffiliateUrl(rawUrl?: string | null, subId?: string): strin
   if (!destination) return null;
 
   const provider = resolveAffiliateProvider(destination);
+  if (provider === "sovrn") return destination;
+
   const template = provider ? PROVIDER_TEMPLATE_ENV[provider] : undefined;
   if (!template) return null;
 

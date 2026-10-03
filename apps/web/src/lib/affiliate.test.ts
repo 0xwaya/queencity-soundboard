@@ -17,12 +17,14 @@ describe("resolveAffiliateProvider", () => {
     expect(resolveAffiliateProvider(TICKETMASTER_EVENT)).toBe("ticketmaster");
     expect(resolveAffiliateProvider("https://concerts.livenation.com/x")).toBe("ticketmaster");
     expect(resolveAffiliateProvider("https://seatgeek.com/e/1")).toBe("seatgeek");
+    expect(resolveAffiliateProvider("https://sovrn.co/oak6tu9")).toBe("sovrn");
   });
 
   it("does not match lookalike domains", async () => {
     const { resolveAffiliateProvider } = await importAffiliate();
     expect(resolveAffiliateProvider("https://notticketmaster.com/event/1")).toBeNull();
     expect(resolveAffiliateProvider("https://ticketmaster.com.evil.test/event/1")).toBeNull();
+    expect(resolveAffiliateProvider("https://sovrn.co.evil.test/oak6tu9")).toBeNull();
   });
 
   it("rejects unsupported or unsafe URLs", async () => {
@@ -51,6 +53,14 @@ describe("buildAffiliateUrl", () => {
     expect(result).toContain("/c/7826925/1/2");
     expect(result).toContain("subId1=event-42");
     expect(result).toContain(`u=${encodeURIComponent(TICKETMASTER_EVENT)}`);
+  });
+
+  it("preserves a Sovrn affiliate link without applying another provider template", async () => {
+    const { buildAffiliateUrl, hasAffiliateProgram } = await importAffiliate();
+    const affiliateLink = "https://sovrn.co/oak6tu9";
+
+    expect(buildAffiliateUrl(affiliateLink, "event-42")).toBe(affiliateLink);
+    expect(hasAffiliateProgram(affiliateLink)).toBe(true);
   });
 
   it("falls back to the destination when a template would downgrade the scheme", async () => {
