@@ -85,8 +85,9 @@ export default async function CincinnatiSportsCard({ events }: Props) {
                     <div className="mt-1 flex items-center justify-between gap-2">
                       <p className="truncate text-[11px] text-slate-400">{formatGameDate(team.upcoming.date)}</p>
                       {(() => {
+                        const ticketEvent = findTicketmasterEvent(team, team.upcoming.date, events);
                         const ticketUrl = buildAffiliateUrl(
-                          findTicketmasterEvent(team, team.upcoming.date, events)?.ticket_url,
+                          ticketEvent?.ticket_url,
                           `sports_${team.id}_${team.upcoming.id}`,
                         );
                         return ticketUrl ? (
@@ -94,6 +95,7 @@ export default async function CincinnatiSportsCard({ events }: Props) {
                             href={ticketUrl}
                             event="ticket_click"
                             label={`sports_${team.id}_${team.upcoming.id}_tickets`}
+                            properties={{ event_id: ticketEvent?.id ?? null, provider: "ticketmaster", surface: "home_sports" }}
                             target="_blank"
                             rel="sponsored noopener noreferrer"
                             className="shrink-0 rounded-md bg-amber-300 px-2 py-1 text-[10px] font-bold text-[#15120a] hover:bg-amber-200"
@@ -112,6 +114,7 @@ export default async function CincinnatiSportsCard({ events }: Props) {
           ))}
         </div>
         <p className="mt-3 text-[10px] text-slate-500">Scores and schedules via ESPN · Updates every 15 minutes</p>
+        <p className="mt-1 text-[10px] text-slate-400">We may earn a commission from ticket links, at no extra cost to you.</p>
       </div>
     </section>
   );

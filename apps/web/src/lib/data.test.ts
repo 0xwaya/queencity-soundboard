@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dedupeSyncedShows, getHomepageEvents, isPromotionActive, isPublicUpcomingEvent } from "@/lib/data";
+import { dedupeSyncedShows, getHomepageEvents, getSponsoredEvents, isPromotionActive, isPublicUpcomingEvent } from "@/lib/data";
 import type { EventItem } from "@/lib/supabase";
 
 const event = (overrides: Partial<EventItem> = {}): EventItem => ({
@@ -69,12 +69,41 @@ describe("isPromotionActive", () => {
     expect(isPromotionActive(event(), now)).toBe(false);
   });
 
-  it("keeps an open-ended promotion active", () => {
-    expect(isPromotionActive(event({ is_promoted: true }), now)).toBe(true);
+  it("requires a finite paid placement window", () => {
+    expect(isPromotionActive(event({ is_promoted: true }), now)).toBe(false);
+    expect(isPromotionActive(event({ is_promoted: true, promoted_until: "invalid" }), now)).toBe(false);
   });
 
   it("keeps a promotion active until its end date passes", () => {
     expect(isPromotionActive(event({ is_promoted: true, promoted_until: "2026-09-27T00:00:00.000Z" }), now)).toBe(true);
     expect(isPromotionActive(event({ is_promoted: true, promoted_until: "2026-09-25T00:00:00.000Z" }), now)).toBe(false);
+  });
+});
+
+describe("getSponsoredEvents", () => {
+  const now = new Date("2026-09-26T12:00:00.000Z").getTime();
+  const sponsored = (overrides: Partial<EventItem> = {}) => event({
+    is_promoted: true,
+    promoted_until: "2026-10-02T12:00:00.000Z",
+    ...overrides,
+  });
+
+  it("limits sponsored inventory to three events without reordering the input", () => {
+    const events = [event({ id: "organic" }), ...["first", "second", "third", "fourth"].map((id) => sponsored({ id }))];
+    expect(getSponsoredEvents(events, now).map(({ id }) => id)).toEqual(["first", "second", "third"]);
+    expect(events.map(({ id }) => id)).toEqual(["organic", "first", "second", "third", "fourth"]);
+  });
+
+  it("excludes unpublished, expired, inactive-venue and already-started events", () => {
+    const events = [
+      sponsored({ id: "draft", status: "draft" }),
+      sponsored({ id: "archived", status: "archived" }),
+      sponsored({ id: "expired", promoted_until: new Date(now).toISOString() }),
+      sponsored({ id: "indefinite", promoted_until: null }),
+      sponsored({ id: "started", event_date: new Date(now).toISOString() }),
+      sponsored({ id: "inactive", venues: { id: "closed", name: "Closed", city: null, state: null, is_active: false } }),
+      sponsored({ id: "valid" }),
+    ];
+    expect(getSponsoredEvents(events, now).map(({ id }) => id)).toEqual(["valid"]);
   });
 });

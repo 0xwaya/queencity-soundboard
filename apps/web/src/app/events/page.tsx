@@ -3,8 +3,9 @@ import EventsViewToggle from "@/components/events-view-toggle";
 import EventBackdrop from "@/components/event-backdrop";
 import SkylineBackdrop from "@/components/skyline-backdrop";
 import TicketWidget from "@/components/ticket-widget";
+import FeaturedEventsWidget from "@/components/featured-events-widget";
 import TrackedLink from "@/components/tracked-link";
-import { getEventCategories, getPublishedEvents } from "@/lib/data";
+import { getEventCategories, getPublishedEvents, getSponsoredEvents } from "@/lib/data";
 import { getLocale } from "@/lib/i18n";
 import { safeJsonLd } from "@/lib/json-ld";
 import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
@@ -47,6 +48,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
   const categories = getEventCategories(allEvents);
   const selectedCategory = resolvedSearchParams?.category;
   const events = selectedCategory ? allEvents.filter((event) => event.category === selectedCategory) : allEvents;
+  const sponsoredEvents = getSponsoredEvents(allEvents).filter((event) => !selectedCategory || event.category === selectedCategory);
   const t =
     locale === "es"
       ? {
@@ -212,6 +214,8 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
         </div>
       </section>
 
+      <FeaturedEventsWidget events={sponsoredEvents} surface="calendar" locale={locale} />
+
       {eventsError ? (
         <div className="rounded-2xl border border-amber-300/30 bg-amber-500/10 p-5 text-sm text-amber-200">
           {t.unavailable}
@@ -242,7 +246,11 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
               ) : null}
               <div className="relative z-10 space-y-4">
               <div className="flex items-start justify-between gap-3">
-                <h2 className="text-xl font-bold tracking-tight text-slate-100">{event.title}</h2>
+                <h2 className="text-xl font-bold tracking-tight text-slate-100">
+                  <TrackedLink href={`/events/${event.id}`} event="event_open" properties={{ event_id: event.id, surface: "calendar" }} className="hover:text-cyan-200">
+                    {event.title}
+                  </TrackedLink>
+                </h2>
                 <span
                   className={`rounded-full border px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
                     event.is_promoted || featured ? "border-fuchsia-300/60 text-fuchsia-200" : "border-white/20 text-slate-300"

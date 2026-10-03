@@ -1,14 +1,15 @@
 import { z } from "zod";
 
 export const PROMOTION_PACKAGES = ["spotlight", "featured_week", "homepage_takeover", "custom"] as const;
+export const PUBLIC_PROMOTION_PACKAGES = ["spotlight", "custom"] as const;
 
 export type PromotionPackage = (typeof PROMOTION_PACKAGES)[number];
 
 export const PROMOTION_PACKAGE_LABELS: Record<PromotionPackage, string> = {
-  spotlight: "Ticket Spotlight — homepage feature",
-  featured_week: "Featured Week — priority placement in the calendar",
-  homepage_takeover: "Homepage Takeover — hero + spotlight",
-  custom: "Something else / not sure yet",
+  spotlight: "Sponsored event spotlight - 7-day pilot",
+  featured_week: "Legacy featured week - custom quote",
+  homepage_takeover: "Homepage takeover - custom quote",
+  custom: "Venue campaign / custom quote",
 };
 
 const optionalDate = z

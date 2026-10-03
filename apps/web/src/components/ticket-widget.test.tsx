@@ -104,9 +104,15 @@ describe("TicketWidget", () => {
     vi.stubEnv("NEXT_PUBLIC_AFFILIATE_TEMPLATE_TICKETMASTER", "https://track.example.com/?u={url}");
     const TicketWidget = await loadTicketWidget();
 
-    render(<TicketWidget eventTitle="Tracked Concert" eventTicketUrl="https://www.ticketmaster.com/event/abc123" />);
+    render(<TicketWidget eventTitle="Tracked Concert" eventId="event-42" surface="event_detail" eventTicketUrl="https://www.ticketmaster.com/event/abc123" />);
     fireEvent.click(screen.getByRole("link", { name: "Buy Tickets" }));
 
     expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith("ticket_click", {
+      event_id: "event-42",
+      provider: "ticketmaster",
+      affiliate_provider: "ticketmaster",
+      surface: "event_detail",
+    });
   });
 });

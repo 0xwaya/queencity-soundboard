@@ -1,96 +1,57 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import EventBackdrop from "@/components/event-backdrop";
+import EventEngagement from "@/components/event-engagement";
+import TrackedLink from "@/components/tracked-link";
+import { getSponsoredEvents } from "@/lib/data";
 import type { EventItem } from "@/lib/supabase";
 
 type Props = {
   events: EventItem[];
+  surface?: string;
+  locale?: "en" | "es";
 };
 
-/** Rotates promoted/upcoming events across every genre, not just one category. */
-export default function FeaturedEventsWidget({ events }: Props) {
-  const featured = events.filter((event) => event.is_promoted).slice(0, 5);
-  const rotation = featured.length > 0 ? featured : events.slice(0, 3);
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    if (rotation.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % rotation.length);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [rotation.length]);
-
-  const currentEvent = rotation[currentIndex];
-  if (!currentEvent) return null;
+export default function FeaturedEventsWidget({ events, surface = "home", locale = "en" }: Props) {
+  const sponsored = getSponsoredEvents(events);
+  if (sponsored.length === 0) return null;
 
   return (
-    <Link href="/events">
-      <div className="group qcs-ambient-card relative overflow-hidden rounded-2xl border border-[#d4b87e]/20 p-6 transition-all hover:border-[#d4b87e]/40 cursor-pointer">
-        <EventBackdrop src={currentEvent.hero_image_url} opacity={30} />
-        <div className="relative z-10 flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🎵</span>
-              <span className="text-xs font-bold uppercase tracking-widest text-[#d4b87e]">
-                {currentEvent.is_promoted
-                  ? "Promoted Event"
-                  : currentEvent.ticketmaster_relevance_rank != null
-                    ? "Ticketmaster relevance"
-                    : "Upcoming in Cincinnati + NKY"}
-              </span>
-            </div>
-
-            <h3 className="mt-3 text-xl font-bold text-[#f5efe1] transition-colors group-hover:text-[#d4b87e]">
-              {currentEvent.title}
-            </h3>
-
-            {currentEvent.description ? (
-              <p className="mt-2 line-clamp-2 text-sm text-slate-300">{currentEvent.description}</p>
-            ) : null}
-
-            <div className="mt-4 flex flex-wrap gap-2">
-              {currentEvent.category ? (
-                <span className="rounded-full border border-[#d4b87e]/30 bg-[#d4b87e]/10 px-2 py-1 text-xs font-semibold text-[#d4b87e]">
-                  {currentEvent.category}
-                </span>
-              ) : null}
-            </div>
-
-            <div className="mt-4 space-y-1 text-sm">
-              {currentEvent.venues?.name ? (
-                <p className="text-slate-300">
-                  <span className="font-semibold">📍</span> {currentEvent.venues.name}
-                  {currentEvent.venues.city ? `, ${currentEvent.venues.city}` : ""}
-                </p>
-              ) : null}
-              <p className="text-slate-300">
-                <span className="font-semibold">📅</span> {new Date(currentEvent.event_date).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex shrink-0 flex-col items-center gap-3">
-            <span className="text-3xl">🔥</span>
-            <div className="flex gap-1">
-              {rotation.map((event, idx) => (
-                <div
-                  key={event.id}
-                  className={`h-2 w-2 rounded-full transition-all ${
-                    idx === currentIndex ? "w-4 bg-[#d4b87e]" : "bg-[#d4b87e]/30"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="relative z-10 mt-5 flex items-center justify-between">
-          <div className="text-xs text-slate-400">Browse all events</div>
-        </div>
+    <section aria-label={locale === "es" ? "Eventos patrocinados" : "Sponsored events"} className="space-y-4">
+      <h2 className="text-xl font-bold text-slate-100">
+        {locale === "es" ? "Eventos patrocinados" : "Sponsored events"}
+      </h2>
+      <div className="grid gap-4 md:grid-cols-3">
+        {sponsored.map((event) => {
+          const campaignId = `${event.id}:${event.promoted_until}`;
+          return (
+            <EventEngagement key={event.id} event="sponsored_impression" eventId={event.id} surface={surface} campaignId={campaignId}>
+              <article className="relative h-full overflow-hidden rounded-lg border border-amber-300/30 p-5">
+                <EventBackdrop src={event.hero_image_url} opacity={30} />
+                <div className="relative z-10 space-y-3">
+                  <p className="text-xs font-semibold uppercase text-amber-200">
+                    {locale === "es" ? "Patrocinado" : "Sponsored"}
+                  </p>
+                  <h3 className="wrap-break-word text-lg font-bold text-white">
+                    <TrackedLink
+                      href={`/events/${event.id}`}
+                      event="sponsor_click"
+                      properties={{ event_id: event.id, surface, campaign_id: campaignId }}
+                      className="hover:text-amber-200"
+                    >
+                      {event.title}
+                    </TrackedLink>
+                  </h3>
+                  <p className="text-sm text-slate-200">{event.venues?.name}</p>
+                  <time dateTime={event.event_date} className="block text-sm text-slate-300">
+                    {new Intl.DateTimeFormat(locale === "es" ? "es-US" : "en-US", {
+                      month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York",
+                    }).format(new Date(event.event_date))}
+                  </time>
+                </div>
+              </article>
+            </EventEngagement>
+          );
+        })}
       </div>
-    </Link>
+    </section>
   );
 }

@@ -1,116 +1,73 @@
-# QueenCity Soundboard — Budget Model (Patch 2)
+# QueenCity Soundboard - Publisher Revenue Model
 
-## Current integrations (from repo)
+Updated 2026-10-03. QueenCity refers visitors to third-party ticket sellers; it does
+not collect ticket face value or pay the seller's per-ticket processing fees.
+Historical Ticket Tailor ticket-sales scenarios are not the current business model.
 
-- **Web hosting:** Vercel (Next.js)
-- **Data/Auth/Storage:** Supabase
-- **Ticketing:** Ticket Tailor widget + API/webhooks
-- **Domain/DNS:** GoDaddy
-- **Payments:** Ticket Tailor checkout (processor fees baked into provider flow)
-- **Optional (future):** Direct Stripe (only if we move off Ticket Tailor checkout)
+## Revenue streams
 
----
+| Stream | Stage | Revenue to count |
+| --- | --- | --- |
+| Ticket affiliates | Approved provider templates; TicketWeb approval pending | Net commission confirmed by the affiliate partner |
+| Sponsored event spotlight | Staff-assisted seven-day pilot | Agreed campaign fee, less refunds |
+| Venue campaign | Custom 30-day pilot quote | Fee for explicitly agreed and delivered placements |
+| Hotel affiliates | Not launched; account approval and curated destinations required | Commission on eligible completed bookings, not hotel booking value |
+| Activities/products | Later, subject to approved agreements and audience demand | Partner-confirmed commission |
 
-## Fixed monthly costs (baseline)
+Keep pending, approved, reversed and paid commissions separate. An approved
+commission may not be paid in the same month. Track cash receipts separately;
+never add approved commission and its eventual payout together as two revenues.
+Sponsor deposits received before delivery are not proof the campaign was fulfilled.
 
-| Item | Est. Monthly | Notes |
-| --- | ---:| --- |
-| Vercel Pro (1 seat) | **$20** | Commercial use + team features |
-| Supabase Pro (1 project) | **$25** | Core DB/Auth/Storage |
-| Domain (GoDaddy) | **~$1–$2** | ~$12–$24/yr equivalent |
+## Pilot offers
 
-**Fixed infra baseline: ~$46–$47/month**
+- Sponsored event spotlight: proposed $49-$99 for seven days on the homepage and
+	sponsored calendar section, an event-specific destination and a visibility/click report.
+- Venue campaign: proposed $149-$249 for 30 days, custom deliverables and inventory
+	agreed before invoicing. There is no dedicated venue takeover or newsletter offer.
+- At most three concurrent sponsored events; standard listings stay free and chronological.
+- Quotes define dates, approval, cancellation, refunds and reporting. No minimum
+	impressions, ticket sales or bookings are guaranteed. These are price experiments,
+	not validated market rates or revenue forecasts.
 
-> Overages to watch: Supabase storage/egress/MAU, Vercel bandwidth/edge.
+## Costs
 
----
+The older planning baseline was approximately $46-$47/month: Vercel Pro $20,
+Supabase Pro $25 and domain amortization $1-$2. These are historical estimates,
+not verified current invoices. Replace them with actual plan charges and usage.
 
-## Variable costs (ticketing + processing)
+Include hosting/database overages, email services if introduced, direct sponsor
+payment fees, paid marketing and any contracted work. Track operator time for
+sales, moderation and reporting separately so pilot margins include effort.
+Ticket-provider checkout fees are not QueenCity costs under the referral model.
 
-Let:
+## Monthly operating model
 
-- `P` = average ticket price
-- `N` = number of paid tickets/month
-- `tt_fee` = Ticket Tailor fee per ticket (verify current plan)
-- `proc_pct` = payment processor percent fee (e.g., 2.9%)
-- `proc_fix` = payment processor fixed fee per order (e.g., $0.30)
-- `orders` = number of checkout orders/month
-
-**Estimated variable monthly cost:**
-
+```text
+net_affiliate_commission = partner_approved_commission - commission_reversals
+net_sponsorship_revenue = delivered_campaign_fees - sponsor_refunds
+publisher_revenue = net_affiliate_commission + net_sponsorship_revenue
+operating_contribution = publisher_revenue - actual_operating_costs
+economic_contribution = operating_contribution - allocated_operator_time_cost
 ```
-variable = (N * tt_fee) + (N * P * proc_pct) + (orders * proc_fix)
-```
 
-**Total monthly cost:**
+If a partner report already provides net commission, do not subtract reversals
+again. Keep cash-flow reporting separate from the delivered/approved revenue model.
 
-```
-total = fixed + variable
-```
+Illustration only: two fulfilled $75 event campaigns and one fulfilled $150 venue
+campaign produce $300 before refunds, payment fees, infrastructure and labor.
+That is not an audience-based forecast; assume no affiliate commission until the
+partner reports it. A $10,000 ticket or hotel booking total is not $10,000 of revenue.
 
----
+## Reporting and launch gates
 
-## Scenario table (example only — verify Ticket Tailor plan)
-
-Assumptions:
-
-- `P = $35`
-- `tt_fee = $0.85` (placeholder)
-- `proc_pct = 2.9%`
-- `proc_fix = $0.30`
-- `orders ~= N` (1 ticket/order)
-
-### Lean launch (200 tickets/month)
-
-- Fixed: $47
-- Ticketing fee: 200 * 0.85 = $170
-- Processing %: 200 *35* 0.029 = $203
-- Processing fixed: 200 * 0.30 = $60
-- **Total est.: ~$480/month**
-
-### Growth (600 tickets/month)
-
-- Fixed: $47
-- Ticketing fee: $510
-- Processing %: $609
-- Processing fixed: $180
-- **Total est.: ~$1,346/month**
-
-### Scale (1500 tickets/month)
-
-- Fixed: $47
-- Ticketing fee: $1,275
-- Processing %: $1,522.50
-- Processing fixed: $450
-- **Total est.: ~$3,295/month**
-
----
-
-## Revenue sanity check (ticket-only)
-
-At $35 average:
-
-- 200 tickets = **$7,000 gross**
-- 600 tickets = **$21,000 gross**
-- 1500 tickets = **$52,500 gross**
-
-Approx cost ratio under example assumptions:
-
-- 200: ~6.9%
-- 600: ~6.4%
-- 1500: ~6.3%
-
-*(Excludes event production, artist guarantees, and marketing spend.)*
-
----
-
-## Notes / Next validation
-
-1. Confirm Ticket Tailor pricing plan + per-ticket fee.
-2. Confirm payment processor fees used in Ticket Tailor checkout.
-3. Set usage alerts on Supabase/Vercel to avoid surprise overages.
-4. If moving to direct Stripe, replace `tt_fee` with Stripe-only fees and add PCI scope review.
-
-## 2026-04-23 implementation note
-
-- SEO/local-SEO upgrades and test harness additions were implemented inside the existing Next.js stack and do not add new recurring SaaS cost by themselves.
+1. Confirm actual recurring bills and provider/network approval and payout terms.
+2. Record sponsored impressions, sponsor clicks, event views and ticket clicks by
+	 event and surface. A sponsored impression requires at least 50% visibility for
+	 one continuous second, once per placement/surface in the browser session.
+3. Join partner sub-ID reports to event IDs where the approved program supports it.
+	 Clicks and reservations are not confirmed sales or paid commission.
+4. Reconcile campaign delivery, invoices, refunds and cash receipts monthly.
+5. Review a 30-day placement pilot; launch a 30-60-day hotel pilot only after approval.
+6. Do not add inventory-based merch checkout, memberships or generic ad networks
+	 until customer demand and fulfillment operations justify them.
