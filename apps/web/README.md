@@ -16,9 +16,14 @@ bash tools/env-crypto.sh dev
 
 ## Required environment variables
 
+The web app expects the following Supabase values to be configured in the Vercel project settings for the production/preview deployment:
+
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- Optional server-side `SUPABASE_URL` and `SUPABASE_ANON_KEY` for API routes
+- Server-side `SUPABASE_URL` and `SUPABASE_ANON_KEY` for API routes and server utilities
+- `SUPABASE_SERVICE_ROLE_KEY` only when a server-side admin flow explicitly requires it; keep it out of the browser bundle
+
+Do not commit the actual values to the repo or copy them into chat logs. Vercel holds the managed production credentials; local `.env` files are only for local development and should stay ignored or encrypted.
 
 ## Ticketing behavior
 
