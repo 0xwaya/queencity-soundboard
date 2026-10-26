@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import EventBackdrop from "@/components/event-backdrop";
+import { formatEventDateTime } from "@/lib/time";
 import type { EventItem } from "@/lib/supabase";
 
 type Props = {
@@ -67,7 +68,7 @@ export default function FeaturedEventsWidget({ events }: Props) {
                 </p>
               ) : null}
               <p className="text-slate-300">
-                <span className="font-semibold">📅</span> {new Date(currentEvent.event_date).toLocaleDateString()}
+                <span className="font-semibold">📅</span> {formatEventDateTime(currentEvent.event_date)}
               </p>
             </div>
           </div>

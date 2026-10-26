@@ -8,6 +8,7 @@ import { getEventCategories, getPublishedEvents } from "@/lib/data";
 import { getLocale } from "@/lib/i18n";
 import { safeJsonLd } from "@/lib/json-ld";
 import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
+import { formatEventDateTime } from "@/lib/time";
 
 function getVenueSchemaData(event: { venues?: { name?: string | null; city?: string | null; state?: string | null } | null }) {
   return {
@@ -258,7 +259,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
                 </span>
               </div>
 
-              <p className="text-sm text-slate-300">{new Date(event.event_date).toLocaleString()}</p>
+              <p className="text-sm text-slate-300">{formatEventDateTime(event.event_date)}</p>
               {event.venues?.name ? (
                 <p className="text-sm text-slate-400">
                   {event.venues.name}
