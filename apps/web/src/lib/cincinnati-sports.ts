@@ -73,6 +73,27 @@ function summarizeGame(event: EspnEvent): GameSummary | null {
   };
 }
 
+const ESPN_TEAMS_API = "https://site.api.espn.com/apis/site/v2/sports";
+
+async function fetchSchedule(url: string): Promise<EspnSchedule | null> {
+  try {
+    const response = await fetch(url, { next: { revalidate: 900 } });
+    return response.ok ? ((await response.json()) as EspnSchedule) : null;
+  } catch {
+    return null;
+  }
+}
+
+function sortedEvents(schedule: EspnSchedule | null): EspnEvent[] {
+  return (schedule?.events ?? [])
+    .filter((event) => event.date && Number.isFinite(Date.parse(event.date)))
+    .sort((a, b) => Date.parse(a.date!) - Date.parse(b.date!));
+}
+
+function findUpcoming(events: EspnEvent[], now: number): EspnEvent | undefined {
+  return events.find((event) => Date.parse(event.date!) > now && !event.competitions?.[0]?.status?.type?.completed);
+}
+
 async function loadTeamSchedule(
   team: (typeof LOCAL_TEAMS)[number],
   now: number,
@@ -81,16 +102,10 @@ async function loadTeamSchedule(
 
   try {
     const season = new Date(now).getFullYear();
-    const response = await fetch(
-      `https://site.api.espn.com/apis/site/v2/sports/${team.path}/schedule?season=${season}`,
-      { next: { revalidate: 900 } },
-    );
-    if (!response.ok) return fallback;
+    const schedule = await fetchSchedule(`${ESPN_TEAMS_API}/${team.path}/schedule?season=${season}`);
+    if (!schedule) return fallback;
 
-    const schedule = (await response.json()) as EspnSchedule;
-    const events = (schedule.events ?? [])
-      .filter((event) => event.date && Number.isFinite(Date.parse(event.date)))
-      .sort((a, b) => Date.parse(a.date!) - Date.parse(b.date!));
+    const events = sortedEvents(schedule);
     const latestEvent = events
       .filter((event) => Date.parse(event.date!) <= now)
       .filter((event) => {
@@ -99,9 +114,11 @@ async function loadTeamSchedule(
         return hasScore || competition?.status?.type?.completed || competition?.status?.type?.state === "in";
       })
       .at(-1);
-    const upcomingEvent = events.find(
-      (event) => Date.parse(event.date!) > now && !event.competitions?.[0]?.status?.type?.completed,
-    );
+    // The season schedule omits postseason fixtures for some leagues (MLS Cup playoffs), so fall back to
+    // ESPN's upcoming-fixtures feed when it has no future game. Offseason teams still return nothing.
+    const upcomingEvent =
+      findUpcoming(events, now) ??
+      findUpcoming(sortedEvents(await fetchSchedule(`${ESPN_TEAMS_API}/${team.path}/schedule?fixture=true`)), now);
 
     return {
       ...fallback,
