@@ -21,7 +21,12 @@ function describeApiKey() {
 const SEARCH_LATLONG = "39.1031,-84.5120";
 const SEARCH_RADIUS_MILES = "25";
 const CLASSIFICATIONS = ["Music", "Arts & Theatre", "Comedy", "Sports"];
-const MAX_EVENTS_PER_CATEGORY = 10;
+// Sports/comedy/theatre were capped at 10, which dropped big local games (e.g. Bearcats football,
+// FC Cincinnati playoffs) whenever ten higher-ranked listings existed.
+const MAX_EVENTS_PER_CATEGORY = 40;
+const NON_MUSIC_PAGES = 2;
+// Ticketmaster lists parking passes and multi-show packages as separate "events".
+const ADD_ON_LISTING = /\b(parking|package)\b/i;
 const MUSIC_PAGES = 5;
 const MAX_MUSIC_PER_CATEGORY = 30;
 const MAX_MUSIC_PER_VENUE = 6;
@@ -145,7 +150,7 @@ async function fetchTicketmasterEvents(): Promise<{ events: RankedTicketmasterEv
   if (ludlowId) searches.push({ classification: "Music", venueId: ludlowId });
 
   for (const { classification, venueId } of searches) {
-    const pageLimit = venueId ? 2 : classification === "Music" ? MUSIC_PAGES : 1;
+    const pageLimit = venueId ? 2 : classification === "Music" ? MUSIC_PAGES : NON_MUSIC_PAGES;
     for (let page = 0; page < pageLimit; page++) {
       const params = new URLSearchParams({
         apikey: ticketmasterApiKey,
@@ -193,7 +198,7 @@ async function fetchTicketmasterEvents(): Promise<{ events: RankedTicketmasterEv
 }
 
 function selectEligibleEvents(events: RankedTicketmasterEvent[], now: number) {
-  const skipped = { notOnSale: 0, notFuture: 0, noHttpsTicketUrl: 0, noVenue: 0, duplicateShow: 0, overVenueLimit: 0, overCategoryLimit: 0, overMusicLimit: 0 };
+  const skipped = { notOnSale: 0, notFuture: 0, noHttpsTicketUrl: 0, noVenue: 0, duplicateShow: 0, overVenueLimit: 0, overCategoryLimit: 0, overMusicLimit: 0, addOnListing: 0, sameVenueAndTime: 0 };
   const eligible: RankedTicketmasterEvent[] = [];
 
   for (const candidate of events) {
@@ -223,6 +228,10 @@ function selectEligibleEvents(events: RankedTicketmasterEvent[], now: number) {
       skipped.noVenue += 1;
       continue;
     }
+    if (ADD_ON_LISTING.test(event.name)) {
+      skipped.addOnListing += 1;
+      continue;
+    }
 
     eligible.push(candidate);
   }
@@ -234,6 +243,7 @@ function selectEligibleEvents(events: RankedTicketmasterEvent[], now: number) {
   const categoryCounts = new Map<string, number>();
   const venueCounts = new Map<string, number>();
   const seenShows = new Set<string>();
+  const seenSlots = new Set<string>();
   const selected: RankedTicketmasterEvent[] = [];
   let musicCount = 0;
 
@@ -243,6 +253,12 @@ function selectEligibleEvents(events: RankedTicketmasterEvent[], now: number) {
     const showKey = venueName ? `${venueName}:${candidate.event.name.trim().toLowerCase()}` : null;
     if (showKey && seenShows.has(showKey)) {
       skipped.duplicateShow += 1;
+      continue;
+    }
+    // Venues sometimes publish two listings (or a renamed copy) for one show; keep the best-ranked one.
+    const slotKey = venueName ? `${venueName}:${Date.parse(candidate.event.dates!.start!.dateTime!)}` : null;
+    if (slotKey && seenSlots.has(slotKey)) {
+      skipped.sameVenueAndTime += 1;
       continue;
     }
 
@@ -263,6 +279,7 @@ function selectEligibleEvents(events: RankedTicketmasterEvent[], now: number) {
     if (isMusic) musicCount += 1;
     if (isMusic && venueName) venueCounts.set(venueName, (venueCounts.get(venueName) ?? 0) + 1);
     if (showKey) seenShows.add(showKey);
+    if (slotKey) seenSlots.add(slotKey);
     selected.push(candidate);
   }
 
@@ -296,6 +313,46 @@ async function upsertVenue(
   }
 
   return inserted?.id as string;
+}
+
+/** Last path segment of a ticket URL, i.e. the Ticketmaster/TicketWeb event id (stable across renames). */
+function ticketEventId(url?: string | null): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).pathname.split("/").filter(Boolean).at(-1) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Events are upserted on (title, event_date), so a listing that Ticketmaster renames (e.g. "USMNT v TBD" ->
+ * "USMNT v Haiti", "SOLD OUT! ...") used to create a second row. Reuse the synced row for the same ticket
+ * event id, or the same venue and start time, so the existing row is updated in place instead.
+ */
+async function findExistingSyncedEvent(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  event: TicketmasterEvent,
+  venueId: string,
+): Promise<string | null> {
+  const eventDate = event.dates?.start?.dateTime;
+  if (!eventDate) return null;
+  const { data, error } = await supabase
+    .from("events")
+    .select("id, title, ticket_url")
+    .eq("source", "sync")
+    .eq("venue_id", venueId)
+    .eq("event_date", eventDate);
+  if (error || !data?.length) return null;
+
+  const rows = data as { id: string; title: string; ticket_url: string | null }[];
+  const ticketId = ticketEventId(event.url);
+  const match =
+    rows.find((existing) => existing.title === event.name) ??
+    rows.find((existing) => ticketId && ticketEventId(existing.ticket_url) === ticketId) ??
+    rows[0];
+  return match.id;
 }
 
 /**
@@ -378,8 +435,7 @@ async function handler(req: Request) {
         continue;
       }
 
-      const { error } = await supabase.from("events").upsert(
-        {
+      const row = {
           title: event.name,
           artist_name: event.name,
           event_date: eventDate,
@@ -390,9 +446,11 @@ async function handler(req: Request) {
           source: "sync",
           hero_image_url: pickHeroImage(event.images),
           ticketmaster_relevance_rank: event.classifications?.[0]?.segment?.name?.toLowerCase() === "music" ? null : relevanceRank,
-        },
-        { onConflict: "title,event_date" },
-      );
+      };
+      const existingId = await findExistingSyncedEvent(supabase, event, venueId);
+      const { error } = existingId
+        ? await supabase.from("events").update(row).eq("id", existingId)
+        : await supabase.from("events").upsert(row, { onConflict: "title,event_date" });
 
       if (error) {
         console.error("[ticketmaster-sync] event upsert failed", error);

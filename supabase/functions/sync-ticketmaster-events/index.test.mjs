@@ -77,3 +77,28 @@ test("date-first selection fills the music limit across genres", () => {
     assert.equal(result.skipped.overMusicLimit, 20);
     assert.deepEqual(JSON.parse(JSON.stringify(result.categoryCounts)), { rock: 20, jazz: 20, pop: 20, edm: 20 });
 });
+
+test("selection drops add-on listings and second listings for the same venue and start time", () => {
+    const { selectEligibleEvents } = loadSync(() => { throw new Error("unexpected request"); });
+    const sports = (name, date, rank, id) => {
+        const candidate = show(name, "Paycor Stadium", date, rank, id);
+        candidate.event.classifications = [{ segment: { name: "Sports" } }];
+        candidate.category = "sports";
+        return candidate;
+    };
+    const candidates = [
+        sports("USMNT v Haiti", "2026-11-18T00:00:00Z", 1, "a"),
+        sports("USMNT v TBD", "2026-11-18T00:00:00Z", 2, "b"),
+        sports("Bengals Parking Pass", "2026-11-19T00:00:00Z", 3, "c"),
+        ...Array.from({ length: 15 }, (_, index) => sports(`Game ${index}`, `2026-12-${String(index + 1).padStart(2, "0")}T00:00:00Z`, index + 4, `g${index}`)),
+    ];
+    const result = selectEligibleEvents(candidates, Date.parse("2026-10-01T00:00:00Z"));
+    const names = result.events.map(({ event }) => event.name);
+    assert.ok(names.includes("USMNT v Haiti"));
+    assert.ok(!names.includes("USMNT v TBD"));
+    assert.ok(!names.includes("Bengals Parking Pass"));
+    assert.equal(result.skipped.sameVenueAndTime, 1);
+    assert.equal(result.skipped.addOnListing, 1);
+    // More than the old ten-per-category cap now fits.
+    assert.equal(names.length, 16);
+});
