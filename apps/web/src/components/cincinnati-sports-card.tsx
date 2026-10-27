@@ -3,6 +3,7 @@ import TrackedExternalLink from "@/components/tracked-external-link";
 import { buildAffiliateUrl, resolveAffiliateProvider } from "@/lib/affiliate";
 import type { CincinnatiSportsTeam } from "@/lib/cincinnati-sports";
 import type { EventItem } from "@/lib/supabase";
+import { formatGameDateTime } from "@/lib/time";
 
 type Props = {
   events: EventItem[];
@@ -34,16 +35,6 @@ function findTicketmasterEvent(team: CincinnatiSportsTeam, gameDate: string, eve
     const searchableText = `${event.title} ${event.artist_name} ${event.description ?? ""}`.toLowerCase();
     return aliases.some((alias) => searchableText.includes(alias));
   });
-}
-
-function formatGameDate(value: string): string {
-  return new Intl.DateTimeFormat("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    timeZone: "America/New_York",
-  }).format(new Date(value));
 }
 
 export default async function CincinnatiSportsCard({ events }: Props) {
@@ -83,7 +74,7 @@ export default async function CincinnatiSportsCard({ events }: Props) {
                   <>
                     <p className="line-clamp-1 text-xs font-semibold text-slate-100">{team.upcoming.name}</p>
                     <div className="mt-1 flex items-center justify-between gap-2">
-                      <p className="truncate text-[11px] text-slate-400">{formatGameDate(team.upcoming.date)}</p>
+                      <p className="truncate text-[11px] text-slate-400">{formatGameDateTime(team.upcoming.date, team.upcoming.timeValid)}</p>
                       {(() => {
                         const ticketUrl = buildAffiliateUrl(
                           findTicketmasterEvent(team, team.upcoming.date, events)?.ticket_url,

@@ -42,3 +42,18 @@ export function formatEventDate(value: Date | number | string): string {
   const date = toDate(value);
   return date ? eventDateFormatter.format(date) : "";
 }
+
+/**
+ * Sports schedule line, e.g. "Sat, Oct 31 · 3:45 PM ET". ESPN marks games
+ * without a confirmed kickoff with timeValid=false and a placeholder instant
+ * (usually 05:00Z), so show the Eastern calendar day with "Time TBD" instead
+ * of a fake 1 AM start.
+ */
+export function formatGameDateTime(value: Date | number | string, timeValid = true): string {
+  const date = toDate(value);
+  if (!date) return "";
+  if (timeValid) return formatEventDateTime(date);
+  const parts = eventDateTimeFormatter.formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((item) => item.type === type)?.value ?? "";
+  return `${part("weekday")}, ${part("month")} ${part("day")} · Time TBD`;
+}

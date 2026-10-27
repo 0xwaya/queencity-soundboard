@@ -8,6 +8,7 @@ type EspnEvent = {
   date?: string;
   name?: string;
   competitions?: Array<{
+    timeValid?: boolean;
     status?: { type?: { completed?: boolean; state?: string; shortDetail?: string; name?: string } };
     competitors?: EspnCompetitor[];
   }>;
@@ -22,6 +23,8 @@ type GameSummary = {
   id: string;
   name: string;
   date: string;
+  /** false when ESPN has no confirmed start time yet (TBD). */
+  timeValid: boolean;
   status: string;
   score: string | null;
 };
@@ -64,6 +67,7 @@ function summarizeGame(event: EspnEvent): GameSummary | null {
     id: event.id ?? `${event.date}-${event.name ?? "game"}`,
     name: event.name ?? "Scheduled game",
     date: event.date,
+    timeValid: competition?.timeValid !== false && status?.shortDetail !== "TBD",
     status: status?.shortDetail ?? status?.name ?? (status?.completed ? "Final" : "Scheduled"),
     score: scoreParts.length ? scoreParts.join(" · ") : null,
   };
