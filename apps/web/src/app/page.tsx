@@ -40,7 +40,7 @@ export default async function Home() {
   const homepageEvents = getHomepageEvents(events);
   const spotlightEvent = findSpotlightEvent(events);
   const spotlightTicketUrl = spotlightEvent
-    ? buildAffiliateUrl(spotlightEvent.ticket_url, spotlightEvent.id)
+    ? buildAffiliateUrl(spotlightEvent.ticket_url, { subId1: spotlightEvent.id, subId2: "spotlight", subId3: "site" })
     : null;
 
   return (
@@ -125,6 +125,7 @@ export default async function Home() {
               href={spotlightTicketUrl}
               event="ticket_click"
               label={`home_ticket_spotlight_${spotlightEvent.id}`}
+              trackProps={{ event_id: spotlightEvent.id, placement: "spotlight" }}
               target="_blank"
               rel="sponsored noopener noreferrer"
               className="qcs-button-3d relative z-10 mt-5 inline-flex w-fit rounded-lg bg-amber-300 px-4 py-2.5 text-sm font-bold text-[#15120a] hover:bg-amber-200"
@@ -190,7 +191,7 @@ export default async function Home() {
                   {event.venues?.name ? ` · ${event.venues.name}` : ""}
                 </p>
                 <TrackedLink
-                  href="/events"
+                  href={`/events/${event.id}`}
                   event="cta_click"
                   label={`home_featured_${event.id}`}
                   className="qcs-button-3d mt-6 inline-flex rounded-md bg-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-fuchsia-400"

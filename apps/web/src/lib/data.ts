@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getSupabaseBrowserClient, hasSupabaseConfig, type EventItem, type MerchItem } from "@/lib/supabase";
 import { normalizeHttpsUrl, normalizeImageUrl } from "@/lib/url";
 
@@ -96,7 +97,7 @@ export function dedupeSyncedShows(events: EventItem[]): EventItem[] {
   });
 }
 
-export async function getPublishedEvents(): Promise<QueryResult<EventItem[]>> {
+async function loadPublishedEvents(): Promise<QueryResult<EventItem[]>> {
   if (!hasSupabaseConfig()) {
     return { data: [], error: null };
   }
@@ -133,6 +134,37 @@ export async function getPublishedEvents(): Promise<QueryResult<EventItem[]>> {
     console.error("[getPublishedEvents] Unexpected failure", err);
     return { data: [], error: "Unable to load events right now." };
   }
+}
+
+/** One Supabase read per request, shared by metadata, the page body and related-event blocks. */
+export const getPublishedEvents = cache(loadPublishedEvents);
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function isEventId(value: string): boolean {
+  return UUID_PATTERN.test(value);
+}
+
+/** An upcoming published event by id, or null (unknown id, past, archived or hidden venue). */
+export async function getPublishedEventById(id: string): Promise<QueryResult<EventItem | null>> {
+  if (!isEventId(id)) return { data: null, error: null };
+  const result = await getPublishedEvents();
+  return { data: result.data.find((event) => event.id === id) ?? null, error: result.error };
+}
+
+/** Up to `limit` other events in the next `days` days, same category or venue first. */
+export function getSimilarEvents(target: EventItem, events: EventItem[], limit = 3, days = 14, now = Date.now()): EventItem[] {
+  const horizon = now + days * 24 * 60 * 60 * 1000;
+  const score = (event: EventItem) =>
+    (target.category && event.category === target.category ? 2 : 0) + (target.venue_id && event.venue_id === target.venue_id ? 1 : 0);
+  return events
+    .filter((event) => {
+      if (event.id === target.id) return false;
+      const time = Date.parse(event.event_date);
+      return time >= now && time <= horizon && score(event) > 0;
+    })
+    .sort((a, b) => score(b) - score(a) || Date.parse(a.event_date) - Date.parse(b.event_date))
+    .slice(0, limit);
 }
 
 /** Distinct categories present among published events, for filter pills. */

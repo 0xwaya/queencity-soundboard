@@ -28,7 +28,7 @@ export default function FeaturedEventsWidget({ events }: Props) {
   if (!currentEvent) return null;
 
   return (
-    <Link href="/events">
+    <Link href={`/events/${currentEvent.id}`} aria-label={`${currentEvent.title}: event details`}>
       <div className="group qcs-ambient-card relative overflow-hidden rounded-2xl border border-[#d4b87e]/20 p-6 transition-all hover:border-[#d4b87e]/40 cursor-pointer">
         <EventBackdrop src={currentEvent.hero_image_url} opacity={30} />
         <div className="relative z-10 flex items-start justify-between gap-4">
@@ -38,9 +38,7 @@ export default function FeaturedEventsWidget({ events }: Props) {
               <span className="text-xs font-bold uppercase tracking-widest text-[#d4b87e]">
                 {currentEvent.is_promoted
                   ? "Promoted Event"
-                  : currentEvent.ticketmaster_relevance_rank != null
-                    ? "Ticketmaster relevance"
-                    : "Upcoming in Cincinnati + NKY"}
+                  : "Upcoming in Cincinnati + NKY"}
               </span>
             </div>
 
@@ -89,7 +87,7 @@ export default function FeaturedEventsWidget({ events }: Props) {
         </div>
 
         <div className="relative z-10 mt-5 flex items-center justify-between">
-          <div className="text-xs text-slate-400">Browse all events</div>
+          <div className="text-xs text-slate-300">View event details</div>
         </div>
       </div>
     </Link>

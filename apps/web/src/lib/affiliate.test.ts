@@ -65,3 +65,52 @@ describe("buildAffiliateUrl", () => {
     expect(buildAffiliateUrl("javascript:alert('xss')")).toBeNull();
   });
 });
+
+describe("buildAffiliateUrl click refs", () => {
+  const LIVE_STYLE = "https://ticketmaster.evyy.net/c/{publisherId}/264167/4272?u={url}&subId1={subId}";
+
+  it("appends placement, source and shared id to Impact-style templates", async () => {
+    vi.stubEnv("NEXT_PUBLIC_IMPACT_PUBLISHER_ID", "7826925");
+    vi.stubEnv("NEXT_PUBLIC_AFFILIATE_TEMPLATE_TICKETMASTER", LIVE_STYLE);
+    const { buildAffiliateUrl } = await importAffiliate();
+    const result = new URL(
+      buildAffiliateUrl(TICKETMASTER_EVENT, {
+        subId1: "event-42",
+        subId2: "event_page",
+        subId3: "tiktok-bio",
+        sharedid: "ab12-cd34",
+      })!,
+    );
+    expect(result.searchParams.get("u")).toBe(TICKETMASTER_EVENT);
+    expect(result.searchParams.get("subId1")).toBe("event-42");
+    expect(result.searchParams.get("subId2")).toBe("event_page");
+    expect(result.searchParams.get("subId3")).toBe("tiktok-bio");
+    expect(result.searchParams.get("sharedid")).toBe("ab12cd34");
+  });
+
+  it("keeps the string form working and leaves empty sub ids out", async () => {
+    vi.stubEnv("NEXT_PUBLIC_AFFILIATE_TEMPLATE_TICKETMASTER", LIVE_STYLE);
+    const { buildAffiliateUrl } = await importAffiliate();
+    const result = new URL(buildAffiliateUrl(TICKETMASTER_EVENT, "event-42")!);
+    expect(result.searchParams.get("subId1")).toBe("event-42");
+    expect(result.searchParams.has("subId2")).toBe(false);
+  });
+
+  it("supports explicit placeholders and does not touch non-Impact templates", async () => {
+    vi.stubEnv(
+      "NEXT_PUBLIC_AFFILIATE_TEMPLATE_STUBHUB",
+      "https://prf.hn/click/camref:abc/pubref:{subId}-{subId2}/destination:{url}",
+    );
+    const { buildAffiliateUrl } = await importAffiliate();
+    const result = buildAffiliateUrl("https://www.stubhub.com/event/1", { subId1: "e1", subId2: "resale", subId3: "x" })!;
+    expect(result).toContain("pubref:e1-resale");
+    expect(result).not.toContain("subId3");
+  });
+
+  it("cleans sub id values", async () => {
+    const { cleanSubId } = await importAffiliate();
+    expect(cleanSubId("  TikTok Bio!! ")).toBe("tiktok-bio");
+    expect(cleanSubId("qcs-tt-20261029-fightingside")).toBe("qcs-tt-20261029-fightingside");
+    expect(cleanSubId(undefined)).toBe("");
+  });
+});

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { dedupeSyncedShows, getHomepageEvents, isPromotionActive, isPublicUpcomingEvent } from "@/lib/data";
+import {
+  dedupeSyncedShows,
+  getHomepageEvents,
+  getSimilarEvents,
+  isEventId,
+  isPromotionActive,
+  isPublicUpcomingEvent,
+} from "@/lib/data";
 import type { EventItem } from "@/lib/supabase";
 
 const event = (overrides: Partial<EventItem> = {}): EventItem => ({
@@ -76,5 +83,25 @@ describe("isPromotionActive", () => {
   it("keeps a promotion active until its end date passes", () => {
     expect(isPromotionActive(event({ is_promoted: true, promoted_until: "2026-09-27T00:00:00.000Z" }), now)).toBe(true);
     expect(isPromotionActive(event({ is_promoted: true, promoted_until: "2026-09-25T00:00:00.000Z" }), now)).toBe(false);
+  });
+});
+describe("event detail helpers", () => {
+  it("only accepts uuid ids", () => {
+    expect(isEventId("d1dbba2f-2cfc-4451-96e3-f2efae804a6c")).toBe(true);
+    expect(isEventId("xyz")).toBe(false);
+    expect(isEventId("../etc")).toBe(false);
+  });
+
+  it("suggests same-category or same-venue shows in the next two weeks", () => {
+    const now = new Date("2026-10-29T12:00:00.000Z").getTime();
+    const target = event({ id: "t", category: "rock", venue_id: "v1" });
+    const sameBoth = event({ id: "both", category: "rock", venue_id: "v1", event_date: "2026-11-05T00:00:00.000Z" });
+    const sameCat = event({ id: "cat", category: "rock", venue_id: "v2", event_date: "2026-10-30T00:00:00.000Z" });
+    const unrelated = event({ id: "no", category: "comedy", venue_id: "v3", event_date: "2026-10-30T00:00:00.000Z" });
+    const tooFar = event({ id: "far", category: "rock", venue_id: "v1", event_date: "2026-12-30T00:00:00.000Z" });
+    expect(getSimilarEvents(target, [target, sameCat, unrelated, tooFar, sameBoth], 3, 14, now).map(({ id }) => id)).toEqual([
+      "both",
+      "cat",
+    ]);
   });
 });
