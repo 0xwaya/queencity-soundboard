@@ -5,7 +5,7 @@ import EventBackdrop from "@/components/event-backdrop";
 import StickyBuyBar from "@/components/sticky-buy-bar";
 import TicketWidget from "@/components/ticket-widget";
 import TrackedExternalLink from "@/components/tracked-external-link";
-import { buildAffiliateUrl } from "@/lib/affiliate";
+import { goHref } from "@/lib/go";
 import { getPublishedEventById, getPublishedEvents, getSimilarEvents } from "@/lib/data";
 import { buildEventJsonLd } from "@/lib/event-json-ld";
 import { safeJsonLd } from "@/lib/json-ld";
@@ -56,7 +56,7 @@ export default async function EventPage({ params }: Props) {
   if (!event) notFound();
 
   const similar = getSimilarEvents(event, allEvents);
-  const stickyHref = buildAffiliateUrl(event.ticket_url, { subId1: event.id, subId2: "sticky", subId3: "site" });
+  const stickyHref = goHref(event.id, event.ticket_url, "sticky");
   const venue = venueLine(event);
 
   return (
@@ -134,7 +134,7 @@ export default async function EventPage({ params }: Props) {
             </h2>
             <div className="grid gap-4 md:grid-cols-3">
               {similar.map((item) => {
-                const href = buildAffiliateUrl(item.ticket_url, { subId1: item.id, subId2: "similar", subId3: "site" });
+                const href = goHref(item.id, item.ticket_url, "similar");
                 return (
                   <article key={item.id} className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0b1228] p-5">
                     <EventBackdrop src={item.hero_image_url} opacity={30} />

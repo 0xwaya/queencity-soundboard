@@ -7,7 +7,7 @@ import EventBackdrop from "@/components/event-backdrop";
 import SkylineBackdrop from "@/components/skyline-backdrop";
 import { buildPageMetadata } from "@/lib/seo";
 import { getHomepageEvents, getPublishedEvents } from "@/lib/data";
-import { buildAffiliateUrl } from "@/lib/affiliate";
+import { goHref } from "@/lib/go";
 import type { EventItem } from "@/lib/supabase";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -40,7 +40,7 @@ export default async function Home() {
   const homepageEvents = getHomepageEvents(events);
   const spotlightEvent = findSpotlightEvent(events);
   const spotlightTicketUrl = spotlightEvent
-    ? buildAffiliateUrl(spotlightEvent.ticket_url, { subId1: spotlightEvent.id, subId2: "spotlight", subId3: "site" })
+    ? goHref(spotlightEvent.id, spotlightEvent.ticket_url, "spotlight")
     : null;
 
   return (
