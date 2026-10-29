@@ -16,7 +16,6 @@ export default function Header() {
   const toggleAriaLabel = locale === "es" ? "EN, switch to English" : "ES, cambiar a español";
   const nav = [
     { href: "/events", label: locale === "es" ? "Eventos" : "Events" },
-    { href: "/merch", label: locale === "es" ? "Merch" : "Merch" },
     { href: "/partners", label: locale === "es" ? "Colabora" : "Partners" },
     { href: "/about", label: locale === "es" ? "Nosotros" : "About" },
   ];

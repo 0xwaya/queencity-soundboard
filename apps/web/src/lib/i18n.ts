@@ -4,7 +4,7 @@ import type { Locale } from "@/lib/i18n-shared";
 export type { Locale };
 
 /**
- * Server-side locale for pages that still render Spanish copy on the server (events, merch,
+ * Server-side locale for pages that still render Spanish copy on the server (events,
  * about). Calling this makes the page dynamic; the root layout must not call it (case study #11).
  */
 export const getLocale = async (): Promise<Locale> => {

@@ -12,7 +12,6 @@ const STATIC_PAGES: MetadataRoute.Sitemap = [
   { url: `${SEO.baseUrl}/cincinnati`, changeFrequency: "weekly", priority: 0.88 },
   { url: `${SEO.baseUrl}/covington`, changeFrequency: "weekly", priority: 0.88 },
   { url: `${SEO.baseUrl}/partners`, changeFrequency: "monthly", priority: 0.7 },
-  { url: `${SEO.baseUrl}/merch`, changeFrequency: "weekly", priority: 0.8 },
   { url: `${SEO.baseUrl}/about`, changeFrequency: "monthly", priority: 0.6 },
 ];
 
