@@ -3,6 +3,7 @@ import {
   dedupeSyncedShows,
   getHomepageEvents,
   getSimilarEvents,
+  getSponsoredEvents,
   isEventId,
   isPromotionActive,
   isPublicUpcomingEvent,
@@ -132,5 +133,22 @@ describe("getTonightEvents", () => {
     const result = getTonightEvents([{ ...base, id: "d", title: "Tomorrow", event_date: "2026-10-30T23:00:00Z" }], now);
     expect(result.isToday).toBe(false);
     expect(result.events.map((event) => event.id)).toEqual(["d"]);
+  });
+});
+
+describe("getSponsoredEvents", () => {
+  const now = new Date("2026-09-26T12:00:00.000Z").getTime();
+
+  it("keeps only active, upcoming paid placements, capped at the slot count", () => {
+    const events = [
+      event({ id: "a", is_promoted: true, promoted_until: "2026-10-01T00:00:00.000Z" }),
+      event({ id: "expired", is_promoted: true, promoted_until: "2026-09-20T00:00:00.000Z" }),
+      event({ id: "free" }),
+      event({ id: "past", is_promoted: true, event_date: "2026-09-20T20:00:00.000Z" }),
+      event({ id: "b", is_promoted: true }),
+      event({ id: "c", is_promoted: true }),
+      event({ id: "d", is_promoted: true }),
+    ];
+    expect(getSponsoredEvents(events, 3, now).map((e) => e.id)).toEqual(["a", "b", "c"]);
   });
 });

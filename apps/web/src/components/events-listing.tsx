@@ -2,6 +2,7 @@ import Link from "next/link";
 import EventsViewToggle from "@/components/events-view-toggle";
 import EventBackdrop from "@/components/event-backdrop";
 import SkylineBackdrop from "@/components/skyline-backdrop";
+import SponsoredEvents from "@/components/sponsored-events";
 import TicketWidget from "@/components/ticket-widget";
 import TrackedLink from "@/components/tracked-link";
 import { getEventCategories, getPublishedEvents } from "@/lib/data";
@@ -178,6 +179,8 @@ export default async function EventsListing({ category: selectedCategory, page: 
         </div>
       </section>
 
+      {page === 1 ? <SponsoredEvents events={filtered} locale={locale} /> : null}
+
       {eventsError ? (
         <div className="rounded-2xl border border-amber-300/30 bg-amber-500/10 p-5 text-sm text-amber-200">
           {t.unavailable}
@@ -219,7 +222,7 @@ export default async function EventsListing({ category: selectedCategory, page: 
                   }`}
                 >
                   {event.is_promoted
-                    ? "Promoted"
+                    ? locale === "es" ? "Patrocinado" : "Sponsored"
                     : featured
                         ? t.featured
                         : t.live}

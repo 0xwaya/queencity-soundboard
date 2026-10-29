@@ -219,3 +219,10 @@ export function getTonightEvents(events: EventItem[], now = Date.now()): { day: 
   );
   return { day, isToday: day === today, events: list };
 }
+
+/** Active paid placements still ahead of us, capped at the configured slot count (case study #15). */
+export function getSponsoredEvents(events: EventItem[], limit = 3, now = Date.now()): EventItem[] {
+  return events
+    .filter((event) => isPromotionActive(event, now) && Date.parse(event.event_date) > now)
+    .slice(0, limit);
+}

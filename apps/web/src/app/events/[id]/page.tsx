@@ -101,7 +101,7 @@ export default async function EventPage({ params }: Props) {
           <div className="relative z-10 grid gap-6 md:grid-cols-[minmax(0,1fr)_20rem] md:items-end">
             <div className="min-w-0">
               {event.is_promoted ? (
-                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">Promoted</p>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">Sponsored</p>
               ) : null}
               {event.category ? (
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-200">{event.category}</p>
