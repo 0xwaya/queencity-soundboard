@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getPublishedEvents } from "@/lib/data";
+import { getEventCategories, getPublishedEvents } from "@/lib/data";
 import { SEO } from "@/lib/seo";
 
 // Event URLs change as shows are synced; rebuild the sitemap hourly.
@@ -23,5 +23,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "daily",
     priority: 0.8,
   }));
-  return [...STATIC_PAGES, ...eventPages];
+  const categoryPages: MetadataRoute.Sitemap = getEventCategories(events).map((category) => ({
+    url: `${SEO.baseUrl}/events/c/${encodeURIComponent(category)}`,
+    changeFrequency: "daily",
+    priority: 0.85,
+  }));
+  return [...STATIC_PAGES, ...categoryPages, ...eventPages];
 }
