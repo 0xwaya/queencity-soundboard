@@ -129,3 +129,66 @@ export function buildAffiliateUrl(rawUrl?: string | null, ref?: ClickRef | strin
   }
   return url.toString();
 }
+
+/* ------------------------------------------------------------------------------------------
+ * Resale (case study #16): "Sold out? Check resale" links, one env template per partner.
+ * Nothing renders until a template is set; StubHub is first in line. Templates may use:
+ *   {query}        "<artist or title> Cincinnati", URL-encoded
+ *   {searchUrl}    the partner's own search URL for that query, URL-encoded (for deep-link networks)
+ *   {rawSearchUrl} same, not encoded
+ *   {subId} {subId2} {subId3}  as above
+ * e.g. NEXT_PUBLIC_RESALE_TEMPLATE_STUBHUB=https://<network click url>?u={searchUrl}&subId1={subId}
+ * ---------------------------------------------------------------------------------------- */
+export const RESALE_PROVIDERS = ["stubhub", "vividseats", "seatgeek"] as const;
+export type ResaleProvider = (typeof RESALE_PROVIDERS)[number];
+
+export const RESALE_PROVIDER_LABELS: Record<ResaleProvider, string> = {
+  stubhub: "StubHub",
+  vividseats: "Vivid Seats",
+  seatgeek: "SeatGeek",
+};
+
+const RESALE_TEMPLATE_ENV: Record<ResaleProvider, string | undefined> = {
+  stubhub: process.env.NEXT_PUBLIC_RESALE_TEMPLATE_STUBHUB,
+  vividseats: process.env.NEXT_PUBLIC_RESALE_TEMPLATE_VIVIDSEATS,
+  seatgeek: process.env.NEXT_PUBLIC_RESALE_TEMPLATE_SEATGEEK,
+};
+
+const RESALE_SEARCH_URL: Record<ResaleProvider, (query: string) => string> = {
+  stubhub: (q) => `https://www.stubhub.com/secure/search?q=${encodeURIComponent(q)}`,
+  vividseats: (q) => `https://www.vividseats.com/search?searchTerm=${encodeURIComponent(q)}`,
+  seatgeek: (q) => `https://seatgeek.com/search?search=${encodeURIComponent(q)}`,
+};
+
+export function isResaleProvider(value: string | null | undefined): value is ResaleProvider {
+  return Boolean(value && (RESALE_PROVIDERS as readonly string[]).includes(value));
+}
+
+/** Resale partners with a template configured, in priority order (StubHub first). */
+export function configuredResaleProviders(): ResaleProvider[] {
+  return RESALE_PROVIDERS.filter((provider) => Boolean(RESALE_TEMPLATE_ENV[provider]?.trim()));
+}
+
+type ResaleEvent = { title: string; artist_name?: string | null; venues?: { city?: string | null } | null };
+
+export function resaleQuery(event: ResaleEvent): string {
+  const name = (event.artist_name || event.title).trim();
+  const city = event.venues?.city?.trim() || "Cincinnati";
+  return `${name} ${city}`.slice(0, 120);
+}
+
+export function buildResaleUrl(provider: ResaleProvider, event: ResaleEvent, ref: ClickRef = {}): string | null {
+  const template = RESALE_TEMPLATE_ENV[provider]?.trim();
+  if (!template) return null;
+  const query = resaleQuery(event);
+  const searchUrl = RESALE_SEARCH_URL[provider](query);
+  const { subId1 = "", subId2 = "", subId3 = "" } = ref;
+  const tracked = template
+    .replaceAll("{query}", encodeURIComponent(query))
+    .replaceAll("{searchUrl}", encodeURIComponent(searchUrl))
+    .replaceAll("{rawSearchUrl}", searchUrl)
+    .replaceAll("{subId2}", encodeURIComponent(subId2.slice(0, MAX_SUBID_LENGTH)))
+    .replaceAll("{subId3}", encodeURIComponent(subId3.slice(0, MAX_SUBID_LENGTH)))
+    .replaceAll("{subId}", encodeURIComponent(subId1.slice(0, MAX_SUBID_LENGTH)));
+  return normalizeHttpsUrl(tracked);
+}

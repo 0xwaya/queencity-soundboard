@@ -6,7 +6,7 @@ import { runInNewContext } from "node:vm";
 
 const source = readFileSync(new URL("./index.ts", import.meta.url), "utf8")
     .replace(/^import \{ createClient \} from .*;\n/m, "")
-    .replace(/export default \{ fetch: handler \};/, "globalThis.sync = { fetchTicketmasterEvents, selectEligibleEvents };");
+    .replace(/export default \{ fetch: handler \};/, "globalThis.sync = { fetchTicketmasterEvents, selectEligibleEvents, resolveCategory, buildDescription };");
 
 function loadSync(fetch) {
     const context = { Deno: { env: { get: () => "test-key" } }, fetch, URL, URLSearchParams, Date, console };
@@ -101,4 +101,31 @@ test("selection drops add-on listings and second listings for the same venue and
     assert.equal(result.skipped.addOnListing, 1);
     // More than the old ten-per-category cap now fits.
     assert.equal(names.length, 16);
+});
+
+test("genres behind the old 'other' bucket map to real categories (case study #13)", () => {
+    const { resolveCategory } = loadSync(async () => ({ ok: true, json: async () => ({}) }));
+    const music = (genre, subGenre) => [{ primary: true, segment: { name: "Music" }, genre: { name: genre }, subGenre: { name: subGenre } }];
+    assert.equal(resolveCategory(music("Alternative", "Alternative Rock")), "alternative");
+    assert.equal(resolveCategory(music("Metal", "Heavy Metal")), "metal");
+    assert.equal(resolveCategory(music("Blues", "Blues")), "jazz");
+    assert.equal(resolveCategory(music("Folk", "Folk")), "folk");
+    assert.equal(resolveCategory(music("Undefined", "Hard Rock")), "rock");
+    assert.equal(resolveCategory(music("Other", "Other")), "other");
+    assert.equal(resolveCategory([{ segment: { name: "Sports" }, genre: { name: "Football" } }]), "sports");
+});
+
+test("every synced event gets a description (case study #13)", () => {
+    const { buildDescription } = loadSync(async () => ({ ok: true, json: async () => ({}) }));
+    const base = {
+        name: "Clutch",
+        classifications: [{ segment: { name: "Music" }, genre: { name: "Rock" }, subGenre: { name: "Hard Rock" } }],
+        _embedded: { venues: [{ name: "The Andrew J Brady Music Center", city: { name: "Cincinnati" }, state: { stateCode: "OH" } }] },
+    };
+    assert.equal(buildDescription({ ...base, info: "  All ages.\n Doors 7pm. " }, "rock"), "All ages. Doors 7pm.");
+    assert.equal(
+        buildDescription(base, "rock"),
+        "Clutch: Hard Rock event at The Andrew J Brady Music Center, Cincinnati, OH. Official tickets through Ticketmaster.",
+    );
+    assert.ok(buildDescription({ ...base, info: "x".repeat(900) }, "rock").length <= 600);
 });

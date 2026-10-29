@@ -27,7 +27,7 @@ const AI_CRAWLERS = [
 ];
 
 export default function robots(): MetadataRoute.Robots {
-  const disallow = ["/api/", "/_next/"];
+  const disallow = ["/api/", "/_next/", "/go/"];
 
   return {
     rules: [

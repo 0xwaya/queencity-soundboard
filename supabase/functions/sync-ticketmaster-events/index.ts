@@ -40,8 +40,10 @@ interface TicketmasterVenue {
 }
 
 interface TicketmasterClassification {
+  primary?: boolean;
   segment?: { name?: string };
   genre?: { name?: string };
+  subGenre?: { name?: string };
 }
 
 interface TicketmasterImage {
@@ -59,6 +61,9 @@ interface TicketmasterEvent {
   images?: TicketmasterImage[];
   dates?: { start?: { dateTime?: string }; status?: { code?: string } };
   classifications?: TicketmasterClassification[];
+  info?: string;
+  description?: string;
+  pleaseNote?: string;
   _embedded?: { venues?: TicketmasterVenue[] };
 }
 
@@ -89,6 +94,38 @@ const GENRE_TO_CATEGORY: Record<string, string> = {
   country: "country",
   jazz: "jazz",
   comedy: "comedy",
+  // Case study #13: the genres behind most of the 40+ "other" rows.
+  alternative: "alternative",
+  "alternative rock": "alternative",
+  indie: "alternative",
+  "indie rock": "alternative",
+  punk: "alternative",
+  emo: "alternative",
+  metal: "metal",
+  "heavy metal": "metal",
+  "hard rock": "rock",
+  "classic rock": "rock",
+  blues: "jazz",
+  "blues & jazz": "jazz",
+  soul: "rnb",
+  funk: "rnb",
+  "r&b/soul": "rnb",
+  folk: "folk",
+  "singer-songwriter": "folk",
+  bluegrass: "folk",
+  "world music": "folk",
+  americana: "country",
+  christian: "community",
+  "religious": "community",
+  gospel: "community",
+  classical: "community",
+  "children's music": "community",
+  "theatre": "community",
+  "musical": "community",
+  "magic & illusion": "community",
+  "spectacular": "community",
+  "fairs & festivals": "festival",
+  festival: "festival",
 };
 
 /** Widest non-fallback 16:9 asset, which suits a wide card backdrop; falls back to the widest image. */
@@ -109,10 +146,14 @@ function pickHeroImage(images?: TicketmasterImage[]): string | null {
 }
 
 function resolveCategory(classifications?: TicketmasterClassification[]): string {
-  const primary = classifications?.[0];
-  const genreKey = primary?.genre?.name?.trim().toLowerCase();
-  if (genreKey && GENRE_TO_CATEGORY[genreKey]) {
-    return GENRE_TO_CATEGORY[genreKey];
+  const ordered = [...(classifications ?? [])].sort((left, right) => Number(Boolean(right.primary)) - Number(Boolean(left.primary)));
+  const primary = ordered[0];
+  // Genre first, then sub-genre, across every classification (case study #13).
+  for (const classification of ordered) {
+    for (const name of [classification.genre?.name, classification.subGenre?.name]) {
+      const key = name?.trim().toLowerCase();
+      if (key && key !== "undefined" && GENRE_TO_CATEGORY[key]) return GENRE_TO_CATEGORY[key];
+    }
   }
 
   const segmentKey = primary?.segment?.name
@@ -126,6 +167,30 @@ function resolveCategory(classifications?: TicketmasterClassification[]): string
   }
 
   return "other";
+}
+
+const DESCRIPTION_LIMIT = 600;
+
+function cleanText(value?: string): string {
+  return (value ?? "").replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Case study #13: every synced event gets a description. Ticketmaster's own text (description,
+ * then info) is used when present; otherwise a short factual line from genre, venue and city.
+ */
+function buildDescription(event: TicketmasterEvent, category: string): string {
+  const own = cleanText(event.description) || cleanText(event.info);
+  if (own) return own.length > DESCRIPTION_LIMIT ? `${own.slice(0, DESCRIPTION_LIMIT - 1).trimEnd()}…` : own;
+
+  const classification = event.classifications?.[0];
+  const genre = [classification?.subGenre?.name, classification?.genre?.name]
+    .map((name) => cleanText(name))
+    .find((name) => name && name.toLowerCase() !== "undefined" && name.toLowerCase() !== "other");
+  const venue = event._embedded?.venues?.[0];
+  const place = [cleanText(venue?.name), cleanText(venue?.city?.name), cleanText(venue?.state?.stateCode)].filter(Boolean).join(", ");
+  const kind = genre ? `${genre} ${category === "comedy" ? "show" : "event"}` : category === "sports" ? "game" : "live event";
+  return `${cleanText(event.name)}: ${kind}${place ? ` at ${place}` : ""}. Official tickets through Ticketmaster.`;
 }
 
 async function fetchTicketmasterEvents(): Promise<{ events: RankedTicketmasterEvent[]; totalFetched: number }> {
@@ -445,6 +510,7 @@ async function handler(req: Request) {
           category,
           source: "sync",
           hero_image_url: pickHeroImage(event.images),
+          description: buildDescription(event, category),
           ticketmaster_relevance_rank: event.classifications?.[0]?.segment?.name?.toLowerCase() === "music" ? null : relevanceRank,
       };
       const existingId = await findExistingSyncedEvent(supabase, event, venueId);

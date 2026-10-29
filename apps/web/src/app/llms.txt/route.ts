@@ -38,7 +38,6 @@ ${SEO.serviceAreas.map((area) => `- ${area.name}`).join("\n")}
 - ${SEO.baseUrl}/cincinnati — Cincinnati, Ohio event guide
 - ${SEO.baseUrl}/covington — Covington, Kentucky event guide
 - ${SEO.baseUrl}/partners — submit an event or request a promoted placement
-- ${SEO.baseUrl}/merch — active merchandise catalog
 - ${SEO.baseUrl}/about — about the portal
 
 ## Upcoming events${eventLines.length ? `\n${eventLines.join("\n")}` : "\n- No published events at this time."}

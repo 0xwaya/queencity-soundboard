@@ -5,7 +5,11 @@ import EventBackdrop from "@/components/event-backdrop";
 import StickyBuyBar from "@/components/sticky-buy-bar";
 import TicketWidget from "@/components/ticket-widget";
 import TrackedExternalLink from "@/components/tracked-external-link";
-import { buildAffiliateUrl } from "@/lib/affiliate";
+import { goHref } from "@/lib/go";
+import ResaleLinks from "@/components/resale-links";
+import Stay22Map from "@/components/stay22-map";
+import { isNewsletterEnabled } from "@/lib/newsletter";
+import NewsletterSignup from "@/components/newsletter-signup";
 import { getPublishedEventById, getPublishedEvents, getSimilarEvents } from "@/lib/data";
 import { buildEventJsonLd } from "@/lib/event-json-ld";
 import { safeJsonLd } from "@/lib/json-ld";
@@ -13,11 +17,15 @@ import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
 import type { EventItem } from "@/lib/supabase";
 import { formatEventDate, formatEventDateTime } from "@/lib/time";
 
-// The root layout reads the locale cookie, so this route must render per request
-// (ISR here threw DYNAMIC_SERVER_USAGE in production).
-export const dynamic = "force-dynamic";
+// Rendered on first request, then cached and refreshed every 5 minutes. This needs the root
+// layout to stay free of cookies() (case study #11); see the hotfix in PR #4.
+export const revalidate = 300;
 
 type Props = { params: Promise<{ id: string }> };
+
+export async function generateStaticParams() {
+  return [];
+}
 
 function venueLine(event: EventItem): string {
   const venue = event.venues;
@@ -56,7 +64,7 @@ export default async function EventPage({ params }: Props) {
   if (!event) notFound();
 
   const similar = getSimilarEvents(event, allEvents);
-  const stickyHref = buildAffiliateUrl(event.ticket_url, { subId1: event.id, subId2: "sticky", subId3: "site" });
+  const stickyHref = goHref(event.id, event.ticket_url, "sticky");
   const venue = venueLine(event);
 
   return (
@@ -95,7 +103,7 @@ export default async function EventPage({ params }: Props) {
           <div className="relative z-10 grid gap-6 md:grid-cols-[minmax(0,1fr)_20rem] md:items-end">
             <div className="min-w-0">
               {event.is_promoted ? (
-                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">Promoted</p>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">Sponsored</p>
               ) : null}
               {event.category ? (
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-200">{event.category}</p>
@@ -111,12 +119,15 @@ export default async function EventPage({ params }: Props) {
                 </p>
               ) : null}
             </div>
-            <TicketWidget
-              eventTitle={event.title}
-              eventTicketUrl={event.ticket_url}
-              eventId={event.id}
-              placement="event_page"
-            />
+            <div className="space-y-3">
+              <TicketWidget
+                eventTitle={event.title}
+                eventTicketUrl={event.ticket_url}
+                eventId={event.id}
+                placement="event_page"
+              />
+              <ResaleLinks eventId={event.id} />
+            </div>
           </div>
         </section>
 
@@ -127,6 +138,10 @@ export default async function EventPage({ params }: Props) {
           </section>
         ) : null}
 
+        <Stay22Map event={event} />
+
+        {isNewsletterEnabled() ? <NewsletterSignup placement="event_page" /> : null}
+
         {similar.length > 0 ? (
           <section className="space-y-4" aria-labelledby="similar-heading">
             <h2 id="similar-heading" className="text-xl font-extrabold tracking-tight text-white">
@@ -134,7 +149,7 @@ export default async function EventPage({ params }: Props) {
             </h2>
             <div className="grid gap-4 md:grid-cols-3">
               {similar.map((item) => {
-                const href = buildAffiliateUrl(item.ticket_url, { subId1: item.id, subId2: "similar", subId3: "site" });
+                const href = goHref(item.id, item.ticket_url, "similar");
                 return (
                   <article key={item.id} className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0b1228] p-5">
                     <EventBackdrop src={item.hero_image_url} opacity={30} />
