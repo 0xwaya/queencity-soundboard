@@ -8,6 +8,7 @@ export const revalidate = 3600;
 const STATIC_PAGES: MetadataRoute.Sitemap = [
   { url: `${SEO.baseUrl}/`, changeFrequency: "daily", priority: 1 },
   { url: `${SEO.baseUrl}/events`, changeFrequency: "daily", priority: 0.95 },
+  { url: `${SEO.baseUrl}/tonight`, changeFrequency: "daily", priority: 0.9 },
   { url: `${SEO.baseUrl}/cincinnati`, changeFrequency: "weekly", priority: 0.88 },
   { url: `${SEO.baseUrl}/covington`, changeFrequency: "weekly", priority: 0.88 },
   { url: `${SEO.baseUrl}/partners`, changeFrequency: "monthly", priority: 0.7 },

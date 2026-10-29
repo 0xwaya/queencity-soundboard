@@ -105,3 +105,32 @@ describe("event detail helpers", () => {
     ]);
   });
 });
+
+describe("getTonightEvents", () => {
+  const base = { artist_name: "", description: null, hero_image_url: null, status: "published" as const, venue_id: null };
+  // 2026-10-29 18:00 ET
+  const now = Date.parse("2026-10-29T22:00:00Z");
+
+  it("returns today's Eastern-date shows, promoted first then by time", async () => {
+    const { getTonightEvents } = await import("@/lib/data");
+    const result = getTonightEvents(
+      [
+        { ...base, id: "a", title: "Late", event_date: "2026-10-30T02:00:00Z" },
+        { ...base, id: "b", title: "Early", event_date: "2026-10-29T23:00:00Z" },
+        { ...base, id: "c", title: "Promo", event_date: "2026-10-30T01:00:00Z", is_promoted: true },
+        { ...base, id: "d", title: "Tomorrow", event_date: "2026-10-30T23:00:00Z" },
+      ],
+      now,
+    );
+    expect(result.isToday).toBe(true);
+    expect(result.day).toBe("2026-10-29");
+    expect(result.events.map((event) => event.id)).toEqual(["c", "b", "a"]);
+  });
+
+  it("falls back to the next date with shows", async () => {
+    const { getTonightEvents } = await import("@/lib/data");
+    const result = getTonightEvents([{ ...base, id: "d", title: "Tomorrow", event_date: "2026-10-30T23:00:00Z" }], now);
+    expect(result.isToday).toBe(false);
+    expect(result.events.map((event) => event.id)).toEqual(["d"]);
+  });
+});

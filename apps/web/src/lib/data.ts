@@ -196,3 +196,26 @@ export async function getActiveMerch(): Promise<QueryResult<MerchItem[]>> {
     return { data: [], error: "Unable to load merch right now." };
   }
 }
+
+/**
+ * Shows for the /tonight landing page (case study #10): everything on today's Eastern date
+ * that has not ended, promoted first then by start time. When today has nothing left, the
+ * next date with shows is used so the TikTok bio link never lands on an empty page.
+ */
+export function getTonightEvents(events: EventItem[], now = Date.now()): { day: string; isToday: boolean; events: EventItem[] } {
+  const today = eventDayKey(now);
+  const byDay = new Map<string, EventItem[]>();
+  for (const event of events) {
+    const time = Date.parse(event.event_date);
+    if (!Number.isFinite(time)) continue;
+    const day = eventDayKey(time);
+    if (day < today) continue;
+    byDay.set(day, [...(byDay.get(day) ?? []), event]);
+  }
+  const days = Array.from(byDay.keys()).sort();
+  const day = byDay.has(today) ? today : days[0] ?? today;
+  const list = [...(byDay.get(day) ?? [])].sort(
+    (a, b) => Number(Boolean(b.is_promoted)) - Number(Boolean(a.is_promoted)) || Date.parse(a.event_date) - Date.parse(b.event_date),
+  );
+  return { day, isToday: day === today, events: list };
+}
