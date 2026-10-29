@@ -15,7 +15,8 @@ export default function Header({ locale }: HeaderProps) {
   const router = useRouter();
   const nextLocale = locale === "es" ? "en" : "es";
   const toggleLabel = locale === "es" ? "EN" : "ES";
-  const toggleAriaLabel = locale === "es" ? "Switch to English" : "Cambiar a español";
+  // The accessible name starts with the visible text (WCAG 2.5.3 label in name).
+  const toggleAriaLabel = locale === "es" ? "EN, switch to English" : "ES, cambiar a español";
   const nav = [
     { href: "/events", label: locale === "es" ? "Eventos" : "Events" },
     { href: "/merch", label: locale === "es" ? "Merch" : "Merch" },
@@ -65,7 +66,7 @@ export default function Header({ locale }: HeaderProps) {
             onClick={toggleLocale}
             disabled={isPending}
             className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/30 hover:bg-white/10"
-              aria-label={toggleAriaLabel}
+            aria-label={toggleAriaLabel}
           >
             <span aria-hidden="true">🌐</span>
             <span>{toggleLabel}</span>
@@ -78,7 +79,7 @@ export default function Header({ locale }: HeaderProps) {
             onClick={toggleLocale}
             disabled={isPending}
             className="inline-flex items-center justify-center rounded-md border border-white/10 px-2 py-1 text-xs font-semibold text-slate-200 transition hover:border-white/30 hover:bg-white/10"
-              aria-label={toggleAriaLabel}
+            aria-label={toggleAriaLabel}
           >
             {toggleLabel}
           </button>
