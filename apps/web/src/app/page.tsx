@@ -191,7 +191,7 @@ export default async function Home() {
                   {event.venues?.name ? ` · ${event.venues.name}` : ""}
                 </p>
                 <TrackedLink
-                  href="/events"
+                  href={`/events/${event.id}`}
                   event="cta_click"
                   label={`home_featured_${event.id}`}
                   className="qcs-button-3d mt-6 inline-flex rounded-md bg-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-fuchsia-400"

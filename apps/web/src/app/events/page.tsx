@@ -251,9 +251,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
                 >
                   {event.is_promoted
                     ? "Promoted"
-                    : event.ticketmaster_relevance_rank != null
-                      ? "Ticketmaster relevance"
-                      : featured
+                    : featured
                         ? t.featured
                         : t.live}
                 </span>
