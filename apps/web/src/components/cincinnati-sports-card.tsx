@@ -76,15 +76,18 @@ export default async function CincinnatiSportsCard({ events }: Props) {
                     <div className="mt-1 flex items-center justify-between gap-2">
                       <p className="truncate text-[11px] text-slate-400">{formatGameDateTime(team.upcoming.date, team.upcoming.timeValid)}</p>
                       {(() => {
-                        const ticketUrl = buildAffiliateUrl(
-                          findTicketmasterEvent(team, team.upcoming.date, events)?.ticket_url,
-                          `sports_${team.id}_${team.upcoming.id}`,
-                        );
+                        const ticketEvent = findTicketmasterEvent(team, team.upcoming.date, events);
+                        const ticketUrl = buildAffiliateUrl(ticketEvent?.ticket_url, {
+                          subId1: ticketEvent?.id,
+                          subId2: "sports_card",
+                          subId3: "site",
+                        });
                         return ticketUrl ? (
                           <TrackedExternalLink
                             href={ticketUrl}
                             event="ticket_click"
                             label={`sports_${team.id}_${team.upcoming.id}_tickets`}
+                            trackProps={{ event_id: ticketEvent?.id ?? "", placement: "sports_card", team: team.id }}
                             target="_blank"
                             rel="sponsored noopener noreferrer"
                             className="shrink-0 rounded-md bg-amber-300 px-2 py-1 text-[10px] font-bold text-[#15120a] hover:bg-amber-200"

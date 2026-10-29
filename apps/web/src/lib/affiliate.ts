@@ -6,7 +6,14 @@
  *   {url}         destination, URL-encoded (use for networks that take a deep-link param)
  *   {rawUrl}      destination, not encoded
  *   {publisherId} value of NEXT_PUBLIC_IMPACT_PUBLISHER_ID
- *   {subId}       per-click attribution value, URL-encoded
+ *   {subId}       per-click attribution value (subId1, the event id), URL-encoded
+ *   {subId2}      placement of the button that was clicked (optional)
+ *   {subId3}      traffic source, e.g. "tiktok-bio" or a post code like "qcs-tt-20261029-x" (optional)
+ *   {sharedid}    per-click id, alphanumeric (optional)
+ *
+ * Impact-style templates (the URL carries a subId1 query param) get subId2, subId3 and
+ * sharedid appended automatically when the template does not place them itself, so the
+ * existing Ticketmaster template keeps working without an env change.
  *
  * A destination is only returned when its provider has a valid tracking template. This
  * prevents ticket CTAs from silently becoming untracked links.
@@ -55,7 +62,37 @@ export function hasAffiliateProgram(url: string): boolean {
   return Boolean(provider && PROVIDER_TEMPLATE_ENV[provider]);
 }
 
-export function buildAffiliateUrl(rawUrl?: string | null, subId?: string): string | null {
+/** Attribution carried to the affiliate network with each click. */
+export type ClickRef = {
+  /** Event id. */
+  subId1?: string;
+  /** Placement, e.g. "event_page", "sticky", "spotlight", "sports_card", "tonight". */
+  subId2?: string;
+  /** Source, e.g. "tiktok-bio", "newsletter", "organic". */
+  subId3?: string;
+  /** Per-click id; alphanumeric only (Impact rule). */
+  sharedid?: string;
+};
+
+const MAX_SUBID_LENGTH = 255;
+
+/** Keep sub ids to a conservative character set so reports stay clean and nothing odd leaks into URLs. */
+export function cleanSubId(value?: string | null, max = 64): string {
+  if (!value) return "";
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._:-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, Math.min(max, MAX_SUBID_LENGTH));
+}
+
+function normalizeRef(ref: ClickRef | string | undefined): ClickRef {
+  if (typeof ref === "string") return { subId1: ref };
+  return ref ?? {};
+}
+
+export function buildAffiliateUrl(rawUrl?: string | null, ref?: ClickRef | string): string | null {
   const destination = normalizeHttpsUrl(rawUrl);
   if (!destination) return null;
 
@@ -63,13 +100,32 @@ export function buildAffiliateUrl(rawUrl?: string | null, subId?: string): strin
   const template = provider ? PROVIDER_TEMPLATE_ENV[provider] : undefined;
   if (!template) return null;
 
+  const { subId1 = "", subId2 = "", subId3 = "", sharedid = "" } = normalizeRef(ref);
+  const sharedIdClean = sharedid.replace(/[^A-Za-z0-9]/g, "").slice(0, MAX_SUBID_LENGTH);
   const publisherId = process.env.NEXT_PUBLIC_IMPACT_PUBLISHER_ID ?? "";
   const tracked = template
     .replaceAll("{url}", encodeURIComponent(destination))
     .replaceAll("{rawUrl}", destination)
     .replaceAll("{publisherId}", encodeURIComponent(publisherId))
-    .replaceAll("{subId}", encodeURIComponent(subId ?? ""));
+    .replaceAll("{subId2}", encodeURIComponent(subId2.slice(0, MAX_SUBID_LENGTH)))
+    .replaceAll("{subId3}", encodeURIComponent(subId3.slice(0, MAX_SUBID_LENGTH)))
+    .replaceAll("{sharedid}", encodeURIComponent(sharedIdClean))
+    .replaceAll("{subId}", encodeURIComponent(subId1.slice(0, MAX_SUBID_LENGTH)));
 
   // A malformed template must never fall back to an untracked destination.
-  return normalizeHttpsUrl(tracked);
+  const normalized = normalizeHttpsUrl(tracked);
+  if (!normalized) return null;
+
+  const url = new URL(normalized);
+  if (url.searchParams.has("subId1")) {
+    const extras: [string, string][] = [
+      ["subId2", subId2],
+      ["subId3", subId3],
+      ["sharedid", sharedIdClean],
+    ];
+    for (const [key, value] of extras) {
+      if (value && !url.searchParams.get(key)) url.searchParams.set(key, value.slice(0, MAX_SUBID_LENGTH));
+    }
+  }
+  return url.toString();
 }
