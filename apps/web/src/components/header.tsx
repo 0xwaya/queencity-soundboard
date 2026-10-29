@@ -36,19 +36,15 @@ export default function Header({ locale }: HeaderProps) {
   return (
     <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0b1020]/85 backdrop-blur">
       <div className="qcs-shell flex items-center justify-between gap-4 py-4">
-        <Link href="/" className="flex items-center gap-2 text-sm font-extrabold tracking-tight text-slate-100 sm:text-base md:text-xl">
-          <span className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/5">
-            <video
-              className="h-full w-full object-cover"
-              src="/qcs-logo-animated.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              aria-label="Queen City Soundboard logo"
-            />
-          </span>
-          <span>QueenCity Soundboard</span>
+        <Link href="/" className="flex shrink-0 items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/qcs-lockup.png"
+            alt="Queen City Soundboard"
+            width={1132}
+            height={361}
+            className="h-10 w-auto sm:h-12"
+          />
         </Link>
 
         <nav className="ml-auto hidden items-center gap-3 text-sm font-medium text-slate-300 md:flex" aria-label="Primary">

@@ -85,7 +85,13 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/qcs-logo-animated.gif",
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/favicon.ico",
   },
   other: {
     "geo.region": "US-OH",
@@ -168,11 +174,11 @@ export default async function RootLayout({
         <footer className="border-t border-white/10 bg-[#0b1020]">
           <div className="qcs-shell flex flex-col gap-4 py-8 text-xs text-slate-400 md:flex-row md:items-center md:justify-between">
             <div className="space-y-1">
-              <p className="text-sm font-semibold text-slate-100">QueenCity Soundboard</p>
+              <p className="text-sm font-semibold text-slate-100">Queen City Soundboard</p>
               <p className="truncate text-xs text-slate-400 max-w-xs sm:max-w-none">{footerTagline}</p>
               <p className="max-w-md text-[11px] text-slate-300">{AFFILIATE_DISCLOSURE[locale]}</p>
               <p className="text-[11px] text-slate-400">
-                © {new Date().getFullYear()} QueenCity Soundboard. {footerCredit} {" "}
+                © {new Date().getFullYear()} Queen City Soundboard. {footerCredit} {" "}
                 <span className="wayalabs-word text-slate-200">wayalabs</span>.
               </p>
             </div>
