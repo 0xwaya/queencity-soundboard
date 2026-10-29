@@ -6,6 +6,34 @@ import Header from "@/components/header";
 import { getLocale } from "@/lib/i18n";
 import { safeJsonLd } from "@/lib/json-ld";
 import { SEO } from "@/lib/seo";
+import { AFFILIATE_DISCLOSURE, activeSocialProfiles, type SocialProfile } from "@/lib/site";
+
+function SocialIcon({ network }: { network: SocialProfile["network"] }) {
+  if (network === "instagram") {
+    return (
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <rect x="4" y="4" width="16" height="16" rx="5" stroke="currentColor" strokeWidth="1.6" />
+        <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.6" />
+        <circle cx="17.3" cy="6.7" r="1.2" fill="currentColor" />
+      </svg>
+    );
+  }
+  if (network === "tiktok") {
+    return (
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M14 4c.6 2.4 2.5 4.3 4.8 4.8V11c-1.9-.1-3.5-.8-4.8-2v6.1c0 2.7-2.2 4.9-4.9 4.9S4.2 17.8 4.2 15.1c0-2.6 2.1-4.8 4.8-4.9v2.5c-1.2.1-2.2 1.1-2.2 2.4 0 1.4 1.1 2.4 2.4 2.4 1.3 0 2.4-1.1 2.4-2.4V4h2.4Z"
+          fill="currentColor"
+        />
+      </svg>
+    );
+  }
+  return (
+    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <path d="M5 4h3.7l4.1 5.6L17.6 4H21l-6.3 8.6L21.4 20H17.8l-4.6-6.2L8.1 20H4.7l6.7-9.2L5 4Z" fill="currentColor" />
+    </svg>
+  );
+}
 
 const bebasNeue = Bebas_Neue({
   subsets: ["latin"],
@@ -152,47 +180,18 @@ export default async function RootLayout({
               <div className="space-y-1">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Socials</p>
                 <div className="flex items-center gap-3">
-                  <a
-                    className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-200 transition hover:border-white/30 hover:text-white"
-                    href="https://www.instagram.com/"
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    aria-label="Instagram"
-                  >
-                    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <rect x="4" y="4" width="16" height="16" rx="5" stroke="currentColor" strokeWidth="1.6" />
-                      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.6" />
-                      <circle cx="17.3" cy="6.7" r="1.2" fill="currentColor" />
-                    </svg>
-                  </a>
-                  <a
-                    className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-200 transition hover:border-white/30 hover:text-white"
-                    href="https://www.tiktok.com/"
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    aria-label="TikTok"
-                  >
-                    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M14 4c.6 2.4 2.5 4.3 4.8 4.8V11c-1.9-.1-3.5-.8-4.8-2v6.1c0 2.7-2.2 4.9-4.9 4.9S4.2 17.8 4.2 15.1c0-2.6 2.1-4.8 4.8-4.9v2.5c-1.2.1-2.2 1.1-2.2 2.4 0 1.4 1.1 2.4 2.4 2.4 1.3 0 2.4-1.1 2.4-2.4V4h2.4Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </a>
-                  <a
-                    className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-200 transition hover:border-white/30 hover:text-white"
-                    href="https://x.com/"
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    aria-label="X"
-                  >
-                    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M5 4h3.7l4.1 5.6L17.6 4H21l-6.3 8.6L21.4 20H17.8l-4.6-6.2L8.1 20H4.7l6.7-9.2L5 4Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </a>
+                  {activeSocialProfiles().map((profile) => (
+                    <a
+                      key={profile.network}
+                      className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-200 transition hover:border-white/30 hover:text-white"
+                      href={profile.url}
+                      target="_blank"
+                      rel="noreferrer noopener me"
+                      aria-label={profile.label}
+                    >
+                      <SocialIcon network={profile.network} />
+                    </a>
+                  ))}
                 </div>
               </div>
             </div>
