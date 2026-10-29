@@ -13,14 +13,11 @@ import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
 import type { EventItem } from "@/lib/supabase";
 import { formatEventDate, formatEventDateTime } from "@/lib/time";
 
-// Rendered on first request, then cached and refreshed every 5 minutes.
-export const revalidate = 300;
+// The root layout reads the locale cookie, so this route must render per request
+// (ISR here threw DYNAMIC_SERVER_USAGE in production).
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ id: string }> };
-
-export async function generateStaticParams() {
-  return [];
-}
 
 function venueLine(event: EventItem): string {
   const venue = event.venues;
