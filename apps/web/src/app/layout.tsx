@@ -170,6 +170,7 @@ export default async function RootLayout({
             <div className="space-y-1">
               <p className="text-sm font-semibold text-slate-100">QueenCity Soundboard</p>
               <p className="truncate text-xs text-slate-400 max-w-xs sm:max-w-none">{footerTagline}</p>
+              <p className="max-w-md text-[11px] text-slate-300">{AFFILIATE_DISCLOSURE[locale]}</p>
               <p className="text-[11px] text-slate-500">
                 © {new Date().getFullYear()} QueenCity Soundboard. {footerCredit} {" "}
                 <span className="wayalabs-word text-slate-200">wayalabs</span>.

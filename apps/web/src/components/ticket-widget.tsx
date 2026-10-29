@@ -2,6 +2,7 @@
 
 import { track } from "@vercel/analytics";
 import { buildAffiliateUrl } from "@/lib/affiliate";
+import { AFFILIATE_DISCLOSURE } from "@/lib/site";
 
 type Props = {
   eventTitle: string;
@@ -63,6 +64,9 @@ export default function TicketWidget({
           >
             {copy.cta}
           </a>
+        ) : null}
+        {checkoutUrl ? (
+          <p className="mt-2 text-[11px] leading-4 text-slate-400">{AFFILIATE_DISCLOSURE[locale]}</p>
         ) : salesDisabled ? (
           <p className="text-sm text-amber-300">{copy.disabled}</p>
         ) : (
