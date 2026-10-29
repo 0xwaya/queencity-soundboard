@@ -3,6 +3,7 @@
 import { track } from "@vercel/analytics";
 import { buildAffiliateUrl } from "@/lib/affiliate";
 import { AFFILIATE_DISCLOSURE } from "@/lib/site";
+import { readClientSource } from "@/lib/click-source";
 
 type Props = {
   eventTitle: string;
@@ -11,6 +12,8 @@ type Props = {
   locale?: "en" | "es";
   salesDisabled?: boolean;
   salesDisabledReason?: "paused" | "date-tbd";
+  /** Where the button sits, sent as Impact subId2 and the analytics `placement`. */
+  placement?: string;
 };
 
 export default function TicketWidget({
@@ -20,9 +23,10 @@ export default function TicketWidget({
   locale = "en",
   salesDisabled = false,
   salesDisabledReason = "paused",
+  placement = "event_list",
 }: Props) {
   const provider = "external tickets";
-  const checkoutUrl = salesDisabled ? null : buildAffiliateUrl(eventTicketUrl, eventId);
+  const checkoutUrl = salesDisabled ? null : buildAffiliateUrl(eventTicketUrl, { subId1: eventId, subId2: placement, subId3: "site" });
   const copy =
     locale === "es"
       ? {
@@ -59,7 +63,9 @@ export default function TicketWidget({
             href={checkoutUrl}
             target="_blank"
             rel="sponsored noreferrer noopener"
-            onClick={() => track("checkout_click", { title: eventTitle, url: checkoutUrl, provider })}
+            onClick={() =>
+              track("ticket_click", { event_id: eventId ?? "", placement, source: readClientSource(), title: eventTitle })
+            }
             className="qcs-button-3d inline-flex w-full items-center justify-center rounded-lg bg-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-fuchsia-400"
           >
             {copy.cta}
