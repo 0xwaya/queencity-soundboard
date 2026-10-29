@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const SEO = {
   siteName: "QueenCity Soundboard",
   legalBusinessName: "QueenCity Soundboard",
-  baseUrl: "https://queencitysoundboard.com",
+  baseUrl: "https://www.queencitysoundboard.com",
   ogImage: "/og-image.png?v=2",
   defaultTitle: "Sounds of the Queen City | QueenCity Soundboard",
   defaultDescription: "Discover live music, concerts, comedy, and cultural events across Cincinnati and Northern Kentucky. Find local picks and official ticket links for your next night out.",

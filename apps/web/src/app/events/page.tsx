@@ -7,7 +7,7 @@ import TrackedLink from "@/components/tracked-link";
 import { getEventCategories, getPublishedEvents } from "@/lib/data";
 import { getLocale } from "@/lib/i18n";
 import { safeJsonLd } from "@/lib/json-ld";
-import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
+import { buildBreadcrumbJsonLd, buildPageMetadata, SEO } from "@/lib/seo";
 import { formatEventDateTime } from "@/lib/time";
 
 function getVenueSchemaData(event: { venues?: { name?: string | null; city?: string | null; state?: string | null } | null }) {
@@ -114,7 +114,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
                       },
                     }
                   : undefined,
-                image: ["https://queencitysoundboard.com/qcs-logo.png"],
+                image: [event.hero_image_url ?? `${SEO.baseUrl}/qcs-logo.png`],
                 description: event.description ?? `${event.title}${venue.venueName ? ` live at ${venue.venueName}.` : "."}`,
                 performer: event.artist_name ? { "@type": "PerformingGroup", name: event.artist_name } : undefined,
                 offers: event.ticket_url
