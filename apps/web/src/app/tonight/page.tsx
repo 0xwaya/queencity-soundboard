@@ -4,6 +4,8 @@ import EventBackdrop from "@/components/event-backdrop";
 import TrackedExternalLink from "@/components/tracked-external-link";
 import { getPublishedEvents, getTonightEvents } from "@/lib/data";
 import { goHref } from "@/lib/go";
+import { isNewsletterEnabled } from "@/lib/newsletter";
+import NewsletterSignup from "@/components/newsletter-signup";
 import { buildPageMetadata } from "@/lib/seo";
 import { AFFILIATE_DISCLOSURE } from "@/lib/site";
 import { formatEventDate, formatEventDateTime } from "@/lib/time";
@@ -87,6 +89,7 @@ export default async function TonightPage() {
           })}
         </ul>
       )}
+      {isNewsletterEnabled() ? <NewsletterSignup placement="tonight" /> : null}
       <p className="text-[11px] text-slate-400">{AFFILIATE_DISCLOSURE.en}</p>
     </div>
   );

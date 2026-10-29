@@ -8,6 +8,8 @@ import SkylineBackdrop from "@/components/skyline-backdrop";
 import { buildPageMetadata } from "@/lib/seo";
 import { getHomepageEvents, getPublishedEvents } from "@/lib/data";
 import { goHref } from "@/lib/go";
+import { isNewsletterEnabled } from "@/lib/newsletter";
+import NewsletterSignup from "@/components/newsletter-signup";
 import type { EventItem } from "@/lib/supabase";
 
 // Cached and refreshed in the background (case study #11).
@@ -290,6 +292,7 @@ export default async function Home() {
           </div>
         </div>
       </section>
+      {isNewsletterEnabled() ? <NewsletterSignup placement="home" /> : null}
     </div>
     </>
   );

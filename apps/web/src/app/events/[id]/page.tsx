@@ -6,6 +6,8 @@ import StickyBuyBar from "@/components/sticky-buy-bar";
 import TicketWidget from "@/components/ticket-widget";
 import TrackedExternalLink from "@/components/tracked-external-link";
 import { goHref } from "@/lib/go";
+import { isNewsletterEnabled } from "@/lib/newsletter";
+import NewsletterSignup from "@/components/newsletter-signup";
 import { getPublishedEventById, getPublishedEvents, getSimilarEvents } from "@/lib/data";
 import { buildEventJsonLd } from "@/lib/event-json-ld";
 import { safeJsonLd } from "@/lib/json-ld";
@@ -130,6 +132,8 @@ export default async function EventPage({ params }: Props) {
             <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-200">{event.description}</p>
           </section>
         ) : null}
+
+        {isNewsletterEnabled() ? <NewsletterSignup placement="event_page" /> : null}
 
         {similar.length > 0 ? (
           <section className="space-y-4" aria-labelledby="similar-heading">
