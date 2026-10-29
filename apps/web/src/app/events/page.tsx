@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import EventsViewToggle from "@/components/events-view-toggle";
 import EventBackdrop from "@/components/event-backdrop";
 import SkylineBackdrop from "@/components/skyline-backdrop";
@@ -7,16 +8,9 @@ import TrackedLink from "@/components/tracked-link";
 import { getEventCategories, getPublishedEvents } from "@/lib/data";
 import { getLocale } from "@/lib/i18n";
 import { safeJsonLd } from "@/lib/json-ld";
-import { buildBreadcrumbJsonLd, buildPageMetadata, SEO } from "@/lib/seo";
+import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
 import { formatEventDateTime } from "@/lib/time";
-
-function getVenueSchemaData(event: { venues?: { name?: string | null; city?: string | null; state?: string | null } | null }) {
-  return {
-    venueName: event.venues?.name ?? null,
-    city: event.venues?.city ?? null,
-    state: event.venues?.state ?? null,
-  };
-}
+import { buildEventJsonLd, eventUrl } from "@/lib/event-json-ld";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Upcoming Events in Cincinnati & Northern Kentucky",
@@ -92,41 +86,9 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
           "@context": "https://schema.org",
           "@type": "ItemList",
           itemListElement: events.map((event, index) => {
-            const venue = getVenueSchemaData(event);
-            return {
-              "@type": "ListItem",
-              position: index + 1,
-              item: {
-                "@type": "Event",
-                name: event.title,
-                startDate: event.event_date,
-                eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-                eventStatus: "https://schema.org/EventScheduled",
-                location: venue.venueName
-                  ? {
-                      "@type": "Place",
-                      name: venue.venueName,
-                      address: {
-                        "@type": "PostalAddress",
-                        addressLocality: venue.city,
-                        addressRegion: venue.state,
-                        addressCountry: "US",
-                      },
-                    }
-                  : undefined,
-                image: [event.hero_image_url ?? `${SEO.baseUrl}/qcs-logo.png`],
-                description: event.description ?? `${event.title}${venue.venueName ? ` live at ${venue.venueName}.` : "."}`,
-                performer: event.artist_name ? { "@type": "PerformingGroup", name: event.artist_name } : undefined,
-                offers: event.ticket_url
-                  ? {
-                      "@type": "Offer",
-                      url: event.ticket_url,
-                      availability: "https://schema.org/InStock",
-                      priceCurrency: "USD",
-                    }
-                  : undefined,
-              },
-            };
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { "@context": _context, ...item } = buildEventJsonLd(event);
+            return { "@type": "ListItem", position: index + 1, url: eventUrl(event.id), item };
           }),
         }
       : null;
@@ -243,7 +205,11 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
               ) : null}
               <div className="relative z-10 space-y-4">
               <div className="flex items-start justify-between gap-3">
-                <h2 className="text-xl font-bold tracking-tight text-slate-100">{event.title}</h2>
+                <h2 className="text-xl font-bold tracking-tight text-slate-100">
+                  <Link href={`/events/${event.id}`} className="hover:text-fuchsia-200 hover:underline">
+                    {event.title}
+                  </Link>
+                </h2>
                 <span
                   className={`rounded-full border px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
                     event.is_promoted || featured ? "border-fuchsia-300/60 text-fuchsia-200" : "border-white/20 text-slate-300"
