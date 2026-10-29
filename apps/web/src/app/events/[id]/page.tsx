@@ -13,11 +13,15 @@ import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
 import type { EventItem } from "@/lib/supabase";
 import { formatEventDate, formatEventDateTime } from "@/lib/time";
 
-// The root layout reads the locale cookie, so this route must render per request
-// (ISR here threw DYNAMIC_SERVER_USAGE in production).
-export const dynamic = "force-dynamic";
+// Rendered on first request, then cached and refreshed every 5 minutes. This needs the root
+// layout to stay free of cookies() (case study #11); see the hotfix in PR #4.
+export const revalidate = 300;
 
 type Props = { params: Promise<{ id: string }> };
+
+export async function generateStaticParams() {
+  return [];
+}
 
 function venueLine(event: EventItem): string {
   const venue = event.venues;

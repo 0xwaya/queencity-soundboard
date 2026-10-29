@@ -4,6 +4,9 @@ import PromotionRequestForm from "@/components/promotion-request-form";
 import SkylineBackdrop from "@/components/skyline-backdrop";
 import { buildPageMetadata } from "@/lib/seo";
 
+// Cached and refreshed in the background (case study #11).
+export const revalidate = 3600;
+
 export const metadata: Metadata = buildPageMetadata({
   title: "Partner With Us",
   description:

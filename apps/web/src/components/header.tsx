@@ -3,13 +3,10 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { Locale } from "@/lib/i18n";
+import { setClientLocale, useClientLocale } from "@/lib/locale-client";
 
-type HeaderProps = {
-  locale: Locale;
-};
-
-export default function Header({ locale }: HeaderProps) {
+export default function Header() {
+  const locale = useClientLocale();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startRefreshTransition] = useTransition();
   const router = useRouter();
@@ -25,8 +22,7 @@ export default function Header({ locale }: HeaderProps) {
   ];
 
   const toggleLocale = () => {
-    const secureAttribute = window.location.protocol === "https:" ? "; secure" : "";
-    document.cookie = `qcs_locale=${nextLocale}; path=/; max-age=31536000; samesite=lax${secureAttribute}`;
+    setClientLocale(nextLocale);
     setIsOpen(false);
     startRefreshTransition(() => {
       router.refresh();

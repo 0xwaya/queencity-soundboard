@@ -3,10 +3,10 @@ import { Bebas_Neue } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import Header from "@/components/header";
-import { getLocale } from "@/lib/i18n";
+import SiteFooterCopy from "@/components/site-footer-copy";
 import { safeJsonLd } from "@/lib/json-ld";
 import { SEO } from "@/lib/seo";
-import { AFFILIATE_DISCLOSURE, activeSocialProfiles, type SocialProfile } from "@/lib/site";
+import { activeSocialProfiles, type SocialProfile } from "@/lib/site";
 
 function SocialIcon({ network }: { network: SocialProfile["network"] }) {
   if (network === "instagram") {
@@ -93,20 +93,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocale();
-  const footerTagline =
-    locale === "es"
-      ? "Noches con cultura. Entradas listas. Al máximo nivel."
-      : "Culture-forward nights. Ticketed. Elevated.";
-  const footerCredit =
-    locale === "es"
-      ? "Construido por"
-      : "Built by";
+  // No cookies() here: reading the locale cookie in the root layout made every page
+  // no-store (case study #11). Header and footer pick up the locale in the browser.
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -152,7 +145,7 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang={locale === "es" ? "es" : "en"}>
+    <html lang="en">
       <body className={`${bebasNeue.variable} bg-[#07090f] text-slate-100 antialiased`}>
         <script
           type="application/ld+json"
@@ -162,20 +155,12 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }}
         />
-        <Header locale={locale} />
+        <Header />
         <main className="qcs-shell py-10">{children}</main>
         <Analytics />
         <footer className="border-t border-white/10 bg-[#0b1020]">
           <div className="qcs-shell flex flex-col gap-4 py-8 text-xs text-slate-400 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-1">
-              <p className="text-sm font-semibold text-slate-100">QueenCity Soundboard</p>
-              <p className="truncate text-xs text-slate-400 max-w-xs sm:max-w-none">{footerTagline}</p>
-              <p className="max-w-md text-[11px] text-slate-300">{AFFILIATE_DISCLOSURE[locale]}</p>
-              <p className="text-[11px] text-slate-400">
-                © {new Date().getFullYear()} QueenCity Soundboard. {footerCredit} {" "}
-                <span className="wayalabs-word text-slate-200">wayalabs</span>.
-              </p>
-            </div>
+            <SiteFooterCopy year={new Date().getFullYear()} />
 
             <div className="flex flex-wrap items-center gap-4">
               <div className="space-y-1">

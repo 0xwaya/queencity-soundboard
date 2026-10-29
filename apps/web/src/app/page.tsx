@@ -10,6 +10,9 @@ import { getHomepageEvents, getPublishedEvents } from "@/lib/data";
 import { goHref } from "@/lib/go";
 import type { EventItem } from "@/lib/supabase";
 
+// Cached and refreshed in the background (case study #11).
+export const revalidate = 300;
+
 export const metadata: Metadata = buildPageMetadata({
   title: "Sounds of the Queen City | Cincinnati Live Music & Events",
   description:
