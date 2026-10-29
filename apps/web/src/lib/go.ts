@@ -1,4 +1,4 @@
-import { buildAffiliateUrl, cleanSubId } from "@/lib/affiliate";
+import { buildAffiliateUrl, cleanSubId, configuredResaleProviders, type ResaleProvider } from "@/lib/affiliate";
 
 /**
  * First-party outbound link for a Buy button: /go/<eventId>?p=<placement>.
@@ -28,4 +28,10 @@ export function referrerHost(referrer: string | null | undefined): string | null
   } catch {
     return null;
   }
+}
+
+/** /go link for a resale partner (case study #16); null when that partner has no template. */
+export function goResaleHref(eventId: string, provider: ResaleProvider): string | null {
+  if (!configuredResaleProviders().includes(provider)) return null;
+  return `/go/${encodeURIComponent(eventId)}?p=resale-${provider}&r=${provider}`;
 }

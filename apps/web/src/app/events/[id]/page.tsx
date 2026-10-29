@@ -6,6 +6,8 @@ import StickyBuyBar from "@/components/sticky-buy-bar";
 import TicketWidget from "@/components/ticket-widget";
 import TrackedExternalLink from "@/components/tracked-external-link";
 import { goHref } from "@/lib/go";
+import ResaleLinks from "@/components/resale-links";
+import Stay22Map from "@/components/stay22-map";
 import { isNewsletterEnabled } from "@/lib/newsletter";
 import NewsletterSignup from "@/components/newsletter-signup";
 import { getPublishedEventById, getPublishedEvents, getSimilarEvents } from "@/lib/data";
@@ -117,12 +119,15 @@ export default async function EventPage({ params }: Props) {
                 </p>
               ) : null}
             </div>
-            <TicketWidget
-              eventTitle={event.title}
-              eventTicketUrl={event.ticket_url}
-              eventId={event.id}
-              placement="event_page"
-            />
+            <div className="space-y-3">
+              <TicketWidget
+                eventTitle={event.title}
+                eventTicketUrl={event.ticket_url}
+                eventId={event.id}
+                placement="event_page"
+              />
+              <ResaleLinks eventId={event.id} />
+            </div>
           </div>
         </section>
 
@@ -132,6 +137,8 @@ export default async function EventPage({ params }: Props) {
             <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-200">{event.description}</p>
           </section>
         ) : null}
+
+        <Stay22Map event={event} />
 
         {isNewsletterEnabled() ? <NewsletterSignup placement="event_page" /> : null}
 

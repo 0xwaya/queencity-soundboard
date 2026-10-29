@@ -114,3 +114,28 @@ describe("buildAffiliateUrl click refs", () => {
     expect(cleanSubId(undefined)).toBe("");
   });
 });
+
+describe("resale links", () => {
+  const show = { title: "Big Tour", artist_name: "Band Name", venues: { city: "Cincinnati" } };
+
+  it("is off when no resale template is set", async () => {
+    vi.stubEnv("NEXT_PUBLIC_RESALE_TEMPLATE_STUBHUB", "");
+    vi.stubEnv("NEXT_PUBLIC_RESALE_TEMPLATE_VIVIDSEATS", "");
+    vi.stubEnv("NEXT_PUBLIC_RESALE_TEMPLATE_SEATGEEK", "");
+    const { buildResaleUrl, configuredResaleProviders } = await importAffiliate();
+    expect(configuredResaleProviders()).toEqual([]);
+    expect(buildResaleUrl("stubhub", show)).toBeNull();
+  });
+
+  it("fills the StubHub template with an encoded search URL and sub ids", async () => {
+    vi.stubEnv("NEXT_PUBLIC_RESALE_TEMPLATE_STUBHUB", "https://track.example.com/c/1?u={searchUrl}&subId1={subId}&subId2={subId2}");
+    const { buildResaleUrl, configuredResaleProviders, isResaleProvider } = await importAffiliate();
+    expect(configuredResaleProviders()[0]).toBe("stubhub");
+    expect(isResaleProvider("stubhub")).toBe(true);
+    expect(isResaleProvider("ebay")).toBe(false);
+    const url = new URL(buildResaleUrl("stubhub", show, { subId1: "evt", subId2: "resale-stubhub" })!);
+    expect(url.searchParams.get("u")).toBe("https://www.stubhub.com/secure/search?q=Band%20Name%20Cincinnati");
+    expect(url.searchParams.get("subId1")).toBe("evt");
+    expect(url.searchParams.get("subId2")).toBe("resale-stubhub");
+  });
+});

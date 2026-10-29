@@ -1,5 +1,5 @@
 import { after, type NextRequest, NextResponse } from "next/server";
-import { buildAffiliateUrl, cleanSubId } from "@/lib/affiliate";
+import { buildAffiliateUrl, buildResaleUrl, cleanSubId, isResaleProvider } from "@/lib/affiliate";
 import { DEFAULT_SOURCE, SOURCE_COOKIE } from "@/lib/click-source";
 import { getPublishedEventById, isEventId } from "@/lib/data";
 import { looksLikeBot, referrerHost } from "@/lib/go";
@@ -33,7 +33,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const placement = cleanSubId(search.get("p")) || "unknown";
   const source = cleanSubId(search.get("src") ?? request.cookies.get(SOURCE_COOKIE)?.value) || DEFAULT_SOURCE;
 
-  const destination = buildAffiliateUrl(event.ticket_url, { subId1: event.id, subId2: placement, subId3: source });
+  // ?r=<partner> sends the click to a resale partner instead of the primary ticket link (case study #16).
+  const resale = search.get("r");
+  const ref = { subId1: event.id, subId2: placement, subId3: source };
+  const destination = isResaleProvider(resale) ? buildResaleUrl(resale, event, ref) : buildAffiliateUrl(event.ticket_url, ref);
   if (!destination) return redirect(request, `/events/${event.id}`);
 
   const userAgent = request.headers.get("user-agent");
