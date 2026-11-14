@@ -7,6 +7,7 @@ import TicketWidget from "@/components/ticket-widget";
 import TrackedLink from "@/components/tracked-link";
 import { getEventCategories, getPublishedEvents } from "@/lib/data";
 import { getLocale } from "@/lib/i18n";
+import { normalizeEventsPage } from "@/lib/events-pagination";
 import { safeJsonLd } from "@/lib/json-ld";
 import { buildBreadcrumbJsonLd } from "@/lib/seo";
 import { formatEventDateTime } from "@/lib/time";
@@ -34,8 +35,7 @@ export default async function EventsListing({ category: selectedCategory, page: 
   const categories = getEventCategories(allEvents);
   const filtered = selectedCategory ? allEvents.filter((event) => event.category === selectedCategory) : allEvents;
   const pageCount = Math.max(1, Math.ceil(filtered.length / EVENTS_PAGE_SIZE));
-  const requestedPage = Number.parseInt(pageParam ?? "1", 10);
-  const page = Number.isFinite(requestedPage) ? Math.min(Math.max(requestedPage, 1), pageCount) : 1;
+  const page = normalizeEventsPage(pageParam, pageCount);
   const events = filtered.slice((page - 1) * EVENTS_PAGE_SIZE, page * EVENTS_PAGE_SIZE);
   const basePath = selectedCategory ? categoryPath(selectedCategory) : "/events";
   const pageHref = (target: number) => {

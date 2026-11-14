@@ -31,4 +31,15 @@ describe("stay22", () => {
     expect(url.searchParams.get("checkin")).toBe("2026-10-31");
     expect(url.searchParams.get("checkout")).toBe("2026-11-01");
   });
+
+  it("advances checkout by an Eastern calendar day across the fall DST transition", () => {
+    const url = new URL(
+      buildStay22MapUrl(
+        { ...show("Paycor Stadium"), event_date: "2026-11-01T04:30:00.000Z" },
+        "qcs",
+      )!,
+    );
+    expect(url.searchParams.get("checkin")).toBe("2026-11-01");
+    expect(url.searchParams.get("checkout")).toBe("2026-11-02");
+  });
 });

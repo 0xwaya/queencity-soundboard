@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import EventsListing, { categoryPath } from "@/components/events-listing";
+import EventsListing, { categoryPath, EVENTS_PAGE_SIZE } from "@/components/events-listing";
+import { getPublishedEvents } from "@/lib/data";
+import { normalizeEventsPage } from "@/lib/events-pagination";
 import { EVENT_CATEGORIES } from "@/lib/event-categories";
 import { buildPageMetadata } from "@/lib/seo";
 
@@ -24,13 +26,16 @@ function label(category: string): string {
   return LABELS[category] ?? category.charAt(0).toUpperCase() + category.slice(1);
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { category } = await params;
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const [{ category }, query] = await Promise.all([params, searchParams]);
   if (!isCategory(category)) return { title: "Category not found", robots: { index: false, follow: true } };
+  const { data } = await getPublishedEvents();
+  const pageCount = Math.max(1, Math.ceil(data.filter((event) => event.category === category).length / EVENTS_PAGE_SIZE));
+  const page = normalizeEventsPage(query?.page, pageCount);
   return buildPageMetadata({
     title: `${label(category)} events in Cincinnati & Northern Kentucky`,
     description: `Upcoming ${label(category).toLowerCase()} events in Cincinnati and Northern Kentucky, with dates, venues and official ticket links.`,
-    path: categoryPath(category),
+    path: page > 1 ? `${categoryPath(category)}?page=${page}` : categoryPath(category),
     keywords: [`${label(category)} Cincinnati`, `${label(category)} events Cincinnati`, `${label(category)} Northern Kentucky`],
   });
 }

@@ -25,11 +25,14 @@ export function buildStay22MapUrl(event: MapEvent, aid = stay22Aid()): string | 
   if (!aid || !venue || !isStay22Venue(venue.name)) return null;
   const start = new Date(event.event_date);
   if (Number.isNaN(start.getTime())) return null;
+  const checkin = easternDate(start);
+  const [year, month, day] = checkin.split("-").map(Number);
+  const checkout = new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10);
   const params = new URLSearchParams({
     aid,
     address: [venue.name, venue.city, venue.state].filter(Boolean).join(", "),
-    checkin: easternDate(start),
-    checkout: easternDate(new Date(start.getTime() + 24 * 60 * 60 * 1000)),
+    checkin,
+    checkout,
     campaign: `event_${event.id}`.slice(0, 64),
   });
   return `https://www.stay22.com/embed/gm?${params.toString()}`;

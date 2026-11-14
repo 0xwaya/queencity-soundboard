@@ -134,6 +134,19 @@ describe("getTonightEvents", () => {
     expect(result.isToday).toBe(false);
     expect(result.events.map((event) => event.id)).toEqual(["d"]);
   });
+
+  it("excludes shows that ended under the four-hour duration policy before falling back", async () => {
+    const { getTonightEvents } = await import("@/lib/data");
+    const result = getTonightEvents(
+      [
+        { ...base, id: "ended", title: "Finished afternoon show", event_date: "2026-10-29T18:00:00Z" },
+        { ...base, id: "tomorrow", title: "Tomorrow", event_date: "2026-10-30T23:00:00Z" },
+      ],
+      now,
+    );
+    expect(result.isToday).toBe(false);
+    expect(result.events.map((event) => event.id)).toEqual(["tomorrow"]);
+  });
 });
 
 describe("getSponsoredEvents", () => {

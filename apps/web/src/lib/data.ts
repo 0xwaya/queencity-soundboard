@@ -8,6 +8,7 @@ export type QueryResult<T> = {
 };
 
 const EVENT_TIME_ZONE = "America/New_York";
+const TONIGHT_EVENT_DURATION_MS = 4 * 60 * 60 * 1000;
 
 function eventDayKey(value: Date | number | string): string {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -207,7 +208,7 @@ export function getTonightEvents(events: EventItem[], now = Date.now()): { day: 
   const byDay = new Map<string, EventItem[]>();
   for (const event of events) {
     const time = Date.parse(event.event_date);
-    if (!Number.isFinite(time)) continue;
+    if (!Number.isFinite(time) || time + TONIGHT_EVENT_DURATION_MS <= now) continue;
     const day = eventDayKey(time);
     if (day < today) continue;
     byDay.set(day, [...(byDay.get(day) ?? []), event]);
