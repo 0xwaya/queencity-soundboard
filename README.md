@@ -11,12 +11,12 @@ A web-first, mobile-friendly local event platform for:
 - Multi-genre event discovery across Cincinnati and Northern Kentucky
 - Third-party ticket links; checkout stays with the venue or ticketing provider
 - Event submissions for review and manually curated listings
-- Promoted event placements, venue/artist partnership intake, and merch browsing
+- Promoted event placements and venue/artist partnership intake. The merch page still exists at `/merch` but is not in the header menu.
 - English-first experience with partial Spanish localization
 
 ## Stack
 
-- **Web:** Next.js on Vercel
+- **Web:** Next.js 16 App Router on Vercel (React 19, TypeScript, Zod)
 - **Data/Auth/Storage:** Supabase
 - **Ticketing:** Event-specific external ticket URLs; missing links are shown as unavailable rather than routing to a shared checkout
 - **Canonical GitHub repo:** `github.com/0xwaya/queencity-soundboard`
@@ -33,7 +33,7 @@ A web-first, mobile-friendly local event platform for:
 
 - Home features a ticket spotlight selected from upcoming published events with ticket links, plus promoted/event listings and submission/partner calls to action.
 - `/events` lists published events, category filters derived from available inventory, spotlight/compact views, city hubs, ticket links, and event structured data.
-- `/cincinnati` and `/covington` provide local discovery entry points; `/about`, `/partners`, and `/merch` provide supporting product pages.
+- `/cincinnati` and `/covington` provide local discovery entry points; `/about` and `/partners` are in the header. `/merch` remains available by URL and is omitted from the menu.
 - Public event submissions are validated and stored in Supabase as pending review. There is no staff moderation dashboard yet.
 - The production Supabase connection was read-tested on 2026-09-26; the published-event query returned 5 rows. This confirms connectivity at that time, not the freshness or completeness of the calendar.
 - Fan voting is paused: the widget has been removed and all `/api/votes/*` endpoints return HTTP 410. Existing poll records are preserved for a future decision, not served by the app.

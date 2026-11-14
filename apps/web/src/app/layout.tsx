@@ -85,7 +85,13 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/qcs-logo-animated.gif",
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/favicon.ico",
   },
   other: {
     "geo.region": "US-OH",
