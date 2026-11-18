@@ -11,9 +11,12 @@ describe("stay22", () => {
   it("only targets arenas, stadiums and Riverbend", () => {
     expect(isStay22Venue("Heritage Bank Center")).toBe(true);
     expect(isStay22Venue("Paycor Stadium")).toBe(true);
+    expect(isStay22Venue("TQL Stadium")).toBe(true);
+    expect(isStay22Venue("Nippert Stadium")).toBe(true);
     expect(isStay22Venue("Truist Arena")).toBe(true);
     expect(isStay22Venue("Riverbend Music Center")).toBe(true);
     expect(isStay22Venue("The Andrew J Brady Music Center")).toBe(true);
+    expect(isStay22Venue("MegaCorp Pavilion")).toBe(true);
     expect(isStay22Venue("Great American Ball Park")).toBe(true);
     expect(isStay22Venue("Bogart's")).toBe(false);
     expect(isStay22Venue("Taft Theatre")).toBe(false);

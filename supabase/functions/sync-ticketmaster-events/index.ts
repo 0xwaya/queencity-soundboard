@@ -31,6 +31,7 @@ const MUSIC_PAGES = 5;
 const MAX_MUSIC_PER_CATEGORY = 30;
 const MAX_MUSIC_PER_VENUE = 6;
 const MAX_MUSIC_EVENTS = 80;
+const DEFAULT_EVENT_TIME_ZONE = "America/New_York";
 
 interface TicketmasterVenue {
   name: string;
@@ -59,11 +60,16 @@ interface TicketmasterEvent {
   name: string;
   url?: string;
   images?: TicketmasterImage[];
-  dates?: { start?: { dateTime?: string }; status?: { code?: string } };
-  classifications?: TicketmasterClassification[];
   info?: string;
   description?: string;
   pleaseNote?: string;
+  dates?: {
+    timezone?: string;
+    start?: { dateTime?: string; localDate?: string; localTime?: string };
+    access?: { startDateTime?: string };
+    status?: { code?: string };
+  };
+  classifications?: TicketmasterClassification[];
   _embedded?: { venues?: TicketmasterVenue[] };
 }
 
@@ -71,6 +77,12 @@ interface RankedTicketmasterEvent {
   event: TicketmasterEvent;
   category: string;
   relevanceRank: number;
+}
+
+interface ClockTime {
+  hour: number;
+  minute: number;
+  label: string;
 }
 
 const SEGMENT_TO_CATEGORY: Record<string, string> = {
@@ -94,7 +106,7 @@ const GENRE_TO_CATEGORY: Record<string, string> = {
   country: "country",
   jazz: "jazz",
   comedy: "comedy",
-  // Case study #13: the genres behind most of the 40+ "other" rows.
+  // Case study #13: genres that used to land in "other". Does not change show-time resolution.
   alternative: "alternative",
   "alternative rock": "alternative",
   indie: "alternative",
@@ -116,17 +128,173 @@ const GENRE_TO_CATEGORY: Record<string, string> = {
   "world music": "folk",
   americana: "country",
   christian: "community",
-  "religious": "community",
+  religious: "community",
   gospel: "community",
   classical: "community",
   "children's music": "community",
-  "theatre": "community",
-  "musical": "community",
+  theatre: "community",
+  musical: "community",
   "magic & illusion": "community",
-  "spectacular": "community",
+  spectacular: "community",
   "fairs & festivals": "festival",
   festival: "festival",
 };
+
+function parseClock(raw: string | undefined | null): ClockTime | null {
+  if (!raw) return null;
+  const match = String(raw).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])m?$/i);
+  if (!match) return null;
+  let hour = Number(match[1]);
+  const minute = Number(match[2] ?? 0);
+  const ampm = match[3].toLowerCase();
+  if (!Number.isInteger(hour) || !Number.isInteger(minute) || hour < 1 || hour > 12 || minute > 59) return null;
+  if (hour === 12) hour = ampm === "a" ? 0 : 12;
+  else if (ampm === "p") hour += 12;
+  const label = `${hour % 12 || 12}:${String(minute).padStart(2, "0")} ${ampm === "a" ? "AM" : "PM"}`;
+  return { hour, minute, label };
+}
+
+function formatClock(hour: number, minute: number): string {
+  const ampm = hour >= 12 ? "PM" : "AM";
+  return `${hour % 12 || 12}:${String(minute).padStart(2, "0")} ${ampm}`;
+}
+
+function parseDoorsAndShow(text: string | undefined | null): { doors?: ClockTime; show?: ClockTime } {
+  if (!text) return {};
+  const normalized = text.replace(/\s+/g, " ");
+  const alt = normalized.match(
+    /(\d{1,2}(?::\d{2})?\s*[ap]m?)\s*doors\b(?:\s*\/\s*|\s*[·,;/-]\s*|\s+)(\d{1,2}(?::\d{2})?\s*[ap]m?)\s*show/i,
+  );
+  if (alt) {
+    const doors = parseClock(alt[1]);
+    const show = parseClock(alt[2]);
+    if (doors || show) return { doors: doors ?? undefined, show: show ?? undefined };
+  }
+  const doorsMatch = normalized.match(/\bdoors(?:\s+open(?:s|ing)?)?\s*(?:at|:|-)?\s*(\d{1,2}(?::\d{2})?\s*[ap]m?)/i);
+  const showMatch = normalized.match(/\bshow(?:\s+time|\s+starts?)?\s*(?:at|:|-)?\s*(\d{1,2}(?::\d{2})?\s*[ap]m?)/i);
+  const doors = doorsMatch ? parseClock(doorsMatch[1]) : null;
+  const show = showMatch ? parseClock(showMatch[1]) : null;
+  return { doors: doors ?? undefined, show: show ?? undefined };
+}
+
+function localDateFromInstant(iso: string, timeZone: string): string | null {
+  const date = new Date(iso);
+  if (!Number.isFinite(date.getTime())) return null;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value;
+  const year = get("year");
+  const month = get("month");
+  const day = get("day");
+  return year && month && day ? `${year}-${month}-${day}` : null;
+}
+
+function zonedLocalToIso(localDate: string, hour: number, minute: number, timeZone: string): string | null {
+  const match = String(localDate).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
+  for (let offsetHours = 0; offsetHours <= 12; offsetHours += 1) {
+    const utcMs = Date.UTC(year, month - 1, day, hour + offsetHours, minute, 0);
+    const parts = formatter.formatToParts(new Date(utcMs));
+    const get = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((part) => part.type === type)?.value);
+    if (get("year") === year && get("month") === month && get("day") === day && get("hour") === hour && get("minute") === minute) {
+      return new Date(utcMs).toISOString();
+    }
+  }
+  return null;
+}
+
+function addOneDay(localDate: string): string {
+  const [year, month, day] = localDate.split("-").map(Number);
+  const next = new Date(Date.UTC(year, month - 1, day + 1));
+  return `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}-${String(next.getUTCDate()).padStart(2, "0")}`;
+}
+
+function clockAfter(left: ClockTime, right: ClockTime): boolean {
+  return left.hour * 60 + left.minute >= right.hour * 60 + right.minute;
+}
+
+/**
+ * Ticketmaster's start.dateTime is often doors time (especially Live Nation rooms
+ * like Bogart's). Prefer an explicit SHOW time from pleaseNote/info, or start.dateTime
+ * when dates.access is clearly the doors window. Times are interpreted in the event
+ * timezone, defaulting to America/New_York so EST/EDT is handled automatically.
+ */
+function resolveEventSchedule(event: TicketmasterEvent): {
+  eventDate: string | null;
+  doorsLabel: string | null;
+  showLabel: string | null;
+  description: string | null;
+  timeZone: string;
+} {
+  const timeZone = event.dates?.timezone || DEFAULT_EVENT_TIME_ZONE;
+  const start = event.dates?.start ?? {};
+  const accessStart = event.dates?.access?.startDateTime;
+  const notes = [event.pleaseNote, event.info].filter(Boolean).join("\n");
+  const parsed = parseDoorsAndShow(notes);
+  let doors = parsed.doors ?? null;
+  let show = parsed.show ?? null;
+
+  const startMs = start.dateTime ? Date.parse(start.dateTime) : Number.NaN;
+  const accessMs = accessStart ? Date.parse(accessStart) : Number.NaN;
+  const gapMs = Number.isFinite(startMs) && Number.isFinite(accessMs) ? startMs - accessMs : Number.NaN;
+  const accessLooksLikeDoors = Number.isFinite(gapMs) && gapMs >= 30 * 60 * 1000 && gapMs <= 3 * 60 * 60 * 1000;
+
+  const clockFromInstant = (iso: string): ClockTime | null => {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(new Date(iso));
+    const hour = Number(parts.find((part) => part.type === "hour")?.value);
+    const minute = Number(parts.find((part) => part.type === "minute")?.value);
+    if (!Number.isInteger(hour) || !Number.isInteger(minute)) return null;
+    return { hour, minute, label: formatClock(hour, minute) };
+  };
+
+  if (!doors && accessLooksLikeDoors && accessStart) doors = clockFromInstant(accessStart);
+  if (!show && accessLooksLikeDoors && start.dateTime) show = clockFromInstant(start.dateTime);
+
+  let localDate = start.localDate || (start.dateTime ? localDateFromInstant(start.dateTime, timeZone) : null);
+  if (show && doors && !clockAfter(show, doors) && show.hour < 12 && doors.hour >= 12) {
+    localDate = localDate ? addOneDay(localDate) : localDate;
+  }
+
+  let eventDate = start.dateTime && Number.isFinite(Date.parse(start.dateTime)) ? new Date(start.dateTime).toISOString() : null;
+  if (show && localDate) {
+    const iso = zonedLocalToIso(localDate, show.hour, show.minute, timeZone);
+    if (iso) eventDate = iso;
+  } else if (!eventDate && start.localDate && start.localTime) {
+    const [hour, minute] = start.localTime.split(":").map(Number);
+    if (Number.isInteger(hour) && Number.isInteger(minute)) {
+      eventDate = zonedLocalToIso(start.localDate, hour, minute, timeZone);
+    }
+  }
+
+  const showLabel = show?.label ?? null;
+  const doorsLabel = doors?.label ?? null;
+  const description = doorsLabel || showLabel
+    ? [doorsLabel ? `Doors ${doorsLabel}` : null, showLabel ? `Show ${showLabel} ET` : null].filter(Boolean).join(" · ")
+    : null;
+
+  return { eventDate, doorsLabel, showLabel, description, timeZone };
+}
 
 /** Widest non-fallback 16:9 asset, which suits a wide card backdrop; falls back to the widest image. */
 function pickHeroImage(images?: TicketmasterImage[]): string | null {
@@ -176,14 +344,18 @@ function cleanText(value?: string): string {
 }
 
 /**
- * Case study #13: every synced event gets a description. Ticketmaster's own text (description,
- * then info) is used when present; otherwise a short factual line from genre, venue and city.
+ * Case study #13: a description when Ticketmaster has no doors/show line to store.
+ * Ticketmaster's own text (description, then info) is used when present; otherwise a short
+ * factual line from genre, venue and city. The handler prefers the v13 schedule line
+ * ("Doors … · Show … ET") and any existing "rescheduled" note over this text.
  */
 function buildDescription(event: TicketmasterEvent, category: string): string {
   const own = cleanText(event.description) || cleanText(event.info);
   if (own) return own.length > DESCRIPTION_LIMIT ? `${own.slice(0, DESCRIPTION_LIMIT - 1).trimEnd()}…` : own;
 
-  const classification = event.classifications?.[0];
+  const classification = [...(event.classifications ?? [])].sort(
+    (left, right) => Number(Boolean(right.primary)) - Number(Boolean(left.primary)),
+  )[0];
   const genre = [classification?.subGenre?.name, classification?.genre?.name]
     .map((name) => cleanText(name))
     .find((name) => name && name.toLowerCase() !== "undefined" && name.toLowerCase() !== "other");
@@ -262,6 +434,11 @@ async function fetchTicketmasterEvents(): Promise<{ events: RankedTicketmasterEv
   return { events: Array.from(eventsById.values()), totalFetched };
 }
 
+function eventInstant(event: TicketmasterEvent): number {
+  const resolved = resolveEventSchedule(event).eventDate ?? event.dates?.start?.dateTime;
+  return resolved ? Date.parse(resolved) : Number.NaN;
+}
+
 function selectEligibleEvents(events: RankedTicketmasterEvent[], now: number) {
   const skipped = { notOnSale: 0, notFuture: 0, noHttpsTicketUrl: 0, noVenue: 0, duplicateShow: 0, overVenueLimit: 0, overCategoryLimit: 0, overMusicLimit: 0, addOnListing: 0, sameVenueAndTime: 0 };
   const eligible: RankedTicketmasterEvent[] = [];
@@ -273,7 +450,7 @@ function selectEligibleEvents(events: RankedTicketmasterEvent[], now: number) {
       continue;
     }
 
-    const eventTime = event.dates.start?.dateTime ? Date.parse(event.dates.start.dateTime) : Number.NaN;
+    const eventTime = eventInstant(event);
     if (!Number.isFinite(eventTime) || eventTime <= now) {
       skipped.notFuture += 1;
       continue;
@@ -302,7 +479,7 @@ function selectEligibleEvents(events: RankedTicketmasterEvent[], now: number) {
   }
 
   eligible.sort((left, right) =>
-    Date.parse(left.event.dates!.start!.dateTime!) - Date.parse(right.event.dates!.start!.dateTime!) ||
+    eventInstant(left.event) - eventInstant(right.event) ||
     left.relevanceRank - right.relevanceRank
   );
   const categoryCounts = new Map<string, number>();
@@ -321,7 +498,7 @@ function selectEligibleEvents(events: RankedTicketmasterEvent[], now: number) {
       continue;
     }
     // Venues sometimes publish two listings (or a renamed copy) for one show; keep the best-ranked one.
-    const slotKey = venueName ? `${venueName}:${Date.parse(candidate.event.dates!.start!.dateTime!)}` : null;
+    const slotKey = venueName ? `${venueName}:${eventInstant(candidate.event)}` : null;
     if (slotKey && seenSlots.has(slotKey)) {
       skipped.sameVenueAndTime += 1;
       continue;
@@ -390,34 +567,69 @@ function ticketEventId(url?: string | null): string | null {
   }
 }
 
+function chooseScheduleDescription(generated: string | null, existing: string | null | undefined): string | undefined {
+  if (existing && /rescheduled/i.test(existing)) return existing;
+  return generated ?? undefined;
+}
+
 /**
- * Events are upserted on (title, event_date), so a listing that Ticketmaster renames (e.g. "USMNT v TBD" ->
- * "USMNT v Haiti", "SOLD OUT! ...") used to create a second row. Reuse the synced row for the same ticket
- * event id, or the same venue and start time, so the existing row is updated in place instead.
+ * v13 writes a doors/show line, and keeps an existing note that says the show was rescheduled.
+ * It does not replace some other description already on the row. When neither applies (a new
+ * row, or a blank one), case study #13 still stores a description.
+ */
+function resolveStoredDescription(
+  scheduleDescription: string | null,
+  existingDescription: string | null | undefined,
+  fallback: string,
+): string | undefined {
+  const chosen = chooseScheduleDescription(scheduleDescription, existingDescription);
+  if (chosen) return chosen;
+  if (existingDescription) return undefined;
+  return fallback;
+}
+
+/**
+ * Events are upserted on (title, event_date), so a listing that Ticketmaster renames, moves
+ * from doors time to show time, or reschedules used to create a second row. Reuse the synced
+ * row for the same ticket event id first, then the same venue and start time.
  */
 async function findExistingSyncedEvent(
   // deno-lint-ignore no-explicit-any
   supabase: any,
   event: TicketmasterEvent,
   venueId: string,
-): Promise<string | null> {
-  const eventDate = event.dates?.start?.dateTime;
+  eventDate?: string | null,
+): Promise<{ id: string; description: string | null } | null> {
+  const ticketId = ticketEventId(event.url);
+  if (ticketId) {
+    const { data, error } = await supabase
+      .from("events")
+      .select("id, title, ticket_url, venue_id, description")
+      .eq("source", "sync")
+      .ilike("ticket_url", `%${ticketId}%`);
+    if (!error && data?.length) {
+      const rows = data as { id: string; title: string; ticket_url: string | null; venue_id: string | null; description: string | null }[];
+      const exact = rows.filter((row) => ticketEventId(row.ticket_url) === ticketId);
+      const match = exact.find((row) => row.venue_id === venueId) ?? exact[0];
+      if (match) return { id: match.id, description: match.description };
+    }
+  }
+
   if (!eventDate) return null;
   const { data, error } = await supabase
     .from("events")
-    .select("id, title, ticket_url")
+    .select("id, title, ticket_url, description")
     .eq("source", "sync")
     .eq("venue_id", venueId)
     .eq("event_date", eventDate);
   if (error || !data?.length) return null;
 
-  const rows = data as { id: string; title: string; ticket_url: string | null }[];
-  const ticketId = ticketEventId(event.url);
+  const rows = data as { id: string; title: string; ticket_url: string | null; description: string | null }[];
   const match =
     rows.find((existing) => existing.title === event.name) ??
     rows.find((existing) => ticketId && ticketEventId(existing.ticket_url) === ticketId) ??
     rows[0];
-  return match.id;
+  return match ? { id: match.id, description: match.description } : null;
 }
 
 /**
@@ -466,13 +678,18 @@ async function handler(req: Request) {
           maxMusicPerCategory: MAX_MUSIC_PER_CATEGORY,
           maxMusicPerVenue: MAX_MUSIC_PER_VENUE,
           maxMusicEvents: MAX_MUSIC_EVENTS,
-          samples: events.slice(0, 12).map(({ event, category, relevanceRank }) => ({
-            title: event.name,
-            venue: event._embedded?.venues?.[0]?.name ?? null,
-            category,
-            relevanceRank,
-            eventDate: event.dates?.start?.dateTime,
-          })),
+          samples: events.slice(0, 12).map(({ event, category, relevanceRank }) => {
+            const schedule = resolveEventSchedule(event);
+            return {
+              title: event.name,
+              venue: event._embedded?.venues?.[0]?.name ?? null,
+              category,
+              relevanceRank,
+              ticketmasterDateTime: event.dates?.start?.dateTime,
+              eventDate: schedule.eventDate,
+              schedule: schedule.description,
+            };
+          }),
         }),
         { status: 200, headers: { "content-type": "application/json" } },
       );
@@ -490,17 +707,24 @@ async function handler(req: Request) {
     const venueIds = new Map<string, string | null>();
 
     for (const { event, category, relevanceRank } of events) {
-      const eventDate = event.dates?.start?.dateTime;
+      const schedule = resolveEventSchedule(event);
+      const eventDate = schedule.eventDate;
       const venue = event._embedded?.venues?.[0];
       const venueKey = `${venue?.name.trim().toLowerCase().replace(/^the /, "")}:${venue?.city?.name}:${venue?.state?.stateCode}`;
       if (!venueIds.has(venueKey)) venueIds.set(venueKey, await upsertVenue(supabase, venue));
       const venueId = venueIds.get(venueKey) ?? null;
-      if (!venueId) {
+      if (!venueId || !eventDate) {
         failed += 1;
         continue;
       }
 
-      const row = {
+      const existing = await findExistingSyncedEvent(supabase, event, venueId, eventDate);
+      const description = resolveStoredDescription(
+        schedule.description,
+        existing?.description,
+        buildDescription(event, category),
+      );
+      const row: Record<string, unknown> = {
           title: event.name,
           artist_name: event.name,
           event_date: eventDate,
@@ -510,12 +734,11 @@ async function handler(req: Request) {
           category,
           source: "sync",
           hero_image_url: pickHeroImage(event.images),
-          description: buildDescription(event, category),
           ticketmaster_relevance_rank: event.classifications?.[0]?.segment?.name?.toLowerCase() === "music" ? null : relevanceRank,
       };
-      const existingId = await findExistingSyncedEvent(supabase, event, venueId);
-      const { error } = existingId
-        ? await supabase.from("events").update(row).eq("id", existingId)
+      if (description) row.description = description;
+      const { error } = existing
+        ? await supabase.from("events").update(row).eq("id", existing.id)
         : await supabase.from("events").upsert(row, { onConflict: "title,event_date" });
 
       if (error) {
