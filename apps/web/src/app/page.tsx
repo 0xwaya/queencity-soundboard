@@ -7,8 +7,13 @@ import EventBackdrop from "@/components/event-backdrop";
 import SkylineBackdrop from "@/components/skyline-backdrop";
 import { buildPageMetadata } from "@/lib/seo";
 import { getHomepageEvents, getPublishedEvents } from "@/lib/data";
-import { buildAffiliateUrl } from "@/lib/affiliate";
+import { goHref } from "@/lib/go";
+import { isNewsletterEnabled } from "@/lib/newsletter";
+import NewsletterSignup from "@/components/newsletter-signup";
 import type { EventItem } from "@/lib/supabase";
+
+// Cached and refreshed in the background (case study #11).
+export const revalidate = 300;
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Sounds of the Queen City | Cincinnati Live Music & Events",
@@ -40,7 +45,7 @@ export default async function Home() {
   const homepageEvents = getHomepageEvents(events);
   const spotlightEvent = findSpotlightEvent(events);
   const spotlightTicketUrl = spotlightEvent
-    ? buildAffiliateUrl(spotlightEvent.ticket_url, { subId1: spotlightEvent.id, subId2: "spotlight", subId3: "site" })
+    ? goHref(spotlightEvent.id, spotlightEvent.ticket_url, "spotlight")
     : null;
 
   return (
@@ -287,6 +292,7 @@ export default async function Home() {
           </div>
         </div>
       </section>
+      {isNewsletterEnabled() ? <NewsletterSignup placement="home" /> : null}
     </div>
     </>
   );

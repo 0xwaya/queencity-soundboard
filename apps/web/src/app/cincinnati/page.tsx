@@ -4,6 +4,9 @@ import { safeJsonLd } from "@/lib/json-ld";
 import SkylineBackdrop from "@/components/skyline-backdrop";
 import { buildPageMetadata, SEO } from "@/lib/seo";
 
+// Cached and refreshed in the background (case study #11).
+export const revalidate = 300;
+
 export const metadata: Metadata = buildPageMetadata({
   title: "Cincinnati Live Music, Comedy, and Culture",
   description:

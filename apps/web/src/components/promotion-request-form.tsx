@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { track } from "@vercel/analytics";
+import { FEATURED_EVENT_PLACEMENT, PLACEMENT_CONTACT_EMAIL, formatPlacementPrice, placementPaymentUrl } from "@/lib/placements";
 import { PROMOTION_PACKAGES, PROMOTION_PACKAGE_LABELS } from "@/lib/promotion-request-schema";
 
 const inputClass =
@@ -49,11 +50,23 @@ export default function PromotionRequestForm() {
     }
   }
 
+  const paymentUrl = placementPaymentUrl();
+
   if (status === "success") {
     return (
       <p className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-6 text-sm text-emerald-200">
-        Thanks — we received your placement request. We&apos;ll reply with availability and pricing within one business
-        day.
+        Thanks — we received your placement request.{" "}
+        {paymentUrl ? (
+          <>
+            If you&apos;re booking a {FEATURED_EVENT_PLACEMENT.name} slot, you can pay now:{" "}
+            <a href={paymentUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-emerald-100 underline">
+              Pay {formatPlacementPrice()}
+            </a>
+            . We&apos;ll confirm your dates by email.
+          </>
+        ) : (
+          <>We&apos;ll follow up by email from {PLACEMENT_CONTACT_EMAIL} to confirm dates and payment.</>
+        )}
       </p>
     );
   }
@@ -83,7 +96,7 @@ export default function PromotionRequestForm() {
         </label>
         <label className="flex flex-col gap-1 text-sm text-slate-200">
           Placement *
-          <select name="package" required defaultValue="spotlight" className={inputClass}>
+          <select name="package" required defaultValue="featured_week" className={inputClass}>
             {PROMOTION_PACKAGES.map((value) => (
               <option key={value} value={value} className="bg-[#0b1228]">
                 {PROMOTION_PACKAGE_LABELS[value]}
@@ -101,7 +114,7 @@ export default function PromotionRequestForm() {
         </label>
         <label className="flex flex-col gap-1 text-sm text-slate-200">
           Budget (USD)
-          <input name="budget" inputMode="decimal" maxLength={20} placeholder="500" className={inputClass} />
+          <input name="budget" inputMode="decimal" maxLength={20} placeholder="25" className={inputClass} />
         </label>
       </div>
 

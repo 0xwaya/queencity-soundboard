@@ -9,14 +9,16 @@ type Props = {
     spotlight: string;
     compact: string;
   };
+  /** Listing the toggle belongs to, e.g. /events/c/comedy. */
+  basePath?: string;
 };
 
-export default function EventsViewToggle({ view, labels }: Props) {
+export default function EventsViewToggle({ view, labels, basePath = "/events" }: Props) {
   const copy = labels ?? { spotlight: "Spotlight", compact: "Compact" };
   return (
     <div className="ml-auto flex items-center gap-2">
       <Link
-        href="/events?view=spotlight"
+        href={basePath}
         onClick={() => track("events_view_toggle", { view: "spotlight" })}
         className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition ${
           view === "spotlight"
@@ -27,7 +29,7 @@ export default function EventsViewToggle({ view, labels }: Props) {
         {copy.spotlight}
       </Link>
       <Link
-        href="/events?view=compact"
+        href={`${basePath}?view=compact`}
         onClick={() => track("events_view_toggle", { view: "compact" })}
         className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition ${
           view === "compact"

@@ -1,6 +1,7 @@
 import { getCincinnatiSports } from "@/lib/cincinnati-sports";
 import TrackedExternalLink from "@/components/tracked-external-link";
-import { buildAffiliateUrl, resolveAffiliateProvider } from "@/lib/affiliate";
+import { resolveAffiliateProvider } from "@/lib/affiliate";
+import { goHref } from "@/lib/go";
 import type { CincinnatiSportsTeam } from "@/lib/cincinnati-sports";
 import type { EventItem } from "@/lib/supabase";
 import { formatGameDateTime } from "@/lib/time";
@@ -77,11 +78,7 @@ export default async function CincinnatiSportsCard({ events }: Props) {
                       <p className="truncate text-[11px] text-slate-400">{formatGameDateTime(team.upcoming.date, team.upcoming.timeValid)}</p>
                       {(() => {
                         const ticketEvent = findTicketmasterEvent(team, team.upcoming.date, events);
-                        const ticketUrl = buildAffiliateUrl(ticketEvent?.ticket_url, {
-                          subId1: ticketEvent?.id,
-                          subId2: "sports_card",
-                          subId3: "site",
-                        });
+                        const ticketUrl = goHref(ticketEvent?.id, ticketEvent?.ticket_url, "sports_card");
                         return ticketUrl ? (
                           <TrackedExternalLink
                             href={ticketUrl}
