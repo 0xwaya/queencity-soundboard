@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FEATURED_EVENT_PLACEMENT, formatPlacementPrice } from "@/lib/placements";
 
 export const PROMOTION_PACKAGES = ["spotlight", "featured_week", "homepage_takeover", "custom"] as const;
 
@@ -6,7 +7,7 @@ export type PromotionPackage = (typeof PROMOTION_PACKAGES)[number];
 
 export const PROMOTION_PACKAGE_LABELS: Record<PromotionPackage, string> = {
   spotlight: "Ticket Spotlight — homepage feature",
-  featured_week: "Featured Week — priority placement in the calendar",
+  featured_week: `${FEATURED_EVENT_PLACEMENT.name} — ${formatPlacementPrice()} (sponsored slot on home and the calendar)`,
   homepage_takeover: "Homepage Takeover — hero + spotlight",
   custom: "Something else / not sure yet",
 };

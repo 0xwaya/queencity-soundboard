@@ -8,6 +8,7 @@ export type QueryResult<T> = {
 };
 
 const EVENT_TIME_ZONE = "America/New_York";
+const TONIGHT_EVENT_DURATION_MS = 4 * 60 * 60 * 1000;
 
 function eventDayKey(value: Date | number | string): string {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -195,4 +196,34 @@ export async function getActiveMerch(): Promise<QueryResult<MerchItem[]>> {
     console.error("[getActiveMerch] Unexpected failure", err);
     return { data: [], error: "Unable to load merch right now." };
   }
+}
+
+/**
+ * Shows for the /tonight landing page (case study #10): everything on today's Eastern date
+ * that has not ended, promoted first then by start time. When today has nothing left, the
+ * next date with shows is used so the TikTok bio link never lands on an empty page.
+ */
+export function getTonightEvents(events: EventItem[], now = Date.now()): { day: string; isToday: boolean; events: EventItem[] } {
+  const today = eventDayKey(now);
+  const byDay = new Map<string, EventItem[]>();
+  for (const event of events) {
+    const time = Date.parse(event.event_date);
+    if (!Number.isFinite(time) || time + TONIGHT_EVENT_DURATION_MS <= now) continue;
+    const day = eventDayKey(time);
+    if (day < today) continue;
+    byDay.set(day, [...(byDay.get(day) ?? []), event]);
+  }
+  const days = Array.from(byDay.keys()).sort();
+  const day = byDay.has(today) ? today : days[0] ?? today;
+  const list = [...(byDay.get(day) ?? [])].sort(
+    (a, b) => Number(Boolean(b.is_promoted)) - Number(Boolean(a.is_promoted)) || Date.parse(a.event_date) - Date.parse(b.event_date),
+  );
+  return { day, isToday: day === today, events: list };
+}
+
+/** Active paid placements still ahead of us, capped at the configured slot count (case study #15). */
+export function getSponsoredEvents(events: EventItem[], limit = 3, now = Date.now()): EventItem[] {
+  return events
+    .filter((event) => isPromotionActive(event, now) && Date.parse(event.event_date) > now)
+    .slice(0, limit);
 }

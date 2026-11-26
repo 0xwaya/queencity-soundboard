@@ -2,6 +2,7 @@
 
 import { track } from "@vercel/analytics";
 import { buildAffiliateUrl } from "@/lib/affiliate";
+import { goHref } from "@/lib/go";
 import { AFFILIATE_DISCLOSURE } from "@/lib/site";
 import { readClientSource } from "@/lib/click-source";
 
@@ -26,7 +27,13 @@ export default function TicketWidget({
   placement = "event_list",
 }: Props) {
   const provider = "external tickets";
-  const checkoutUrl = salesDisabled ? null : buildAffiliateUrl(eventTicketUrl, { subId1: eventId, subId2: placement, subId3: "site" });
+  // Buy goes through /go/<id> (first-party click log, then the affiliate link); without an
+  // event id fall back to the direct affiliate link.
+  const checkoutUrl = salesDisabled
+    ? null
+    : eventId
+      ? goHref(eventId, eventTicketUrl, placement)
+      : buildAffiliateUrl(eventTicketUrl, { subId2: placement, subId3: "site" });
   const copy =
     locale === "es"
       ? {

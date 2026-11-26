@@ -37,7 +37,7 @@ export default function FeaturedEventsWidget({ events }: Props) {
               <span className="text-xl">🎵</span>
               <span className="text-xs font-bold uppercase tracking-widest text-[#d4b87e]">
                 {currentEvent.is_promoted
-                  ? "Promoted Event"
+                  ? "Sponsored"
                   : "Upcoming in Cincinnati + NKY"}
               </span>
             </div>
