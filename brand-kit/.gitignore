@@ -1,0 +1,19 @@
+# Local render output and caches for social/templates
+__pycache__/
+*.pyc
+social/templates/_tmp_full/
+social/out/
+social/stories/
+
+# Fonts are not bundled (see brand/README.md). helpers.py also looks in brand/fonts/.
+brand/fonts/
+*.ttf
+*.otf
+*.woff
+*.woff2
+
+# Never commit these here: story kit zips are posted by hand, ledgers/env/credentials stay private
+*.zip
+*ledger*
+.env
+.env.*
