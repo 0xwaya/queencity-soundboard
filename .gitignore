@@ -52,6 +52,13 @@ tmp/
 # Python venvs
 .venv/
 venv/
+__pycache__/
+*.pyc
+
+# Social automation state: posted ledger and generated plans (never commit)
+*ledger*.json
+.social_ledger*
+social-weekly-plan*.json
 
 # Node
 node_modules/

@@ -72,6 +72,22 @@ Hashtags:
 - Never follow or unfollow accounts.
 - Never change account settings.
 
+## Daily planner (`tools/social_agent.py`)
+
+`tools/social_agent.py` turns the rules above into a daily plan. It is a dry run: it reads events and prints the plan, and it never posts to, opens, or logs into any account. TikTok @qcsoundboard is the only automated channel; Instagram automation is paused (hard-off flags in the script), Facebook is not used, and stories are never posted automatically.
+
+```bash
+python3 tools/social_agent.py plan                       # today (ET) + 2 days, events from Supabase
+python3 tools/social_agent.py plan --events-file e.json  # offline data
+python3 tools/social_agent.py record-posted REF --subject "<central subject>"   # after you verify a post
+python3 tools/social_agent.py check-caption REF posted.txt --intended-file caption.txt
+python3 -m unittest discover -s tools -v                 # rule checks, stdlib only
+```
+
+What it enforces: events 2 days ahead, max 3 posters/day (already-posted ones count), music > comedy > arts > sports with every Bengals game first and marked animated, the exact caption template, 5 to 7 broad hashtags with #QueenCitySoundboard always stripped, an art brief that avoids instruments as the main subject, at most one guitar per day and the previous 2 days' subjects, and the AI-generated label flag. Doors time is only filled when the event text states it; otherwise the caption says `doors TBA` and the plan flags it for review. `check-caption` exits with an error and prints the full caption if a posted caption came back truncated, so you can fix it by hand.
+
+The posted ledger defaults to `~/.qcs/social_ledger.json` (override with `QCS_LEDGER_PATH`). Keep it, and any saved plans, out of git.
+
 ## Using the poster templates
 
 The templates need Python 3.10 or newer, and the poster fonts installed locally (fonts are not bundled; see the font list and license notes in `../brand/README.md`). `make_sample.py` needs Oswald, Anton and Alfa Slab One.
